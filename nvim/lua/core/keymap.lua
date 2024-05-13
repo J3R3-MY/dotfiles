@@ -5,9 +5,10 @@ vim.opt.laststatus = 2
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.opt.clipboard = 'unnamedplus'
+vim.opt.mouse = 'a'
 
-
-vim.opt.ignorecase = true 
+vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = false -- clean-up search
 
