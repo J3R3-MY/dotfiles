@@ -8,6 +8,15 @@ vim.g.maplocalleader = " "
 vim.opt.clipboard = 'unnamedplus'
 vim.opt.mouse = 'a'
 
+vim.api.nvim_create_user_command("Cppath", function()
+    local path = vim.fn.expand("%:p")
+    vim.fn.setreg("+", path)
+    vim.notify('Copied "' .. path .. '" to the clipboard!')
+end, {})
+
+local keymap = vim.keymap
+keymap.set("n", "<leader>--", vim.cmd.Cppath)
+
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = false -- clean-up search
