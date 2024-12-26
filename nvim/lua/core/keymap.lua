@@ -17,6 +17,9 @@ end, {})
 local keymap = vim.keymap
 keymap.set("n", "<leader>--", vim.cmd.Cppath)
 
+vim.keymap.set("n", "<leader>hd", ":lua vim.diagnostic.hide()<CR>")
+vim.keymap.set("n", "<leader>sh", ":lua vim.diagnostic.show()<CR>")
+
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = false -- clean-up search
