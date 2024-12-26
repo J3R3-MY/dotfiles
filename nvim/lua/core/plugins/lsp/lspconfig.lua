@@ -64,6 +64,9 @@ return {
 
         opts.desc = "Restart LSP"
         keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
+
+     --    opt.desc = "Hide diagnostics for buffer"
+    	-- keymap.set("n", "<leader>hd", vim.diagnostic.hide, opts)
       end,
     })
 
