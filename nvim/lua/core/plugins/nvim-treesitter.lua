@@ -15,6 +15,7 @@ return {
       treesitter.setup({ -- enable syntax highlighting
         highlight = {
           enable_autocmd = false,
+          enable = true,
         },
         -- enable indentation
         indent = { enable = true },
@@ -25,8 +26,7 @@ return {
         -- ensure these language parsers are installed
         ensure_installed = {
           "json",
-          "javascript",
-          "typescript",
+          "python",
           "tsx",
           "yaml",
           "html",
