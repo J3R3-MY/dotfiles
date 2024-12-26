@@ -28,13 +28,11 @@ return {
       -- list of servers for mason to install
       ensure_installed = {
         "clangd",
-        "groovyls",
       },
     })
 
     mason_tool_installer.setup({
       ensure_installed = {
-        "pylint",
       },
     })
   end,
