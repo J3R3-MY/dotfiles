@@ -9,8 +9,8 @@ return {
 
 	  vim.cmd.exec '"normal! \\<RightMouse>"'
 	
-		local normal_buffer = require("menu_default")
-		local nvimtree_buffer = require("menu_nvimtree")
+		local normal_buffer = require("core.menus.menu_default")
+		local nvimtree_buffer = require("core.menus.menu_nvimtree")
 	  -- clicked buf
 	  local buf = vim.api.nvim_win_get_buf(vim.fn.getmousepos().winid)
 	  if vim.bo[buf].ft == "NvimTree" then
