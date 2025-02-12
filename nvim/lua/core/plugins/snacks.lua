@@ -51,6 +51,24 @@ return {
       filter = function(buf)
         return vim.g.snacks_indent ~= false and vim.b[buf].snacks_indent ~= false and vim.bo[buf].buftype == ""
       end,
-    }
+    },
+    explorer ={},
+    picker = {
+      layout = {
+        preset = "telescope",
+      },
+      sources = {
+        explorer = {
+          exclude = { ".DS_Store" },
+        },
+      },
+    },
+  },
+  keys = {
+    { "<leader>ff", function() Snacks.picker.files() end, desc = "Find Files" },
+    { "<leader>fr", function() Snacks.picker.recent() end, desc = "Recent Files" },
+    { "<leader>fs", function() Snacks.picker.grep() end, desc = "Live Grep" },
+    { "<leader>fc", function() Snacks.picker.grep_string() end, desc = "Find String under Cursor" },
+    { "<leader>ee", function() Snacks.picker.explorer() end, desc = "Toggle Filetree" },
   },
 }
