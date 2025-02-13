@@ -28,6 +28,9 @@ return {
       -- list of servers for mason to install
       ensure_installed = {
         "clangd",
+        "pylsp",
+     		"cmake-language-server",
+    		"lua-language-server",
       },
     })
 
