@@ -29,8 +29,6 @@ return {
       ensure_installed = {
         "clangd",
         "pylsp",
-     		"cmake-language-server",
-    		"lua-language-server",
       },
     })
 

@@ -15,12 +15,12 @@ vim.api.nvim_create_user_command("Cppath", function()
 end, {})
 
 local keymap = vim.keymap
-opts.desc = "Copy absolute path"
+-- opts.desc = "Copy absolute path"
 keymap.set("n", "<leader>--", vim.cmd.Cppath)
 
-opts.desc = "Hide Diagnostics"
+-- opts.desc = "Hide Diagnostics"
 vim.keymap.set("n", "<leader>hd", ":lua vim.diagnostic.hide()<CR>")
-opts.desc = "Show Diagnostics"
+-- opts.desc = "Show Diagnostics"
 vim.keymap.set("n", "<leader>sh", ":lua vim.diagnostic.show()<CR>")
 
 vim.opt.ignorecase = true
