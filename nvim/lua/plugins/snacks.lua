@@ -70,5 +70,8 @@ return {
     { "<leader>fs", function() Snacks.picker.grep() end, desc = "Live Grep" },
     { "<leader>fc", function() Snacks.picker.grep_string() end, desc = "Find String under Cursor" },
     { "<leader>ee", function() Snacks.picker.explorer() end, desc = "Toggle Filetree" },
+    { "<leader>lg", function() Snacks.lazygit.open() end, desc = "LazyGit" },
   },
 }
+
+
