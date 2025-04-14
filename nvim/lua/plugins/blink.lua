@@ -10,7 +10,6 @@ return {
     },
     {
         "saghen/blink.cmp",
-        -- optional: provides snippets for the snippet source
         dependencies = {
             "rafamadriz/friendly-snippets",
         },
@@ -19,8 +18,9 @@ return {
         version = "1.*",
         opts = {
             keymap = {
-                preset = "default",
-                ["<C-Z>"] = { "accept", "fallback" },
+                preset = "enter",
+								["<C-j>"] = { "show", "select_next", "fallback" },
+								["<C-k>"] = { "show", "select_prev", "fallback" },
             },
 
             appearance = {
