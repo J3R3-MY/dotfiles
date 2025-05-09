@@ -45,8 +45,6 @@ return {
 					},
 				},
 			},
-
-			opts_extend = { "sources.default" },
 		},
 	}
 }
