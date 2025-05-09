@@ -15,11 +15,13 @@
 					},
 				},
 				suggestion = {
-					auto_trigger = true,
-					keymap = {
-						accept = "<Tab>",
+				 enabled = false,
+				 auto_trigger = true,
+				 keymap = {
+						accept = false,
 					},
 				},
+			 panel = {enabled = false},
 			})
   end,
 }
