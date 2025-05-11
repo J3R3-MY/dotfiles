@@ -3,7 +3,6 @@ return {
   dependencies = {
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		"neovim/nvim-lspconfig",
   },
   config = function()
     -- import mason
@@ -11,7 +10,6 @@ return {
 
     -- import mason-lspconfig
     local mason_lspconfig = require("mason-lspconfig")
-    local lspconfig = require("lspconfig")
 
     local mason_tool_installer = require("mason-tool-installer")
 
