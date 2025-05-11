@@ -18,11 +18,6 @@ local keymap = vim.keymap
 -- opts.desc = "Copy absolute path"
 keymap.set("n", "<leader>--", vim.cmd.Cppath)
 
--- opts.desc = "Hide Diagnostics"
-vim.keymap.set("n", "<leader>hd", ":lua vim.diagnostic.hide()<CR>")
--- opts.desc = "Show Diagnostics"
-vim.keymap.set("n", "<leader>sh", ":lua vim.diagnostic.show()<CR>")
-
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.hlsearch = false -- clean-up search
@@ -37,6 +32,17 @@ vim.opt.showcmd = true --show command in bottom bar
 
 --LSP keymaps
     local keymap = vim.keymap -- for conciseness
+
+--Toggle diagnostics
+		local diagnostics_active = true
+		keymap.set('n', '<leader>td', function()
+			diagnostics_active = not diagnostics_active
+			if diagnostics_active then
+				vim.diagnostic.show()
+			else
+				vim.diagnostic.hide()
+			end
+		end)
 
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -69,24 +75,12 @@ vim.opt.showcmd = true --show command in bottom bar
 
         opts.desc = "Show buffer diagnostics"
         keymap.set("n", "<leader>D", "<cmd>lua Snacks.picker.diagnostics_buffer()<CR>", opts) -- show  diagnostics for file
-
         opts.desc = "Show line diagnostics"
         keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
-
-        opts.desc = "Go to previous diagnostic"
-        keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- jump to previous diagnostic in buffer
-
-        opts.desc = "Go to next diagnostic"
-        keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
 
         opts.desc = "Show documentation for what is under cursor"
         keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
-        opts.desc = "Restart LSP"
-        keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
-
-     --    opt.desc = "Hide diagnostics for buffer"
-    	-- keymap.set("n", "<leader>hd", vim.diagnostic.hide, opts)
       end,
     })
 
