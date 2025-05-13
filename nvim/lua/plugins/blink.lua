@@ -27,6 +27,11 @@ return {
 			completion = { documentation = { auto_show = true } },
 			signature = { enabled = true },
 
+			cmdline = {
+				keymap = { preset = 'inherit' },
+				completion = { menu = { auto_show = false } },
+			},
+
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer", "copilot" },
 				providers = {
