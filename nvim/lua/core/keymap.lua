@@ -15,8 +15,8 @@ vim.api.nvim_create_user_command("Cppath", function()
 end, {})
 
 local keymap = vim.keymap
--- opts.desc = "Copy absolute path"
-keymap.set("n", "<leader>--", vim.cmd.Cppath)
+
+keymap.set("n", "<leader>--", vim.cmd.Cppath, { desc = "Copy absolute path of current buffer" })
 
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
@@ -33,16 +33,15 @@ vim.opt.showcmd = true --show command in bottom bar
 --LSP keymaps
     local keymap = vim.keymap -- for conciseness
 
---Toggle diagnostics
 		local diagnostics_active = true
 		keymap.set('n', '<leader>td', function()
 			diagnostics_active = not diagnostics_active
 			if diagnostics_active then
-				vim.diagnostic.show()
+				vim.diagnostic.disable()
 			else
-				vim.diagnostic.hide()
+				vim.diagnostic.enable()
 			end
-		end)
+		end, {desc = "Toggle Diagnostics"})
 
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -76,7 +75,7 @@ vim.opt.showcmd = true --show command in bottom bar
         opts.desc = "Show buffer diagnostics"
         keymap.set("n", "<leader>D", "<cmd>lua Snacks.picker.diagnostics_buffer()<CR>", opts) -- show  diagnostics for file
         opts.desc = "Show line diagnostics"
-        keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
+        keymap.set("n", "<leader>dl", vim.diagnostic.open_float, opts) -- show diagnostics for line
 
         opts.desc = "Show documentation for what is under cursor"
         keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
