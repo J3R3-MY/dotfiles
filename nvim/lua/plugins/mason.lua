@@ -29,6 +29,7 @@ return {
       ensure_installed = {
         "clangd",
         "basedpyright",
+        "ruff",
         "lua_ls",
       },
     })
