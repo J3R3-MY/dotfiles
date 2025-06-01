@@ -1,0 +1,97 @@
+format = """
+$directory\
+$git_branch\
+$git_status\
+$fill\
+$python\
+$lua\
+$cpp\
+$jobs\
+$time\
+$cmd_duration\
+$line_break\
+$character"""
+
+palette = "tokyonight-storm"
+
+[directory]
+style = 'bold blue'
+truncation_length = 3
+truncation_symbol = '.../'
+truncate_to_repo = false
+format = '[$path ]($style)'
+
+[directory.substitutions]
+'Documents' = '󰈙'
+'Downloads' = ' '
+'Music' = ' '
+'Pictures' = ' '
+
+[git_branch]
+style = 'fg:green'
+symbol = ' '
+format = '[ $symbol $branch ]($style)'
+
+[git_status]
+style = 'fg:yellow'
+format = '([$all_status$ahead_behind]($style) )'
+
+[fill]
+symbol = ' '
+
+[python]
+style = 'teal'
+symbol = ' '
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+pyenv_version_name = true
+pyenv_prefix = ''
+
+[lua]
+symbol = ' '
+style = 'blue'
+format = '[$symbol($version )]($style)'
+
+[c]
+symbol = " "
+style = "blue"
+format = '[ $symbol ($version) ]($style)'
+
+[cpp]
+symbol = " "
+style = "blue"
+format = '[ $symbol ($version) ]($style)'
+
+[time]
+disabled = false
+style = 'grey'
+format = '[\[ $time \]]($style) '
+time_format = '%T'
+utc_time_offset = '+1'
+time_range = '08:00:00-18:30:00'
+
+[package]
+disabled = true
+
+[jobs]
+symbol = ' '
+style = 'red'
+number_threshold = 1
+format = '[$symbol]($style)'
+
+[cmd_duration]
+min_time = 500
+style = 'fg:gray'
+format = '[$duration]($style)'
+
+[palettes.tokyonight-storm]
+darkblue = '#3d59a1'
+blue = '#7aa2f7'
+teal = '#41a6b5'
+red = '#f7768e'
+orange = '#ff9e64'
+green = '#9ece6a'
+yellow = '#e0af68'
+purple = '#c099ff'
+gray = '#737aa2'
+black = '#414868'
+white='#D8DEE9'

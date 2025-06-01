@@ -7,6 +7,8 @@ return {
     require('mini.pairs').setup {}
     require('mini.comment').setup {}
     require('mini.icons').setup {}
+    require('mini.operators').setup{}
+    require('mini.ai').setup{}
 
     local miniclue = require('mini.clue')
     miniclue.setup({
