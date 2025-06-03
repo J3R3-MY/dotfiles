@@ -9,7 +9,10 @@ return {
          theme = 'auto',
        },
        sections = {
-         lualine_x = {
+       	lualine_a = { "mode" },
+       	lualine_b = { { "branch", fmt = function(str) return str:sub(1,16) end }},
+       	lualine_c = { "filename" },
+        lualine_x = {
            {
              lazy_status.updates,
              cond = lazy_status.has_updates,
