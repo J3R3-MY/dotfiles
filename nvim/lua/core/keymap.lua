@@ -17,6 +17,7 @@ end, {})
 local keymap = vim.keymap
 
 keymap.set("n", "<leader>--", vim.cmd.Cppath, { desc = "Copy absolute path of current buffer" })
+keymap.set("n", "<leader>p", "<cmd> Precognition toggle <CR>", {desc = "Toggle precognition hints"})
 
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
