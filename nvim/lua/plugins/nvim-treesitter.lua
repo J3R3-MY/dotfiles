@@ -27,21 +27,18 @@ return {
         ensure_installed = {
           "json",
           "python",
-          "tsx",
           "yaml",
           "html",
-          "css",
-          "prisma",
           "markdown",
           "markdown_inline",
-          "svelte",
-          "graphql",
           "bash",
           "lua",
           "vim",
           "dockerfile",
           "gitignore",
           "query",
+          "c",
+          "cpp"
         },
         incremental_selection = {
           enable = true,
