@@ -29,9 +29,11 @@ return {
 
 			cmdline = {
 				keymap = { preset = 'inherit' },
-				completion = { menu = { auto_show = false } },
+				completion = {
+					menu = { auto_show = false },
+					ghost_text = { enabled = false },
+				},
 			},
-
 			sources = {
 				default = { "lsp", "path", "snippets", "buffer" },
 			},
