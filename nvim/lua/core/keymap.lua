@@ -17,6 +17,7 @@ end, {})
 local keymap = vim.keymap
 
 keymap.set("n", "<leader>--", vim.cmd.Cppath, { desc = "Copy absolute path of current buffer" })
+keymap.set("n", "<leader>cc", "<cmd> NoiceDismiss <CR>", {desc = "Clear notifications"})
 
 vim.opt.ignorecase = true
 vim.opt.smartcase = true
