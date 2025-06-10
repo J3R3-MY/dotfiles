@@ -73,8 +73,8 @@ return {
 	keys = {
 		{ "<leader>ff", function() Snacks.picker.files() end,         desc = "Find Files" },
 		{ "<leader>fr", function() Snacks.picker.recent() end,        desc = "Recent Files" },
-		{ "<leader>fs", function() Snacks.picker.grep() end,          desc = "Live Grep" },
-		{ "<leader>fc", function() Snacks.picker.grep_word() end,     desc = "Find String under Cursor" },
+		{ "<leader>fg", function() Snacks.picker.grep() end,          desc = "Live Grep" },
+		{ "<leader>fw", function() Snacks.picker.grep_word() end,     desc = "Find String under Cursor", mode = { "n", "x" } },
 		{ "<leader>ee", function() Snacks.picker.explorer() end,      desc = "Toggle Filetree" },
 		{ "<leader>lg", function() Snacks.lazygit.open() end,         desc = "LazyGit" },
 		{ "<leader>n",  function() Snacks.picker.notifications() end, desc = "Notification History" },
