@@ -71,7 +71,7 @@ return {
 		},
 	},
 	keys = {
-		{ "<leader>ff", function() Snacks.picker.files() end,         desc = "Find Files" },
+		{ "<leader>ff", function() Snacks.picker.smart() end,         desc = "Find Files" },
 		{ "<leader>fr", function() Snacks.picker.recent() end,        desc = "Recent Files" },
 		{ "<leader>fg", function() Snacks.picker.grep() end,          desc = "Live Grep" },
 		{ "<leader>fw", function() Snacks.picker.grep_word() end,     desc = "Find String under Cursor", mode = { "n", "x" } },
