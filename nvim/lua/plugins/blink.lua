@@ -18,6 +18,9 @@ return {
 		-- use a release tag to download pre-built binaries
 		version = "1.*",
 		opts = {
+			fuzzy = {
+				implementation = "lua"
+			},
 			keymap = {
 				preset = "enter",
 				["<C-j>"] = { "show", "select_next", "fallback" },
@@ -35,7 +38,22 @@ return {
 				},
 			},
 			sources = {
-				default = { "lsp", "path", "snippets", "buffer" },
+				default = { "lsp", "path", "snippets", "buffer", "copilot" },
+				providers = {
+					copilot = {
+						name = "copilot",
+						module = "blink-cmp-copilot",
+						score_offset = 100,
+						async = true,
+						transform_items = function(_, items)
+							for _, item in ipairs(items) do
+								item.kind_icon = ""
+								item.kind_name = "Copilot"
+							end
+							return items
+						end,
+					},
+				},
 			},
 		},
 	}
