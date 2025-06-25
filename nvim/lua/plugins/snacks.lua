@@ -14,9 +14,6 @@ return {
 		notifier = {
 			enabled = true,
 		},
-		scroll = {
-			enabled = true,
-		},
 		indent = {
 			enabled = true,
 			priority = 1,
