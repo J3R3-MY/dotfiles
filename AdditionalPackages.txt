@@ -1,0 +1,40 @@
+-- Personal tools --
+lazygit
+starship
+zsh-syntax-highlighting
+zsh-syntax-autocompletion
+cgdb
+bob
+tokei
+fzf
+watchexec
+lsd
+sd
+choose
+broot
+git-delta
+trash-cli
+thefuck
+ripgrep
+obsidian
+fastfetch
+uv
+mcfly
+
+-- Essentials --
+wl-clipboard
+ninja
+ffmpeg
+tailscale
+mediainfo
+nasm
+libgit2
+lnav
+fq
+nerd-fonts
+tinyxml2
+
+-- AUR --
+snapper-support btrfs-assistant
+konsave
+nvidia-inst
