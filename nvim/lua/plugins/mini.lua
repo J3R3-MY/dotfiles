@@ -9,7 +9,7 @@ return {
     require('mini.icons').setup {}
     require('mini.operators').setup{}
     require('mini.ai').setup{}
-    require('mini.animate').setup{}
+    -- require('mini.animate').setup{}
 
     local miniclue = require('mini.clue')
     miniclue.setup({
