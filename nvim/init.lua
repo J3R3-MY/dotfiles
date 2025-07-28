@@ -9,6 +9,7 @@ vim.lsp.config.clangd = {
 	root_markers = {
 		".clangd",
 		".git",
+		"compile_commands.json",
 		vim.uv.cwd()
 	},
 }

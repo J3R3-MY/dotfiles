@@ -56,7 +56,7 @@ vim.opt.showcmd = true --show command in bottom bar
 				keymap.set("n", "gR", "<cmd>lua Snacks.picker.lsp_references()<CR>", opts) -- show definition, references
 
         opts.desc = "Go to declaration"
-        keymap.set("n", "gD", vim.lsp.buf.declaration, opts) -- go to declaration
+        keymap.set("n", "gD","<cmd>lua Snacks.picker.lsp_declarations()<CR>", opts) -- go to declaration
 
         opts.desc = "Show LSP definitions"
         keymap.set("n", "gd", "<cmd>lua Snacks.picker.lsp_definitions()<CR>", opts) -- show lsp definitions
@@ -80,6 +80,21 @@ vim.opt.showcmd = true --show command in bottom bar
 
         opts.desc = "Show documentation for what is under cursor"
         keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+
+        opts.desc = "Show Git Diff (Hunks)"
+				keymap.set("n", "Gd", "<cmd>lua Snacks.picker.git_diff()<CR>", opts) -- show git diff (hunks)
+
+        opts.desc = "Show Git Status"
+				keymap.set("n", "Gs", "<cmd>lua Snacks.picker.git_status()<CR>", opts) -- show git status
+
+        opts.desc = "Open Config"
+				keymap.set("n", "C", "<cmd>lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})<CR>", opts) -- open nvim config
+
+        opts.desc = "Registers"
+				keymap.set("n", "R", "<cmd>lua Snacks.picker.registers()<CR>", opts) -- show registers
+
+				opts.desc = "Format buffer with LSP"
+				keymap.set("n", "<leader>F", vim.lsp.buf.format, opts) -- format buffer with lsp
 
       end,
     })
