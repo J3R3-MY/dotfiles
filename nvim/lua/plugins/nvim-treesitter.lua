@@ -28,7 +28,6 @@ return {
           "json",
           "python",
           "yaml",
-          "html",
           "markdown",
           "markdown_inline",
           "bash",
