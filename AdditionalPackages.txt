@@ -7,6 +7,7 @@ cgdb
 bob
 tokei
 fzf
+fd
 watchexec
 lsd
 sd
@@ -19,7 +20,6 @@ ripgrep
 obsidian
 fastfetch
 uv
-mcfly
 
 -- Essentials --
 wl-clipboard

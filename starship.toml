@@ -66,7 +66,7 @@ disabled = false
 style = 'grey'
 format = '[\[ $time \]]($style) '
 time_format = '%T'
-utc_time_offset = '+1'
+utc_time_offset = '+2'
 time_range = '08:00:00-18:30:00'
 
 [package]
