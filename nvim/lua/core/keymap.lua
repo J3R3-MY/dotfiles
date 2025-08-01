@@ -92,6 +92,11 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     opts.desc = "Registers"
     keymap.set("n", "<leader>R", "<cmd>lua Snacks.picker.registers()<CR>", opts) -- show registers
+
+    opts.desc = "Find LuaSnip Snippet"
+    keymap.set("n", "<leader>fs", function()
+      require('extensions.snacks-luasnip').open()
+    end)
   end,
 })
 
