@@ -11,6 +11,15 @@ return {
     require('mini.ai').setup{}
     -- require('mini.animate').setup{}
 
+  -- Create symmetrical `$$` pair only in Tex files
+  local map_tex = function()
+    MiniPairs.map_buf(0, 'i', '$', { action = 'closeopen', pair = '$$' })
+  end
+  vim.api.nvim_create_autocmd(
+    'FileType',
+    { pattern = 'tex', callback = map_tex }
+  )
+
     local miniclue = require('mini.clue')
     miniclue.setup({
       triggers = {
