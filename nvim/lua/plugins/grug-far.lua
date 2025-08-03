@@ -15,8 +15,11 @@ return {
           },
         })
       end,
-      mode = { "n", "v" },
-      desc = "Search and Replace",
+      mode = { "n" },
+      desc = "GrugFar",
     },
+    vim.keymap.set({ 'v', 'x' }, '<leader>gf', function()
+      require('grug-far').open({ visualSelectionUsage = 'operate-within-range' })
+    end, { desc = 'GrugFarWithin' })
   },
 }
