@@ -9,7 +9,6 @@ return {
     require('mini.icons').setup {}
     require('mini.operators').setup{}
     require('mini.ai').setup{}
-    -- require('mini.animate').setup{}
 
   -- Create symmetrical `$$` pair only in Tex files
   local map_tex = function()
