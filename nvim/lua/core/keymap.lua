@@ -67,6 +67,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
     opts.desc = "Show LSP type definitions"
     keymap.set("n", "gt", "<cmd>lua Snacks.picker.lsp_type_definitions()<CR>", opts)     -- show lsp type definitions
 
+    opts.desc = "LSP Symbols"
+    keymap.set("n", "<leader>gs",
+      "<cmd>lua Snacks.picker.lsp_symbols({layout = {preset = 'vscode', preview = 'main'}})<CR>", opts)                             -- show lsp symbols
+
     opts.desc = "See available code actions"
     keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)     -- see available code actions, in visual mode will apply to selection
 
