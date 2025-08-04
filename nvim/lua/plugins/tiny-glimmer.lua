@@ -5,7 +5,8 @@ return {
   opts = {
     overwrite = {
       paste = {
-        enabled = false,
+        enabled = true,
+        default_animation = "fade", -- change as desired
       },
       yank = {
         enabled = true,

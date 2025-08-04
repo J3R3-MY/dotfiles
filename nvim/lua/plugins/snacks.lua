@@ -14,6 +14,10 @@ return {
 		notifier = {
 			enabled = true,
 		},
+		scroll = {
+		  enabled = true,
+		  easing = "quadratic",
+		},
 		indent = {
 			enabled = true,
 			priority = 1,

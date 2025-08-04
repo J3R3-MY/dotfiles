@@ -1,21 +1,31 @@
 return {
    "nvim-lualine/lualine.nvim",
-   dependencies = { "nvim-tree/nvim-web-devicons" },
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+    "otavioschwanck/arrow.nvim",
+  },
    config = function()
      local lualine = require("lualine")
      local lazy_status = require("lazy.status") -- to configure lazy pending updates count
+     local arrow = require("arrow.statusline")
      lualine.setup({
        options = {
          theme = 'auto',
        },
        sections = {
        	lualine_a = { "mode" },
-       	lualine_b = { { "branch", fmt = function(str) return str:sub(1,16) end }},
+        lualine_b = { { "branch", fmt = function(str) return str:sub(1, 16) end },
+          {
+            function()
+              return arrow.text_for_statusline_with_icons()
+            end
+          }
+        },
        	lualine_c = { "filename",
 					{
             function()
               local reg = vim.fn.reg_recording()
-              return ' recording to ' .. reg
+              return '  recording to ' .. reg
             end,
             color = 'DiagnosticError',
             cond = function()
@@ -31,7 +41,7 @@ return {
            },
            { "encoding" },
            { "fileformat" },
-           { "filetype" }, 
+           { "filetype" },
          },
        },
      })
