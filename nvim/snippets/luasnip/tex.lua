@@ -1,23 +1,16 @@
 local ls = require("luasnip")
 local s = ls.snippet
-local sn = ls.snippet_node
 local t = ls.text_node
 local i = ls.insert_node
-local f = ls.function_node
-local c = ls.choice_node
-local d = ls.dynamic_node
-local r = ls.restore_node
-local l = require("luasnip.extras").lambda
-local rep = require("luasnip.extras").rep
-local p = require("luasnip.extras").partial
-local m = require("luasnip.extras").match
-local n = require("luasnip.extras").nonempty
-local dl = require("luasnip.extras").dynamic_lambda
-local fmt = require("luasnip.extras.fmt").fmt
-local fmta = require("luasnip.extras.fmt").fmta
-local types = require("luasnip.util.types")
 
 return {
+  -- for easier typing
+  s({trig="ä", snippetType="autosnippet", desc="backslash", wordTrig=false},
+    {t("\\")}
+  ),
+  s({ trig = "\\n", snippetType = "autosnippet", desc = "newline" },
+    { t("\\newline") }
+  ),
   -- Autosnippets for Greek letters and common symbols
   s({trig=";a", snippetType="autosnippet", desc="alpha", wordTrig=false},
     {t("\\alpha")}
@@ -141,7 +134,6 @@ return {
     }
   ),
 
-  -- Your custom commands
   s({ trig = "theobox", desc = "Theorem box", name = "Theorem Box" },
     {
       t("\\theobox{"),
@@ -238,7 +230,6 @@ return {
     }
   ),
 
-  -- Columns (common in your slides)
   s({ trig = "columns", desc = "Columns environment", name = "Two Columns" },
     {
       t("\\begin{columns}["),

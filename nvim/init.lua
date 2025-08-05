@@ -35,6 +35,24 @@ vim.lsp.config.lua_ls = {
 vim.lsp.enable("lua_ls")
 -- }}}
 
+-- Ltex LSP
+-- vim.lsp.config.ltex_plus = {
+--   cmd = { "ltex-ls-plus" },
+--   filetypes = { "markdown", "tex", "latex", "text" },
+--   root_markers = {
+--     ".git",
+--     vim.uv.cwd()
+--   },
+--   settings = {
+--     ltex = {
+--       checkFrequency = 'save',
+--       enabled = { 'markdown', 'tex', 'latex', 'text' },
+--       language = 'en-US',
+--     },
+--   },
+-- }
+-- vim.lsp.enable("ltex_plus")
+
 -- Python {{{
 vim.lsp.config.basedpyright = {
 	name = "basedpyright",

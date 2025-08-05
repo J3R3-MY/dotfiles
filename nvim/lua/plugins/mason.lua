@@ -31,6 +31,7 @@ return {
         "basedpyright",
         "ruff",
         "lua_ls",
+        "ltex_plus",
       },
     })
 
