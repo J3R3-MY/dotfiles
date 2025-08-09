@@ -10,7 +10,7 @@ return {
     model = 'claude-sonnet-4',
     headers = {
       user = 'User  ', -- Header to use for user questions
-      assistant = '  Copilot', -- Header to use for AI answers
+      assistant = '  Copilot   ', -- Header to use for AI answers
       tool = '## Tool ', -- Header to use for tool calls
     },
   },
