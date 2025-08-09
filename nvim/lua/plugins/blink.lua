@@ -61,7 +61,7 @@ return {
           Constructor = '󱁤',
 
           Field = '󰜢',
-          Variable = "󰀫",
+          Variable = "󰯙",
           Property = '',
 
           Class = '',
