@@ -96,8 +96,9 @@ return {
 				},
 			},
 			sources = {
-        default = { "lsp", "path", "snippets", "buffer", "copilot" },
+        -- default = { "lsp", "path", "snippets", "buffer", "copilot" },
 
+        default = { "lsp", "path", "snippets", "buffer"},
         per_filetype = {
           lua = { inherit_defaults = true },
           cpp = { inherit_defaults = true },
@@ -120,7 +121,7 @@ return {
           vimtex = {
             name = 'vimtex',
             module = 'blink.compat.source',
-            score_offset = 20,
+            score_offset = -1,
 						transform_items = function(_, items)
 							for _, item in ipairs(items) do
 								item.kind_icon = ""
@@ -129,19 +130,19 @@ return {
 							return items
 						end,
           },
-					copilot = {
-						name = "copilot",
-						module = "blink-cmp-copilot",
-						score_offset = 0,
-						async = true,
-						transform_items = function(_, items)
-							for _, item in ipairs(items) do
-								item.kind_icon = " "
-								item.kind_name = "Copilot"
-							end
-							return items
-						end,
-					},
+					-- copilot = {
+					-- 	name = "copilot",
+					-- 	module = "blink-cmp-copilot",
+					-- 	score_offset = 0,
+					-- 	async = true,
+					-- 	transform_items = function(_, items)
+					-- 		for _, item in ipairs(items) do
+					-- 			item.kind_icon = " "
+					-- 			item.kind_name = "Copilot"
+					-- 		end
+					-- 		return items
+					-- 	end,
+					-- },
           thesaurus = {
             name = "blink-cmp-words",
             module = "blink-cmp-words.thesaurus",
