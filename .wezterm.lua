@@ -2,7 +2,7 @@
 local wezterm = require("wezterm")
 
 local config = wezterm.config_builder()
-config.leader = { key = 'a', mods = 'CTRL', timeout_milliseconds = 1000 }
+config.leader = { key = 'e', mods = 'CTRL', timeout_milliseconds = 1000 }
 
 config.window_padding = {
   left = 0,

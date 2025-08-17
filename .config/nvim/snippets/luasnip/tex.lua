@@ -269,7 +269,15 @@ return {
     }
   ),
 
-  s({ trig = "textit", desc = "Italic text" },
+  s({ trig = "mm", desc = "Bold math text" },
+    {
+      t("\\mathbf{"),
+      i(1, "text"),
+      t("}")
+    }
+  ),
+
+  s({ trig = "\\ti", desc = "Italic text" },
     {
       t("\\textit{"),
       i(1, "text"),
@@ -311,28 +319,28 @@ return {
     {t("\\mathbb{C}")}
   ),
 
-  -- Quantum notation (specific to your thesis)
+  -- Quantum notation
   s({trig="ket", desc="Quantum ket"},
     {
-      t("\\ket{"),
+      t("$|"),
       i(1, "state"),
-      t("}")
+      t("\\rangle$")
     }
   ),
   s({trig="bra", desc="Quantum bra"},
     {
-      t("\\bra{"),
+      t("$\\langle "),
       i(1, "state"),
-      t("}")
+      t("|$")
     }
   ),
   s({trig="braket", desc="Quantum braket"},
     {
-      t("\\braket{"),
+      t("$\\langle "),
       i(1, "bra"),
-      t("}{"),
+      t("|"),
       i(2, "ket"),
-      t("}")
+      t("\\rangle$")
     }
   ),
 
