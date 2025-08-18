@@ -35,3 +35,4 @@ _fzf_compgen_dir() {
 }
 
 eval $(thefuck --alias)
+eval "$(zoxide init zsh)"
