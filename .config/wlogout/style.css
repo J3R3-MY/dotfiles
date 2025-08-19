@@ -22,7 +22,7 @@ button {
 
 button:active,
 button:focus {
-  box-shadow: 0 0 10px #ebe1f0;
+  box-shadow: 0 0 10px #ffffff;
 }
 
 /* Adjust the size of the icon or content inside the button */

@@ -34,7 +34,7 @@ packages=(
     "git-delta" 
     "zsh-syntax-highlighting"
     "wofi" 
-    "zsh-autocomplete" 
+    "zsh-autosuggestions" 
     "thefuck" 
     "ripgrep" 
     "uv" 
@@ -50,7 +50,8 @@ packages=(
     "starship"
     "zsh"
     "vim"
-    "wezterm"
+    "wezterm-git"
+    "kitty"
     "rofi-wayland"
     "thunar-volman" 
     "tumbler" 
@@ -74,6 +75,7 @@ packages=(
     "gvfs"
     "dunst"
     "thunar"
+    "xdg-desktop-portal-gtk"
     "xdg-desktop-portal-hyprland"
     "qt5-wayland"
     "qt6-wayland"
@@ -191,7 +193,9 @@ _installPackages "${packages[@]}"
 # default shell
 chsh -s $(which zsh)
 
+# Enable sddm and get astronaut theme
 sudo systemctl enable sddm
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh)"
 sudo systemctl enable bluetooth
 sudo systemctl enable fstrim.timer
 
