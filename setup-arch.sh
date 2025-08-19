@@ -13,6 +13,7 @@ packages=(
     "hypridle" 
     "docker"
     "okular" 
+    "nwg-look"
     "feh" 
     "gwenview" 
     "vlc" 

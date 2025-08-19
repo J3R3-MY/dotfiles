@@ -4,7 +4,7 @@
         "reload_style_on_change": true,
         "modules-left": ["custom/appmenuicon", "clock"],
         "modules-center": ["hyprland/workspaces"],
-        "modules-right": ["group/expand","pulseaudio", "bluetooth","network","battery", "custom/exit"],
+        "modules-right": ["group/expand","pulseaudio","bluetooth","tray","battery", "custom/exit"],
 
 
         "hyprland/workspaces": {
@@ -50,16 +50,9 @@
             "tooltip-format-enumerate-connected-battery": "{device_alias}\n{device_address}\n{device_battery_percentage}%",
             "on-click": "blueberry",
         }, 
-        "network": {
-            "format-wifi": "",
-            "format-ethernet": "",
-            "format-disconnected": "",
-            "tooltip-format": " {ifname} via {gwaddr}",
-            "tooltip-format-wifi": " {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
-            "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
-            "tooltip-format-disconnected": "Disconnected",
-            "max-length": 50,
-            "on-click": "nm-connection-editor"
+        "tray":{
+        "icon size": 18,
+        "spacing": 5,
         },
         "pulseaudio": {
           "format": "{icon}    {volume}%",
