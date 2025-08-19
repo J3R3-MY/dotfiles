@@ -15,6 +15,7 @@ _darcs
 .gitignore
 .gitmodules
 .DS_STORE
+setup-arch.sh
 
 .+~          # emacs backup files
 #.*#       # emacs autosave files
