@@ -25,7 +25,7 @@
         },
         "custom/appmenuicon": {
           "format": "",
-          "on-click": "rofi -show drun -replace -theme ~/.config/rofi/launchers/type-1/style-6.rasi",
+          "on-click": "rofi -show drun",
           "tooltip": false
         },
         "clock": {
@@ -37,17 +37,6 @@
                     "today": "<span color='#fAfBfC'><b>{}</b></span>"
                 }
             },
-        },
-        "network": {
-            "format-wifi": "",
-            "format-ethernet": "",
-            "format-disconnected": "",
-            "tooltip-format": " {ifname} via {gwaddr}",
-            "tooltip-format-wifi": " {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
-            "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
-            "tooltip-format-disconnected": "Disconnected",
-            "max-length": 50,
-            "on-click": "nm-connection-editor"
         },
         "bluetooth": {
             "format-on": "󰂯",
@@ -61,6 +50,17 @@
             "tooltip-format-enumerate-connected-battery": "{device_alias}\n{device_address}\n{device_battery_percentage}%",
             "on-click": "blueberry",
         }, 
+        "network": {
+            "format-wifi": "",
+            "format-ethernet": "",
+            "format-disconnected": "",
+            "tooltip-format": " {ifname} via {gwaddr}",
+            "tooltip-format-wifi": " {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
+            "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\nUp: {bandwidthUpBytes} Down: {bandwidthDownBytes}",
+            "tooltip-format-disconnected": "Disconnected",
+            "max-length": 50,
+            "on-click": "nm-connection-editor"
+        },
         "pulseaudio": {
           "format": "{icon}    {volume}%",
           "format-bluetooth": "{icon}    {volume}%",
