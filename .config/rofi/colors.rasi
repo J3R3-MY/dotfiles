@@ -1,0 +1,34 @@
+* {
+	wallpaper: "/home/hypr/.config/wallpapers/galaxy-waves_tokyo-night-Storm-Night-Moon-Day.png";
+    
+	active-background: #9F8763;
+    active-foreground: @foreground;
+    normal-background: @background;
+    normal-foreground: @foreground;
+    urgent-background: #3173D8;
+    urgent-foreground: @foreground;
+	
+    alternate-active-background: @background;
+    alternate-active-foreground: @foreground;
+    alternate-normal-background: @background;
+    alternate-normal-foreground: @foreground;
+    alternate-urgent-background: @background;
+    alternate-urgent-foreground: @foreground;
+
+    selected-active-background: #3173D8;
+    selected-active-foreground: @foreground;
+    selected-normal-background: #3356A6;
+    selected-normal-foreground: @foreground;
+    selected-urgent-background: #b5ddf6;
+    selected-urgent-foreground: @background;
+
+    background: #101119;
+    foreground: #b5ddf6;
+    border-color: @foreground;
+
+	// General settings
+    background-color: transparent;
+	cursor-width: 1px;
+	font: "Caskaydia Cove Nerd Font 14";
+}
+
