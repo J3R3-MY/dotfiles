@@ -19,7 +19,7 @@ rofi_cmd() {
 	rofi -dmenu \
 		-p "  $USER" \
 		-mesg "  Uptime: $uptime" \
-		-config powermenu-config.rasi
+		-config powermenu.rasi
 }
 
 # Confirmation CMD
