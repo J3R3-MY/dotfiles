@@ -29,7 +29,7 @@ if [ ! -d "${cache_dir}" ] ; then
 fi
 
 # Convert images in directory and save to cache dir
-for imagen in "$wall_dir"/*.{jpg,jpeg,png,webp}; do
+for imagen in "$wall_dir"/*.{jpg,jpeg,png,webp,JPG,PNG}; do
 	if [ -f "$imagen" ]; then
 		filename=$(basename "$imagen")
 			if [ ! -f "${cache_dir}/${filename}" ] ; then
@@ -44,6 +44,8 @@ wall_selection=$(ls "${wall_dir}" -t | while read -r A ; do  echo -en "$A\x00ico
 # Set the wallpaper with waypaper
 [[ -n "$wall_selection" ]] || exit 1
 waypaper --wallpaper ${wall_dir}${wall_selection}
-
+hellwal --skip-term-colors -i ${wall_dir}${wall_selection}
+cp -r ~/.cache/hellwal/* ~/.config/hellwal/output/
+pkill waybar && hyprctl dispatch exec waybar
 exit 0
 

@@ -84,25 +84,20 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     opts.desc = "Show documentation for what is under cursor"
     keymap.set("n", "K", vim.lsp.buf.hover, opts)     -- show documentation for what is under cursor
-
-    opts.desc = "Show Git Diff (Hunks)"
-    keymap.set("n", "<leader>Gd", "<cmd>lua Snacks.picker.git_diff()<CR>", opts) -- show git diff (hunks)
-
-    opts.desc = "Show Git Status"
-    keymap.set("n", "<leader>Gs", "<cmd>lua Snacks.picker.git_status()<CR>", opts) -- show git status
-
-    opts.desc = "Open Config"
-    keymap.set("n", "<leader>C", "<cmd>lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})<CR>", opts) -- open nvim config
-
-    opts.desc = "Registers"
-    keymap.set("n", "<leader>R", "<cmd>lua Snacks.picker.registers()<CR>", opts) -- show registers
-
-    opts.desc = "Find LuaSnip Snippet"
-    keymap.set("n", "<leader>fs", function()
-      require('extensions.snacks-luasnip').open()
-    end)
   end,
 })
+
+    keymap.set("n", "<leader>Gd", "<cmd>lua Snacks.picker.git_diff()<CR>", {desc = "Show Git Diff (Hunks)"}) -- show git diff (hunks)
+
+    keymap.set("n", "<leader>Gs", "<cmd>lua Snacks.picker.git_status()<CR>", {desc = "Show Git Status"}) -- show git status
+
+    keymap.set("n", "<leader>C", "<cmd>lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})<CR>", {desc = "Open Config"}) -- open nvim config
+
+    keymap.set("n", "<leader>R", "<cmd>lua Snacks.picker.registers()<CR>", {desc = "Registers"}) -- show registers
+
+    keymap.set("n", "<leader>fs", function()
+      require('extensions.snacks-luasnip').open()
+    end, {desc = "Find LuaSnip Snippet"})
 
 local signs = { Error = "󰚌", Warn = "󰈸", Hint = " ", Info = "" }
 vim.diagnostic.config({

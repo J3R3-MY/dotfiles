@@ -1,4 +1,4 @@
-@theme '~/.config/rofi/colors.rasi'
+@theme "~/.config/rofi/colors.rasi"
 
 configuration {
     modi:                        "drun";
@@ -33,7 +33,7 @@ mainbox {
     background-color:            transparent;
 	border: 					 2px;
 	border-radius:				 inherit;
-	border-color: 				 @border-color;
+	border-color: 				 transparent;
 }
 
 inputbar {
@@ -41,7 +41,7 @@ inputbar {
     spacing:                     10px;
     padding:                     30px 60px;
     background-color:            transparent;
-    text-color:                  @background;
+    text-color:                  @magenta;
 	border-radius: 				 15px 5px 15px 5px;
     orientation:                 horizontal;
     children:                    [ "dummy", "textbox-prompt-colon", "entry", "entry-counter", "dummy" ];
@@ -67,7 +67,7 @@ entry {
     text-color:                  inherit;
     cursor:                      text;
     placeholder:                 "Search Wallpaper";
-    placeholder-color:           rgba(16,17,25, 0.5);
+    placeholder-color:           @fg0;
 }
 
 dummy {
@@ -133,7 +133,7 @@ element {
     cursor:                      pointer;
     background-color:            @foreground;
 	border:						 2px;
-	border-color:				 rgba(51,86,166, 0.8);
+	border-color:				 @selected-normal-foreground;
     text-color:                  @background;
 }
 
@@ -146,7 +146,7 @@ element {
 element selected.normal {
     background-color:            @selected-normal-background;
     text-color:                  @selected-normal-foreground;
-    border-color: @foreground;
+    border-color: @green;
 }
 
 element-icon {

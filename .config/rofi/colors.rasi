@@ -1,34 +1,117 @@
 * {
-	wallpaper: "/home/hypr/.config/wallpapers/galaxy-waves_tokyo-night-Storm-Night-Moon-Day.png";
-    
-	active-background: #9F8763;
-    active-foreground: @foreground;
-    normal-background: @background;
-    normal-foreground: @foreground;
-    urgent-background: #3173D8;
-    urgent-foreground: @foreground;
-	
-    alternate-active-background: @background;
-    alternate-active-foreground: @foreground;
-    alternate-normal-background: @background;
-    alternate-normal-foreground: @foreground;
-    alternate-urgent-background: @background;
-    alternate-urgent-foreground: @foreground;
 
-    selected-active-background: #3173D8;
-    selected-active-foreground: @foreground;
-    selected-normal-background: #3356A6;
-    selected-normal-foreground: @foreground;
-    selected-urgent-background: #b5ddf6;
-    selected-urgent-foreground: @background;
+    bg0: #24283b;
+    bg1: #000000;
+    grey0: #C5C8C6;
+    fg0: #9274ca;
+    magenta: #bb9af7;
+    cyan:  #b4f9f8;
+    black: #24283b;
 
-    background: #101119;
-    foreground: #b5ddf6;
-    border-color: @foreground;
+    blue: #7daea3;
+    red: #f7768e;
+    orange: #ff9e64;
+    orange2: #e0af68;
+    green: #9ece6a;
+    bgStatusline3: #e78a4e;
 
-	// General settings
-    background-color: transparent;
-	cursor-width: 1px;
-	font: "Caskaydia Cove Nerd Font 14";
+    background-color: @bg0;
 }
 
+window {
+    height: 600;
+    width: 600;
+
+    border: 5;
+    border-radius: 10;
+    border-color: @bg0;
+}
+
+mainbox {
+    spacing: 0;
+    children: [inputbar, message, listview];
+}
+
+inputbar {
+    color: @fg0;
+    padding: 14;
+    background-color: @bg0;
+}
+
+message {
+    padding: 10;
+    background-color: @grey0;
+}
+
+listview {
+    padding: 8;
+    border-radius: 0 0 10 10;
+    border: 2 2 2 2;
+    border-color: @bg0;
+    background-color: @bg0;
+    dynamic: false;
+}
+
+textbox {
+    text-color: @fg0;
+    background-color: inherit;
+}
+
+error-message {
+    border: 20 20 20 20;
+}
+
+entry, prompt, case-indicator {
+    text-color: inherit;
+}
+
+prompt {
+    margin: 0 10 0 0;
+}
+
+element {
+    padding: 5;
+    vertical-align: 0.5;
+    border-radius: 10;
+    background-color: @bg1;
+}
+
+element.selected.normal {
+    background-color: @magenta;
+}
+
+element.alternate.normal {
+    background-color: inherit;
+}
+
+element.normal.active, element.alternate.active {
+    background-color: @orange2;
+}
+
+element.selected.active {
+    text-color: @black;
+    background-color: @green;
+}
+
+element.normal.urgent, element.alternate.urgent {
+    background-color: @red;
+}
+
+element.selected.urgent {
+    background-color: @blue;
+}
+
+element-text, element-icon {
+    size: 40;
+    margin: 0 10 0 0;
+    vertical-align: 0.5;
+    background-color: inherit;
+    text-color: @fg0;
+}
+element-text.selected{
+    text-color: @black;
+}
+
+element-text .active, element-text .urgent {
+    text-color: @black;
+}

@@ -4,7 +4,7 @@
         "reload_style_on_change": true,
         "modules-left": ["custom/appmenuicon", "clock"],
         "modules-center": ["hyprland/workspaces"],
-        "modules-right": ["group/expand","pulseaudio","bluetooth","tray","battery", "custom/exit"],
+        "modules-right": ["group/expand","pulseaudio","bluetooth","network","battery", "custom/exit"],
 
 
         "hyprland/workspaces": {
@@ -50,9 +50,14 @@
             "tooltip-format-enumerate-connected-battery": "{device_alias}\n{device_address}\n{device_battery_percentage}%",
             "on-click": "blueberry",
         }, 
-        "tray":{
-        "icon size": 18,
-        "spacing": 5,
+        "network": {
+            "format-wifi": "",
+            "format-ethernet":"",
+            "format-disconnected": "",
+            "tooltip-format-disconnected": "Error",
+            "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+            "tooltip-format-ethernet": "{ifname} 🖧 ",
+            "on-click": "networkmanager_dmenu"
         },
         "pulseaudio": {
           "format": "{icon}    {volume}%",

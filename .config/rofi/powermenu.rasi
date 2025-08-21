@@ -1,4 +1,4 @@
-@theme '~/.config/rofi/colors.rasi'
+@theme "~/.config/rofi/colors.rasi"
 
 /*****----- Main Window -----*****/
 window {
