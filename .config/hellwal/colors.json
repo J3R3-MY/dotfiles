@@ -1,0 +1,28 @@
+{
+  "wallpaper": "/home/hypr/.config/wallpapers/galaxy-waves_tokyo-night-Storm-Night-Moon-Day.png",
+  "alpha": "100",
+  "special": {
+    "background": "#000004",
+    "foreground": "#93cfff",
+    "cursor": "#93cfff",
+    "border": "#93cfff"
+  },
+  "colors": {
+    "color0": "#000004",
+    "color1": "#101010",
+    "color2": "#103050",
+    "color3": "#103070",
+    "color4": "#242e55",
+    "color5": "#305070",
+    "color6": "#306070",
+    "color7": "#6e9bec",
+    "color8": "#000014",
+    "color9": "#141414",
+    "color10": "#143c64",
+    "color11": "#143c8c",
+    "color12": "#2d396a",
+    "color13": "#3c648c",
+    "color14": "#3c788c",
+    "color15": "#93cfff"
+  }
+}

@@ -9,12 +9,7 @@
  * -----------------------------------------------------
 */
 
-@define-color backgroundlight #FFFFFF;
-@define-color backgrounddark #FFFFFF;
-@define-color bordercolor #FFFFFF;
-@define-color color7 #d6d5e3;
-@define-color color9 #97a5ca;
-@define-color iconcolor #FFFFFF;
+@import url('../hellwal/output/waybar-colors.css');
 
 * {
     font-size:18px;
@@ -48,7 +43,7 @@ tooltip {
     background:@background;
     color: @color7;
 }
-#clock:hover,#bluetooth:hover,#tray:hover,#battery:hover, #cpu:hover,#memory:hover,#temperature:hover{
+#clock:hover,#bluetooth:hover,#network:hover,#battery:hover, #cpu:hover,#memory:hover,#temperature:hover{
     transition: all .3s ease;
     color:@color9;
 }
@@ -100,16 +95,17 @@ tooltip {
 }
 #bluetooth{
     padding: 0px 8px;
-    margin-left: -3px;
+    margin-left: -1px;
     transition: all .3s ease;
     color:@color7;
 
 }
-#tray{
-    padding: 0px 8px;
+#network{
+    padding: 0px 10px;
+    margin-left: -3px;
+    margin-right: 2px;
     transition: all .3s ease;
     color:@color7;
-
 }
 #battery{
     padding: 0px 6px;
