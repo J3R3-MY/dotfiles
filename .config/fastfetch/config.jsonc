@@ -8,22 +8,97 @@
             "top": 1
         }
     },
-    "display": {
-        "separator": " "
-    },
-    "modules": [
-      "os",
-      "host",
-      "kernel",
-      "shell",
-      "wm",
-      "theme",
-      "icons",
-      "font",
-      "terminal",
-      "cpu",
-      "gpu",
-      "poweradapter",
-      "colors"
-    ]
+	"display": {
+		"separator": " "
+	},
+	"modules": [
+		"break",
+		{
+			"type": "custom",
+			"format": "\u001b[90m┌──────────────────────Hardware──────────────────────┐",
+		},
+		{
+			"type": "host",
+			"key": " PC ",
+			"keyColor": "red",
+		},
+		{
+			"type": "cpu",
+			"key": "│ ├ ",
+			"keyColor": "red",
+		},
+		{
+			"type": "gpu",
+			"key": "│ ├󰒆 ",
+			"keyColor": "red",
+		},
+		{
+			"type": "memory",
+			"key": "└ └󰍛 ",
+			"keyColor": "red",
+		},
+		{
+			"type": "custom",
+			"format": "\u001b[90m└────────────────────────────────────────────────────┘",
+		},
+		{
+			"type": "custom",
+			"format": "\u001b[90m┌──────────────────────Software──────────────────────┐",
+		},
+		{
+			"type": "os",
+			"key": "􀣺 OS ",
+			"keyColor": "green",
+		},
+		{
+			"type": "kernel",
+			"key": "│ ├ ",
+			"keyColor": "green",
+		},
+		{
+			"type": "packages",
+			"key": "│ ├󰏖 ",
+			"keyColor": "green",
+		},
+		{
+			"type": "shell",
+			"key": "└ └ ",
+			"keyColor": "green",
+		},
+		{
+			"type": "de",
+			"key": " DE ",
+			"keyColor": "blue",
+		},
+		{
+			"type": "lm",
+			"key": "│ ├ ",
+			"keyColor": "blue",
+		},
+		{
+			"type": "wm",
+			"key": "│ ├ ",
+			"keyColor": "blue",
+		},
+		{
+			"key": "│ ├ ",
+			"keyColor": "blue",
+			"type": "command",
+			"text": "pgrep yabai &> /dev/null && echo yabai || echo Quartz Compositor",
+		},
+		{
+			"type": "terminal",
+			"key": "│ ├ ",
+			"keyColor": "blue",
+		},
+		{
+			"type": "terminalfont",
+			"key": "└ └ ",
+			"keyColor": "blue",
+		},
+		{
+			"type": "custom",
+			"format": "\u001b[90m└────────────────────────────────────────────────────┘",
+		},
+	]
 }
