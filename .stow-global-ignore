@@ -1,0 +1,15 @@
+# files in repo root
+^AdditionalPackages\.txt$
+^LICENSE$
+^\.DS_Store$
+
+# directories inside .config
+^alacritty$
+^dunst$
+^hypr$
+^rofi$
+^scripts$
+^wallpapers$
+^waybar$
+^wlogout$
+^xdg-desktop-portal$
