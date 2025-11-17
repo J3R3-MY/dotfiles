@@ -114,7 +114,8 @@ config.keys = {
 
 config.scrollback_lines = 3500
 
-config.color_scheme = 'tokyonight-storm'
+-- config.color_scheme = 'tokyonight-storm'
+config.color_scheme = 'duskfox'
 config.font = wezterm.font 'JetBrains Mono'
 config.font_size = 19
 

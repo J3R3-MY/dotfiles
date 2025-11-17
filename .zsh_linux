@@ -6,7 +6,7 @@ setopt APPENDHISTORY
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY
 
-export PATH=$PATH:$HOME/.local/share/bob/nvim-bin
+export PATH=$PATH:$HOME/.local/share/bob/nvim-bin:$HOME/.cargo/bin
 
 alias ls="ls --color=auto"
 
