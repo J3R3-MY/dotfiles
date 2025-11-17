@@ -15,7 +15,7 @@ $character"""
 palette = "tokyonight-storm"
 
 [directory]
-style = 'bold blue'
+style = 'bold cyan'
 truncation_length = 3
 truncation_symbol = '.../'
 truncate_to_repo = false
@@ -66,7 +66,7 @@ disabled = false
 style = 'grey'
 format = '[\[ $time \]]($style) '
 time_format = '%T'
-utc_time_offset = '+2'
+utc_time_offset = '+1'
 time_range = '08:00:00-18:30:00'
 
 [package]
@@ -95,3 +95,7 @@ purple = '#c099ff'
 gray = '#737aa2'
 black = '#414868'
 white='#D8DEE9'
+
+#fluoromachine
+cyan = '#61E2FF'
+# green = '#72F1B8'
