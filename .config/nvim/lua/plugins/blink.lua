@@ -106,7 +106,7 @@ return {
           python = { inherit_defaults = true },
           tex = { inherit_defaults = true, "thesaurus", "dictionary", "vimtex"},
           markdown = { inherit_defaults = true, "thesaurus", "dictionary" },
-          text = { inherit_defaults = true, "thesaurus", "dictionary" },
+          -- text = { inherit_defaults = true, "thesaurus", "dictionary" },
         },
 				providers = {
 				  lsp = {
