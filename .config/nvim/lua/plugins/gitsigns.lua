@@ -10,19 +10,13 @@ return {
       end
 
       -- Actions
-      map("n", "<leader>hs", gs.stage_hunk, "Stage hunk")
-      map("n", "<leader>hr", gs.reset_hunk, "Reset hunk")
-      map("v", "<leader>hs", function()
-        gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
-      end, "Stage hunk")
-      map("v", "<leader>hr", function()
-        gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
-      end, "Reset hunk")
+      map({"n", "v"}, "<leader>hs", ":Gitsigns stage_hunk<CR>", "Stage hunk")
+      map({"n", "v"}, "<leader>hr", ":Gitsigns reset_hunk<CR>", "Reset hunk")
 
       map("n", "<leader>hS", gs.stage_buffer, "Stage buffer")
       map("n", "<leader>hR", gs.reset_buffer, "Reset buffer")
 
-      map("n", "<leader>hu", gs.undo_stage_hunk, "Undo stage hunk")
+      map({"n", "v"}, "<leader>hu", ":Gitsigns undo_stage_hunk<CR>", "Undo stage hunk")
 
       map("n", "<leader>hp", gs.preview_hunk, "Preview hunk")
 
