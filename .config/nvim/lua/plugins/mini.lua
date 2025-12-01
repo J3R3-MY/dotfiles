@@ -1,5 +1,5 @@
 return {
-  'echasnovski/mini.nvim',
+  'nvim-mini/mini.nvim',
   dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring'},
   event = 'VeryLazy',
   config = function()
