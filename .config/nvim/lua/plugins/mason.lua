@@ -32,6 +32,7 @@ return {
         "ruff",
         "lua_ls",
         "ltex_plus",
+        "json-lsp",
       },
     })
 
