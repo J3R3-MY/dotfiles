@@ -16,6 +16,18 @@ vim.lsp.config.clangd = {
 vim.lsp.enable("clangd")
 -- }}}
 
+-- json {{{
+vim.lsp.config.jsonls = {
+	cmd = { "vscode-json-language-server", "--stdio" },
+	filetypes = { "json"},
+	root_markers = {
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("jsonls")
+-- }}}
+
 -- Lua {{{
 vim.lsp.config.lua_ls = {
 	cmd = { "lua-language-server" },
