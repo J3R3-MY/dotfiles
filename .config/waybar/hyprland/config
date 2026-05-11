@@ -3,7 +3,7 @@
         "position": "top",
         "reload_style_on_change": true,
         "modules-left": ["custom/appmenuicon", "clock"],
-        "modules-center": ["hyprland/workspaces"],
+        "modules-center": ["sway/workspaces"],
         "modules-right": ["group/expand","pulseaudio","bluetooth","network","battery", "custom/exit"],
 
 
