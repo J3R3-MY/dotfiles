@@ -1,55 +1,71 @@
-/* ----------- 💫 https://github.com/JaKooLit 💫 -------- */
-/* Importing pywal colors */
-
-@import "../waybar/style.css";
+* {
+    background-image: none;
+}
 
 window {
-  font-family: Fira Code Medium;
-  font-size: 16pt;
-  color: #cdd6f4; /* text */
-  background-color: rgba(30, 30, 46, 0.6);
+    background-color: transparent;
+    background-image: url("/tmp/wlogout-bg.png");
+    background-size: cover;
+    background-position: center;
 }
 
 button {
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 20%;
-  background-color: rgba(200, 220, 255, 0);
-  animation: gradient_f 20s ease-in infinite;
-  border-radius: 50px; /* Increased border radius for a more rounded look */
-  outline: none;
+    outline-style: none;
+    color: #D3C6AA;
+    background-color: rgba(45, 53, 59, 0.75);
+    border-style: solid;
+    border-color: #3A515D;
+    border-width: 2px;
+    border-radius: 8px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 25%;
+    font-family: Ubuntu;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 0px 15px;
+    box-shadow: none;
+    text-shadow: none;
 }
 
-button:active,
+button:active, button:hover {
+    background-color: rgba(127, 187, 179, 0.55);
+    border-color: #7FBBB3;
+    outline-style: none;
+    color: #2D353B;
+    font-family: Ubuntu;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 0px 15px;
+    box-shadow: none;
+    text-shadow: none;
+}
+
 button:focus {
-  box-shadow: 0 0 10px #ffffff;
-}
-
-/* Adjust the size of the icon or content inside the button */
-button span {
-  font-size: 1.2em; /* Increase the font size */
+    border-color: #3A515D;
+    outline-style: none;
 }
 
 #lock {
-  background-image: image(url("./icons/lock.png"));
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/lock.png"), url("/usr/share/wlogout/icons/lock.png"));
 }
 
 #logout {
-  background-image: image(url("./icons/logout.png"));
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/logout.png"), url("/usr/share/wlogout/icons/logout.png"));
 }
 
 #suspend {
-  background-image: image(url("./icons/sleep.png"));
-}
-
-#shutdown {
-  background-image: image(url("./icons/power.png"));
-}
-
-#reboot {
-  background-image: image(url("./icons/restart.png"));
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/sleep.png"), url("/usr/share/wlogout/icons/suspend.png"));
 }
 
 #hibernate {
-  background-image: image(url("./icons/hibernate.png"));
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/hibernate.png"), url("/usr/share/wlogout/icons/hibernate.png"));
+}
+
+#shutdown {
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/power.png"), url("/usr/share/wlogout/icons/shutdown.png"));
+}
+
+#reboot {
+    background-image: image(url("/home/jklinke/.config/wlogout/icons/restart.png"), url("/usr/share/wlogout/icons/reboot.png"));
 }
