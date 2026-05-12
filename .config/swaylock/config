@@ -1,0 +1,41 @@
+# Image
+image=$HOME/dotfiles/.config/wallpapers/nika_everforest.png
+scaling=fill
+
+# Indicator
+indicator-caps-lock
+
+# Colors (Everforest palette — matches starship.toml)
+# inside (indicator fill)
+inside-color=2D353Bff
+inside-clear-color=A7C080cc
+inside-ver-color=DBBC7Fcc
+inside-wrong-color=ED9A9Ccc
+
+# ring
+ring-color=83C092ff
+ring-clear-color=A7C080ff
+ring-ver-color=DBBC7Fff
+ring-wrong-color=ED9A9Cff
+
+# line between ring and inside
+line-color=00000000
+line-clear-color=00000000
+line-ver-color=00000000
+line-wrong-color=00000000
+
+# key / backspace highlights
+key-hl-color=A7C080ff
+bs-hl-color=ED9A9Cff
+
+# separator
+separator-color=00000000
+
+# text
+text-color=D3C6AAff
+text-clear-color=2D353Bff
+text-ver-color=2D353Bff
+text-wrong-color=2D353Bff
+
+# Behavior
+show-failed-attempts
