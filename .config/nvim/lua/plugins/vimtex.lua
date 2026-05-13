@@ -2,6 +2,7 @@ return {
   {
     "lervag/vimtex",
     lazy = false,
+    enabled = false,
     -- tag = "v2.15", -- uncomment to pin to a specific release
     config = function()
       vim.g.vimtex_imaps_enabled = 0

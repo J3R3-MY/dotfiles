@@ -1,5 +1,6 @@
 return {
   "barreiroleo/ltex_extra.nvim",
+  enabled = false,
 
   opts = {
     load_langs = { "en-US" },
