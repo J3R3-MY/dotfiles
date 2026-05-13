@@ -2,7 +2,7 @@ return {
   "folke/snacks.nvim",
   priority = 1000,
   lazy = false,
-  dependencies = { "amansingh-afk/milli.nvim" },
+  dependencies = { "J3R3-MY/milli.nvim" },
   ---@type snacks.Config
   opts = function()
     local splash = require("milli").load({ splash = "lumon" })

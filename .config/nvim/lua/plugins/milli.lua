@@ -1,1 +1,1 @@
-return { "amansingh-afk/milli.nvim", lazy = false }
+return { "J3R3-MY/milli.nvim", lazy = false }
