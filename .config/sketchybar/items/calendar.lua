@@ -1,25 +1,53 @@
-local settings = require("settings")
-local colors = require("colors")
-
--- Padding item required because of bracket
-sbar.add("item", { position = "right", width = settings.group_paddings })
+local icons = require "icons"
+local colors = require("colors").sections.calendar
+local settings = require "settings"
 
 local cal = sbar.add("item", {
-	icon = {
-		font = {
-			style = settings.font.style_map["Black"],
-			size = 12.0,
-		},
-	},
-	label = {
-		width = 49,
-		align = "right",
-		font = { family = settings.font.numbers },
-	},
-	position = "right",
-	update_freq = 30,
+  icon = {
+    padding_left = 8,
+    padding_right = 4,
+    font = {
+      family = settings.font.numbers,
+      style = settings.font.style_map["Bold"],
+    },
+  },
+  label = {
+    color = colors.label,
+    align = "left",
+    padding_right = 8,
+  },
+  padding_left = 10,
+  position = "right",
+  update_freq = 30,
+  -- click_script = "open -a 'Calendar'",
 })
 
+-- cal:subscribe("mouse.clicked", function()
+--   sbar.animate("tanh", 8, function()
+--     cal:set {
+--       background = {
+--         shadow = {
+--           distance = 0,
+--         },
+--       },
+--       y_offset = -4,
+--       padding_left = 14,
+--       padding_right = 0,
+--     }
+--     cal:set {
+--       background = {
+--         shadow = {
+--           distance = 4,
+--         },
+--       },
+--       y_offset = 0,
+--       padding_left = 10,
+--       padding_right = 4,
+--     }
+--   end)
+-- end)
+
+-- english date
 cal:subscribe({ "forced", "routine", "system_woke" }, function(env)
-	cal:set({ icon = os.date("%a. %d %b."), label = os.date("%H:%M") })
+  cal:set { icon = os.date "%a %d %b %H:%M"}
 end)

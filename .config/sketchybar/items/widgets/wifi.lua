@@ -1,266 +1,153 @@
-local icons = require("icons")
-local colors = require("colors")
-local settings = require("settings")
-
--- Execute the event provider binary which provides the event "network_update"
--- for the network interface "en0", which is fired every 2.0 seconds.
-sbar.exec(
-	"killall network_load >/dev/null; $CONFIG_DIR/helpers/event_providers/network_load/bin/network_load en0 network_update 2.0"
-)
+local icons = require "icons"
+local colors = require("colors").sections.widgets.wifi
 
 local popup_width = 250
+local wifi_iface = "en0"   -- BSD device name, used for ipconfig
+local wifi_svc   = "Wi-Fi" -- networksetup service name, used for SSID lookup
 
-local wifi_up = sbar.add("item", "widgets.wifi1", {
-	position = "right",
-	width = 0,
-	icon = {
-		padding_right = 0,
-		font = {
-			style = settings.font.style_map["Bold"],
-			size = 9.0,
-		},
-		string = icons.wifi.upload,
-		width = 0,
-	},
-	label = {
-		font = {
-			family = settings.font.numbers,
-			style = settings.font.style_map["Bold"],
-			size = 9.0,
-		},
-		color = colors.red,
-		string = "??? Bps",
-		width = 0,
-	},
-	y_offset = 4,
-})
-
-local wifi_down = sbar.add("item", "widgets.wifi2", {
-	position = "right",
-	padding_left = -5,
-	icon = {
-		padding_right = 0,
-		font = {
-			style = settings.font.style_map["Bold"],
-			size = 9.0,
-		},
-		string = icons.wifi.download,
-		width = 0,
-	},
-	label = {
-		font = {
-			family = settings.font.numbers,
-			style = settings.font.style_map["Bold"],
-			size = 9.0,
-		},
-		color = colors.blue,
-		string = "??? Bps",
-		width = 0,
-	},
-	background = { drawing = false },
-	y_offset = -4,
-})
-
-local wifi = sbar.add("item", "widgets.wifi.padding", {
-	position = "right",
-	label = { drawing = false },
-	padding_left = 0,
-	padding_right = 0,
-})
-
--- Background around the item
-local wifi_bracket = sbar.add("bracket", "widgets.wifi.bracket", {
-	wifi.name,
-	wifi_up.name,
-	wifi_down.name,
-}, {
-	background = { color = colors.bg },
-	popup = { align = "center", height = 30, background = { corner_radius = 12 } },
-})
-
-local ssid = sbar.add("item", {
-	position = "popup." .. wifi_bracket.name,
-	icon = {
-		font = {
-			style = settings.font.style_map["Bold"],
-		},
-		string = icons.wifi.router,
-	},
-	width = popup_width,
-	align = "center",
-	label = {
-		font = {
-			size = 15,
-			style = settings.font.style_map["Bold"],
-		},
-		max_chars = 18,
-		string = "????????????",
-	},
-	background = {
-		height = 2,
-		color = colors.fg_secondary,
-		y_offset = -15,
-	},
-})
-
-local hostname = sbar.add("item", {
-	position = "popup." .. wifi_bracket.name,
-	icon = {
-		align = "left",
-		string = "Hostname:",
-		width = popup_width / 2,
-	},
-	label = {
-		max_chars = 20,
-		string = "????????????",
-		width = popup_width / 2,
-		align = "right",
-	},
+local wifi = sbar.add("item", "widgets.wifi", {
+  position = "right",
+  icon = {
+    color = colors.icon,
+  },
+  label = {
+    drawing = false,
+    padding_right = 6,
+  },
+  background = { drawing = false },
+  popup = {
+    align = "center",
+    height = 30,
+    y_offset = 2,
+  },
+  padding_left = 4,
+  padding_right = 4,
 })
 
 local ip = sbar.add("item", {
-	position = "popup." .. wifi_bracket.name,
-	icon = {
-		align = "left",
-		string = "IP:",
-		width = popup_width / 2,
-	},
-	label = {
-		string = "???.???.???.???",
-		width = popup_width / 2,
-		align = "right",
-	},
+  position = "popup." .. wifi.name,
+  icon = {
+    align = "left",
+    string = "IP:",
+    width = popup_width / 2,
+  },
+  label = {
+    string = "???.???.???.???",
+    width = popup_width / 2,
+    align = "right",
+  },
+  background = { drawing = false },
 })
 
 local mask = sbar.add("item", {
-	position = "popup." .. wifi_bracket.name,
-	icon = {
-		align = "left",
-		string = "Subnet mask:",
-		width = popup_width / 2,
-	},
-	label = {
-		string = "???.???.???.???",
-		width = popup_width / 2,
-		align = "right",
-	},
+  position = "popup." .. wifi.name,
+  icon = {
+    align = "left",
+    string = "Subnet mask:",
+    width = popup_width / 2,
+  },
+  label = {
+    string = "???.???.???.???",
+    width = popup_width / 2,
+    align = "right",
+  },
+  background = { drawing = false },
 })
 
 local router = sbar.add("item", {
-	position = "popup." .. wifi_bracket.name,
-	icon = {
-		align = "left",
-		string = "Router:",
-		width = popup_width / 2,
-	},
-	label = {
-		string = "???.???.???.???",
-		width = popup_width / 2,
-		align = "right",
-	},
+  position = "popup." .. wifi.name,
+  icon = {
+    align = "left",
+    string = "Router:",
+    width = popup_width / 2,
+  },
+  label = {
+    string = "???.???.???.???",
+    width = popup_width / 2,
+    align = "right",
+  },
+  background = { drawing = false },
 })
 
--- sbar.add("item", { position = "right", width = settings.group_paddings })
+local function update_wifi()
+  local cmd = [[for i in $(ifconfig -lX "en[0-9]"); do ipconfig getsummary "$i" | awk '/ SSID/{print $NF}'; done 2>/dev/null]]
+  sbar.exec(cmd, function(result)
+    local ssid = result:match("^%s*(.-)%s*$") or ""
+    local connected = ssid ~= "" and ssid ~= "<redacted>"
 
-wifi_up:subscribe("network_update", function(env)
-	local up_color = (env.upload == "000 Bps") and colors.fg_secondary or colors.red
-	local down_color = (env.download == "000 Bps") and colors.fg_secondary or colors.blue
-	wifi_up:set({
-		icon = { color = up_color },
-		label = {
-			string = env.upload,
-			color = up_color,
-		},
-	})
-	wifi_down:set({
-		icon = { color = down_color },
-		label = {
-			string = env.download,
-			color = down_color,
-		},
-	})
-end)
+    if connected then
+      sbar.exec([[scutil --nwi | grep -c utun]], function(vpn)
+        local vpn_on = tonumber(vpn) and tonumber(vpn) > 0
+        wifi:set {
+          icon = {
+            string = vpn_on and icons.wifi.vpn or icons.wifi.connected,
+            color = colors.icon,
+          },
+          label = { drawing = true, string = ssid },
+        }
+      end)
+    else
+      wifi:set {
+        icon = { string = icons.wifi.disconnected, color = colors.icon },
+        label = { drawing = true, string = "No WiFi" },
+      }
+    end
+  end)
+end
 
-wifi:subscribe({ "wifi_change", "system_woke" }, function(env)
-	sbar.exec("ipconfig getifaddr en0", function(ip)
-		local connected = not (ip == "")
-		wifi:set({
-			icon = {
-				string = connected and icons.wifi.connected or icons.wifi.disconnected,
-				color = connected and colors.fg or colors.red,
-			},
-		})
-	end)
+wifi:subscribe({ "wifi_change", "system_woke" }, update_wifi)
+
+-- Detect both the BSD device name (for ipconfig) and the service name
+-- (for networksetup -getairportnetwork) from listallhardwareports.
+-- Output looks like:
+--   Hardware Port: Wi-Fi
+--   Device: en1
+sbar.exec([[networksetup -listallhardwareports | awk '
+  /Wi-Fi|AirPort/ { svc=$3 }
+  svc && /Device:/ { print svc; print $2; exit }
+']], function(result)
+  local lines = {}
+  for line in result:gmatch("[^\n]+") do lines[#lines + 1] = line end
+  if lines[1] and lines[1] ~= "" then wifi_svc  = lines[1] end
+  if lines[2] and lines[2] ~= "" then wifi_iface = lines[2] end
+  update_wifi()
 end)
 
 local function hide_details()
-	wifi_bracket:set({ popup = { drawing = false } })
-	sbar.animate("tanh", 30, function()
-		wifi_up:set({
-			icon = { width = 0 },
-			label = { width = 0 },
-		})
-		wifi_down:set({
-			icon = { width = 0 },
-			label = { width = 0 },
-		})
-	end)
-end
-
-local function show_details()
-	sbar.animate("tanh", 30, function()
-		wifi_up:set({
-			icon = { width = "dynamic" },
-			label = { width = "dynamic" },
-		})
-		wifi_down:set({
-			icon = { width = "dynamic" },
-			label = { width = "dynamic" },
-		})
-	end)
+  wifi:set { popup = { drawing = false } }
 end
 
 local function toggle_details()
-	local should_draw = wifi_bracket:query().popup.drawing == "off"
-	if should_draw then
-		wifi_bracket:set({ popup = { drawing = true } })
-		sbar.exec("networksetup -getcomputername", function(result)
-			hostname:set({ label = result })
-		end)
-		sbar.exec("ipconfig getifaddr en0", function(result)
-			ip:set({ label = result })
-		end)
-		sbar.exec("ipconfig getsummary en0 | awk -F ' SSID : '  '/ SSID : / {print $2}'", function(result)
-			ssid:set({ label = result })
-		end)
-		sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Subnet mask: ' '/^Subnet mask: / {print $2}'", function(result)
-			mask:set({ label = result })
-		end)
-		sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Router: ' '/^Router: / {print $2}'", function(result)
-			router:set({ label = result })
-		end)
-	else
-		hide_details()
-	end
+  local should_draw = wifi:query().popup.drawing == "off"
+  if should_draw then
+    wifi:set { popup = { drawing = true } }
+    sbar.exec("ipconfig getifaddr " .. wifi_iface, function(result)
+      ip:set { label = result }
+    end)
+    sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Subnet mask: ' '/^Subnet mask: / {print $2}'", function(result)
+      mask:set { label = result }
+    end)
+    sbar.exec("networksetup -getinfo Wi-Fi | awk -F 'Router: ' '/^Router: / {print $2}'", function(result)
+      router:set { label = result }
+    end)
+  else
+    hide_details()
+  end
 end
 
-wifi:subscribe("mouse.entered", show_details)
-wifi_up:subscribe("mouse.clicked", toggle_details)
-wifi_down:subscribe("mouse.clicked", toggle_details)
-wifi:subscribe("mouse.clicked", toggle_details)
-wifi:subscribe("mouse.exited.global", hide_details)
+wifi:subscribe("mouse.clicked", function()
+  toggle_details()
+end)
 
 local function copy_label_to_clipboard(env)
-	local label = sbar.query(env.NAME).label.value
-	sbar.exec('echo "' .. label .. '" | pbcopy')
-	sbar.set(env.NAME, { label = { string = icons.clipboard, align = "center" } })
-	sbar.delay(1, function()
-		sbar.set(env.NAME, { label = { string = label, align = "right" } })
-	end)
+  local label = sbar.query(env.NAME).label.value
+  sbar.exec('echo "' .. label .. '" | pbcopy')
+  sbar.set(env.NAME, { label = { string = icons.clipboard, align = "center" } })
+  sbar.delay(1, function()
+    sbar.set(env.NAME, { label = { string = label, align = "right" } })
+  end)
 end
 
-ssid:subscribe("mouse.clicked", copy_label_to_clipboard)
-hostname:subscribe("mouse.clicked", copy_label_to_clipboard)
 ip:subscribe("mouse.clicked", copy_label_to_clipboard)
 mask:subscribe("mouse.clicked", copy_label_to_clipboard)
 router:subscribe("mouse.clicked", copy_label_to_clipboard)
