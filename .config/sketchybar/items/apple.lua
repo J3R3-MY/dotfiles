@@ -1,39 +1,42 @@
-local colors = require("colors")
-local icons = require("icons")
-local settings = require("settings")
+local colors = require("colors").sections
+local icons = require "icons"
 
--- Padding item required because of bracket
-sbar.add("item", { width = 5 })
-
-local apple = sbar.add("item", {
-	icon = {
-		font = { size = 16.0 },
-		string = icons.apple,
-		padding_right = 8,
-		padding_left = 8,
-		color = colors.white,
-	},
-	label = { drawing = false },
-	background = {
-		drawing = false,
-		color = colors.bg1,
-		border_color = colors.black,
-		border_width = 1,
-	},
-	padding_left = 1,
-	padding_right = 1,
-	click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s 0",
+sbar.add("item", {
+  icon = {
+    font = { size = 18 },
+    string = icons.apple,
+    padding_right = 8,
+    padding_left = 8,
+    color = colors.apple,
+  },
+  background = {
+    drawing = false,
+  },
+  label = { drawing = false },
+  -- click_script = "$CONFIG_DIR/helpers/menus/bin/menus -s 0",
 })
 
--- Double border for apple using a single item bracket
-sbar.add("bracket", { apple.name }, {
-	background = {
-		drawing = false,
-		color = colors.transparent,
-		height = 30,
-		border_color = colors.grey,
-	},
-})
-
--- Padding item required because of bracket
-sbar.add("item", { width = 7 })
+-- apple:subscribe("mouse.clicked", function()
+--   sbar.animate("tanh", 8, function()
+--     apple:set {
+--       background = {
+--         shadow = {
+--           distance = 0,
+--         },
+--       },
+--       y_offset = -4,
+--       padding_left = 8,
+--       padding_right = 0,
+--     }
+--     apple:set {
+--       background = {
+--         shadow = {
+--           distance = 4,
+--         },
+--       },
+--       y_offset = 0,
+--       padding_left = 4,
+--       padding_right = 4,
+--     }
+--   end)
+-- end)

@@ -1,0 +1,23 @@
+(cd event_providers && /Library/Developer/CommandLineTools/usr/bin/make) >/dev/null
+(cd menus && /Library/Developer/CommandLineTools/usr/bin/make) >/dev/null
+[2026-05-24 18:17:55] [!] Set (item_4): Expected <key>=<value> pair, but got: '--add'
+[2026-05-24 18:17:55] [!] Set (item_4): Expected <key>=<value> pair, but got: 'item'
+[2026-05-24 18:17:55] [!] Set (item_4): Expected <key>=<value> pair, but got: 'menu.padding'
+[2026-05-24 18:17:55] [!] Set (item_4): Expected <key>=<value> pair, but got: 'left'
+[2026-05-24 18:17:55] [!] Set: Item not found 'menu.padding'
+No matching processes belonging to you were found
+[2026-05-24 18:17:55] [!] Set (item_11): Expected <key>=<value> pair, but got: '--add'
+[2026-05-24 18:17:55] [!] Set (item_11): Expected <key>=<value> pair, but got: 'item'
+[2026-05-24 18:17:55] [!] Set (item_11): Expected <key>=<value> pair, but got: 'widget.padding'
+[2026-05-24 18:17:55] [!] Set (item_11): Expected <key>=<value> pair, but got: 'left'
+[2026-05-24 18:17:55] [!] Set: Item not found 'widget.padding'
+[i] sketchybar: [!] Set (item_4): Expected <key>=<value> pair, but got: '--add'
+[!] Set (item_4): Expected <key>=<value> pair, but got: 'item'
+[!] Set (item_4): Expected <key>=<value> pair, but got: 'menu.padding'
+[!] Set (item_4): Expected <key>=<value> pair, but got: 'left'
+[!] Set: Item not found 'menu.padding'
+[!] Set (item_11): Expected <key>=<value> pair, but got: '--add'
+[!] Set (item_11): Expected <key>=<value> pair, but got: 'item'
+[!] Set (item_11): Expected <key>=<value> pair, but got: 'widget.padding'
+[!] Set (item_11): Expected <key>=<value> pair, but got: 'left'
+[!] Set: Item not found 'widget.padding'

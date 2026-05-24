@@ -1,9 +1,10 @@
--- From left-most to right
--- require("items.apple")
-require("items.aerospace")
-require("items.front_app")
--- require("items.media")
+--left
+require "items.apple"
+-- require "items.aerospace"
+require "items.spaces"
+-- require "items.menus"
 
--- From right-most to left
-require("items.calendar")
-require("items.widgets")
+--right (reverse order)
+require "items.calendar"
+require "items.widgets"
+-- require "items.spotify"
