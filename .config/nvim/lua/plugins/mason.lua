@@ -28,10 +28,10 @@ return {
       -- list of servers for mason to install
       ensure_installed = {
         "clangd",
-        "basedpyright",
-        "ruff",
+        -- "basedpyright",
+        -- "ruff",
         "lua_ls",
-        "ltex_plus",
+        -- "ltex_plus",
         "json-lsp",
       },
     })
