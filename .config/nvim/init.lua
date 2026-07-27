@@ -1,3 +1,8 @@
+-- Ensure cargo-installed CLIs (e.g. tree-sitter, used by nvim-treesitter to
+-- compile parsers) are found regardless of how Neovim is launched (GUI apps
+-- and non-login shells may not inherit ~/.cargo/bin on PATH).
+vim.env.PATH = vim.fn.expand("~/.cargo/bin") .. ":" .. vim.env.PATH
+
 require("core.keymap")
 require("core.lazy")
 
@@ -19,13 +24,121 @@ vim.lsp.enable("clangd")
 -- json {{{
 vim.lsp.config.jsonls = {
 	cmd = { "vscode-json-language-server", "--stdio" },
-	filetypes = { "json"},
+	filetypes = { "json", "jsonc" },
+	root_markers = {
+		".git",
+		vim.uv.cwd()
+	},
+	settings = {
+		json = {
+			-- SchemaStore catalog: K8s, GitHub Actions, compose, etc.
+			schemas = require("schemastore").json.schemas(),
+			validate = { enable = true },
+		},
+	},
+}
+vim.lsp.enable("jsonls")
+-- }}}
+
+-- yaml {{{
+vim.lsp.config.yamlls = {
+	cmd = { "yaml-language-server", "--stdio" },
+	filetypes = { "yaml", "yaml.docker-compose", "yaml.gitlab" },
+	root_markers = {
+		".git",
+		vim.uv.cwd()
+	},
+	settings = {
+		yaml = {
+			-- Disable the built-in schema store in favor of SchemaStore.nvim
+			schemaStore = {
+				enable = false,
+				url = "",
+			},
+			schemas = require("schemastore").yaml.schemas(),
+			validate = true,
+			keyOrdering = false,
+		},
+	},
+}
+vim.lsp.enable("yamlls")
+-- }}}
+
+-- Docker {{{
+vim.lsp.config.dockerls = {
+	cmd = { "docker-langserver", "--stdio" },
+	filetypes = { "dockerfile" },
+	root_markers = {
+		"Dockerfile",
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("dockerls")
+-- }}}
+
+-- Bash {{{
+vim.lsp.config.bashls = {
+	cmd = { "bash-language-server", "start" },
+	filetypes = { "sh", "bash" },
 	root_markers = {
 		".git",
 		vim.uv.cwd()
 	},
 }
-vim.lsp.enable("jsonls")
+vim.lsp.enable("bashls")
+-- }}}
+
+-- Terraform {{{
+vim.lsp.config.terraformls = {
+	cmd = { "terraform-ls", "serve" },
+	filetypes = { "terraform", "terraform-vars" },
+	root_markers = {
+		".terraform",
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("terraformls")
+-- }}}
+
+-- Helm {{{
+vim.lsp.config.helm_ls = {
+	cmd = { "helm_ls", "serve" },
+	filetypes = { "helm" },
+	root_markers = {
+		"Chart.yaml",
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("helm_ls")
+-- }}}
+
+-- Ansible {{{
+vim.lsp.config.ansiblels = {
+	cmd = { "ansible-language-server", "--stdio" },
+	filetypes = { "yaml.ansible" },
+	root_markers = {
+		"ansible.cfg",
+		".ansible-lint",
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("ansiblels")
+-- }}}
+
+-- TOML {{{
+vim.lsp.config.taplo = {
+	cmd = { "taplo", "lsp", "stdio" },
+	filetypes = { "toml" },
+	root_markers = {
+		".git",
+		vim.uv.cwd()
+	},
+}
+vim.lsp.enable("taplo")
 -- }}}
 
 -- Lua {{{
@@ -66,42 +179,23 @@ vim.lsp.enable("lua_ls")
 -- vim.lsp.enable("ltex_plus")
 
 -- Python {{{
-vim.lsp.config.basedpyright = {
-	name = "basedpyright",
+-- ty: Astral's type checker / language server (replaces basedpyright)
+vim.lsp.config.ty = {
+	name = "ty",
 	filetypes = { "python" },
-	cmd = { "basedpyright-langserver", "--stdio" },
+	cmd = { "ty", "server" },
 	root_markers = {
+		"ty.toml",
 		"pyproject.toml",
 		"setup.py",
 		"setup.cfg",
 		"requirements.txt",
 		"Pipfile",
-		"pyrightconfig.json",
 		".git",
 		vim.uv.cwd(),
 	},
-	settings = {
-		basedpyright = {
-			disableOrganizeImports = true,
-			analysis = {
-				-- Use ruff for linting
-				ignore = { '*' },
-				-- autoSearchPaths = true,
-				-- autoImportCompletions = true,
-				-- useLibraryCodeForTypes = true,
-				-- diagnosticMode = "openFilesOnly",
-				-- typeCheckingMode = "basic",
-				-- inlayHints = {
-				--   variableTypes = true,
-				--   callArgumentNames = true,
-				--   functionReturnTypes = true,
-				--   genericTypes = false,
-				-- },
-			},
-		},
-	},
 }
-vim.lsp.enable("basedpyright")
+vim.lsp.enable("ty")
 
 
 vim.lsp.config('ruff', {
@@ -140,7 +234,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			return
 		end
 		if client.name == 'ruff' then
-			-- Disable hover in favor of Pyright
+			-- Disable hover in favor of ty
 			client.server_capabilities.hoverProvider = false
 		end
 	end,

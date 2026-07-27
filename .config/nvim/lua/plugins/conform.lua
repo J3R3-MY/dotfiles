@@ -16,7 +16,15 @@ return {
     -- Define formatters
     formatters_by_ft = {
       lua = { "stylua" },
-      cpp = { "clang-format" }
+      cpp = { "clang-format" },
+      sh = { "shfmt" },
+      bash = { "shfmt" },
+      yaml = { "prettierd" },
+      json = { "prettierd" },
+      jsonc = { "prettierd" },
+      markdown = { "prettierd" },
+      terraform = { "terraform_fmt" },
+      hcl = { "terraform_fmt" },
     },
     -- Set default options
     default_format_opts = {

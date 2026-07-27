@@ -44,7 +44,11 @@ return {
         "gitignore",
         "query",
         "c",
-        "cpp"
+        "cpp",
+        "terraform",
+        "hcl",
+        "toml",
+        "make"
       }
     end,
   },
