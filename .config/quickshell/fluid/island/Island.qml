@@ -34,7 +34,8 @@ Item {
         "clipboard": Qt.size(600, 480),
         "media": Qt.size(480, 200),
         "calendar": Qt.size(380, 380),
-        "theme": Qt.size(860, 470)
+        "theme": Qt.size(1000, 580),
+        "keys": Qt.size(1040, 640)
     })
     readonly property real restWidth: restRow.implicitWidth + 26
     readonly property size targetSize: open ? viewSizes[view]

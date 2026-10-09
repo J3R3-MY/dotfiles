@@ -17,7 +17,7 @@ AGPL), so this stays under the repo's MIT licence.
 | Fluid bar | top of every output | Waybar layout and colours. Sliding workspace highlight, pills widen on hover to show details (IP, sink name, RAM GiB, battery time) |
 | Dynamic island | the clock | Morphs into launcher, clipboard, media, calendar or theme picker. Shows a "live" equaliser while music plays; hover to see the track |
 | Control center | hover the top-right corner, click a status pill, or `$mod+i` | Wi-Fi/Bluetooth/DND/mic tiles with detail pages, volume + brightness sliders, media, notification history, power menu |
-| Theme selector | `$mod+t` | Pick a wallpaper; matugen recolours bar, panels, sway borders and WezTerm. Dark/light switch |
+| Theme selector | `$mod+t` | Pick a wallpaper; matugen recolours bar, panels, sway borders and WezTerm. Tweak panel: dark/light, base colour from the wallpaper, hue shift, palette style, contrast, brightness, shuffle and reset — all live |
 | OSD | bottom centre | Appears for any volume/brightness change, including the old pamixer/brightnessctl keys |
 | Notifications | top right | Replaces dunst while the shell runs |
 
@@ -34,6 +34,7 @@ Old binds are untouched. New ones use keys that were unbound:
 | `$mod+t` | Wallpaper / theme picker |
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |
+| `$mod+?` / `$mod+F1` | Keybind cheat sheet (built from the sway config, so new binds appear automatically) |
 | `$mod+Alt+w` / `$mod+Alt+q` | Switch to the old waybar setup / back to the fluid shell |
 
 Bar mouse: left-click a status pill opens the control center, right-click

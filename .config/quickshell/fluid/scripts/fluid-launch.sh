@@ -18,21 +18,28 @@ mode="$(cat "$state/shell" 2>/dev/null || echo fluid)"
 
 qs_bin="$(command -v qs || command -v quickshell)"
 
-pidfile="$state/supervisor.pid"
-shell_re='(qs|quickshell) -c fluid$'
+supervisor_pid="$state/supervisor.pid"
+qs_pid="$state/qs.pid"
 
-# Kill the supervisor first so it doesn't restart the shell we're stopping
+# Stop by PID (Quickshell's process title doesn't reliably match its command
+# line, which is why matching on "qs -c fluid" missed it), then ask Quickshell
+# itself. The supervisor goes first so it can't restart the shell.
 stop_fluid() {
-    [ -f "$pidfile" ] && kill "$(cat "$pidfile")" 2>/dev/null
-    rm -f "$pidfile"
-    pkill -f -- "$shell_re" 2>/dev/null
+    [ -f "$supervisor_pid" ] && kill "$(cat "$supervisor_pid")" 2>/dev/null
+    [ -f "$qs_pid" ] && kill "$(cat "$qs_pid")" 2>/dev/null
+    rm -f "$supervisor_pid" "$qs_pid"
+    [ -n "$qs_bin" ] && "$qs_bin" kill -c fluid >/dev/null 2>&1
+    return 0
 }
-stop_classic() { pkill -x waybar 2>/dev/null; pkill -x dunst 2>/dev/null; }
+stop_classic() { pkill -x waybar 2>/dev/null; pkill -x dunst 2>/dev/null; return 0; }
 
 start_classic() {
     stop_fluid
-    pgrep -x waybar >/dev/null || waybar >/dev/null 2>&1 &
-    pgrep -x dunst  >/dev/null || dunst  >/dev/null 2>&1 &
+    # The shell drew the wallpaper itself; hand it back to swaybg
+    wp="$(cat "$state/wallpaper" 2>/dev/null)"
+    [ -n "$wp" ] && [ -f "$wp" ] && swaymsg output '*' bg "$wp" fill >/dev/null 2>&1
+    pgrep -x waybar >/dev/null || setsid -f waybar >/dev/null 2>&1
+    pgrep -x dunst  >/dev/null || setsid -f dunst  >/dev/null 2>&1
 }
 
 if [ "$mode" != "fluid" ] || [ -z "$qs_bin" ]; then
@@ -43,18 +50,20 @@ fi
 
 stop_classic
 stop_fluid
-sleep 0.2
+sleep 0.3
 
 # Supervise: restart on crash, but give up (and fall back to waybar) if it
 # dies within 10s three times in a row.
 (
-    echo "$BASHPID" > "$pidfile"
+    echo "$BASHPID" > "$supervisor_pid"
     fails=0
     while [ "$(cat "$state/shell" 2>/dev/null || echo fluid)" = "fluid" ]; do
         started=$(date +%s)
-        "$qs_bin" -c fluid >>"$state/fluid.log" 2>&1
+        "$qs_bin" -c fluid >>"$state/fluid.log" 2>&1 &
+        echo $! > "$qs_pid"
+        wait $!
         code=$?
-        # A clean exit (e.g. `fluid-launch.sh classic` killing us) ends supervision
+        # Switched to classic meanwhile: stop supervising
         [ "$(cat "$state/shell" 2>/dev/null)" != "fluid" ] && exit 0
         if [ $(( $(date +%s) - started )) -lt 10 ]; then
             fails=$((fails + 1))
@@ -63,6 +72,8 @@ sleep 0.2
         fi
         if [ "$fails" -ge 3 ]; then
             notify-send -u critical "fluid shell keeps crashing" "Falling back to waybar. Log: $state/fluid.log" 2>/dev/null
+            echo classic > "$state/shell"
+            rm -f "$supervisor_pid"     # don't let start_classic kill this subshell
             start_classic
             exit 1
         fi

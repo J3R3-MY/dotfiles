@@ -5,7 +5,7 @@ import Quickshell.Io
 import Quickshell.I3
 
 // Global UI state + the IPC surface used by sway keybinds:
-//   qs -c fluid ipc call fluid toggle launcher|clipboard|media|calendar|theme
+//   qs -c fluid ipc call fluid toggle launcher|clipboard|media|calendar|theme|keys
 //   qs -c fluid ipc call fluid controlCenter
 //   qs -c fluid ipc call fluid osd volume|brightness
 //   qs -c fluid ipc call fluid reloadTheme
@@ -21,7 +21,7 @@ Singleton {
     property bool dnd: false
 
     readonly property string focusedScreen: I3.focusedMonitor ? I3.focusedMonitor.name : ""
-    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme"]
+    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys"]
 
     signal osdRequested(string kind)
     // Sent by fluid-theme.sh after matugen ran, in case the file watch missed it
