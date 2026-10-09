@@ -125,4 +125,14 @@ config.enable_tab_bar = false
 config.window_background_opacity = 0.75
 -- config.macos_window_background_blur = 10
 
+-- Fluid theme picker: once a wallpaper has been picked, follow its colours.
+-- Until then (or if the file is missing) the colour scheme above is used.
+local fluid_colors = wezterm.home_dir .. '/.local/state/fluid/wezterm-colors.lua'
+local ok, colors = pcall(dofile, fluid_colors)
+if ok and type(colors) == 'table' then
+	config.color_scheme = nil
+	config.colors = colors
+end
+wezterm.add_to_config_reload_watch_list(fluid_colors)
+
 return config

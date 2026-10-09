@@ -1,0 +1,15 @@
+# matugen config used by scripts/fluid-theme.sh.
+# Every output goes to ~/.local/state/fluid so nothing writes into the repo.
+[config]
+
+[templates.fluid]
+input_path = "templates/colors.json"
+output_path = "~/.local/state/fluid/colors.json"
+
+[templates.sway]
+input_path = "templates/sway-colors.conf"
+output_path = "~/.local/state/fluid/sway-colors.conf"
+
+[templates.wezterm]
+input_path = "templates/wezterm-colors.lua"
+output_path = "~/.local/state/fluid/wezterm-colors.lua"

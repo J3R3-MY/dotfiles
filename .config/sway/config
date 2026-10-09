@@ -302,7 +302,9 @@ bindsym $mod+r mode "resize"
 #    }
 #}
 
-exec waybar
+# waybar is now started by fluid-launch.sh (see fluid.conf): it runs the
+# Quickshell bar, or waybar exactly as before if Quickshell is unavailable.
+# exec waybar
 
 # Aspecto
 default_border pixel 2px
@@ -317,3 +319,8 @@ client.focused #000000 #000000 #ffffff #000000 #2ecc71
 # client.urgent           #ff0000   
 
 include /etc/sway/config.d/*
+
+# Fluid shell: bar, dynamic island, control center, theme picker, OSD.
+# To go back to the old setup completely: comment this out and un-comment
+# `exec waybar` above. (Or switch at runtime with $mod+Alt+w / $mod+Alt+q.)
+include ~/.config/sway/fluid.conf
