@@ -40,19 +40,33 @@ Bar mouse: left-click a status pill opens the control center, right-click
 audio opens pavucontrol (the old waybar on-click), middle-click mutes, scroll
 on audio/backlight changes the level.
 
-## Install (Arch)
-
-Run the main script first, then the fluid one:
+## Install (fresh EndeavourOS, "No Desktop")
 
 ```bash
-./setup-arch.sh
-./setup-fluid.sh
+git clone <this repo> ~/dotfiles
+cd ~/dotfiles
+./install-sway.sh          # sway + waybar + dunst (the plain setup)
+./install-sway-fluid.sh    # the same, plus the Quickshell fluid shell
 ```
 
-`setup-fluid.sh` installs sway and the shell's dependencies, enables
-NetworkManager, bluetooth and PipeWire, stows the repo into `~` (it reports
-conflicts instead of overwriting), prepares `~/.local/state/fluid`, and starts
-the shell right away if you run it inside sway.
+Reboot afterwards and pick **Sway** in SDDM (**Sway (NVIDIA)** on NVIDIA cards).
+
+Both scripts share `install/lib.sh` and:
+
+- install everything the sway config, scripts, zsh/tmux/nvim setup and the
+  apps from `setup-arch.sh` use (Hyprland-only packages are left out)
+- add snapper/btrfs-assistant on btrfs and run `nvidia-inst` on NVIDIA
+- enable NetworkManager, bluetooth, SDDM (astronaut theme), fstrim, docker,
+  tailscaled and PipeWire
+- stow the repo into `~` file by file, moving clashing files to
+  `~/.dotfiles-backup-<date>` first
+- link `~/.zshrc` to `.zsh_linux` (the repo's `.zshrc` is the macOS one) and
+  `~/dotfiles` to the repo (the sway config uses those paths)
+- set zsh as login shell, install tpm, install neovim through bob, append
+  `.gitconfig_appendix.txt` to `~/.gitconfig`
+
+They're safe to re-run. Packages that fail are listed at the end; the full
+log is in `~/dotfiles-install-<date>.log`.
 
 ## Downwards compatibility
 

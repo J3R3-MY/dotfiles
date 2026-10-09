@@ -93,7 +93,10 @@ exec keepassxc -platform xcb & dropbox start -i &
 
 # SCREEN SHARING
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
-exec /usr/libexec/xdg-desktop-portal-wlr -r
+# Arch installs the portal to /usr/lib (the old /usr/libexec path doesn't exist there)
+exec /usr/lib/xdg-desktop-portal-wlr -r
+# Password prompts for GUI apps (btrfs-assistant, gparted, ...)
+exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 ### Input configuration
 #

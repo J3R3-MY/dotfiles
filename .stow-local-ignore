@@ -16,7 +16,9 @@ _darcs
 .gitmodules
 .DS_STORE
 setup-arch.sh
-setup-fluid.sh
+^/install.*
+^/README.*
+.gitconfig_appendix.txt
 
 .+~          # emacs backup files
 #.*#       # emacs autosave files
@@ -24,3 +26,4 @@ setup-fluid.sh
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
+\.stow-global-ignore
