@@ -286,6 +286,9 @@ do_dotfiles() {
     local backup="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)" moved=0
     while IFS= read -r f; do
         local target="$HOME/$f"
+        case "$f" in .config/quickshell/*) continue ;; esac
+        # Never move a file that is really inside the repo (reached via a linked folder)
+        case "$(realpath "$target" 2>/dev/null)" in "$REPO_DIR"/*) continue ;; esac
         if [ -e "$target" ] && [ ! -L "$target" ]; then
             mkdir -p "$backup/$(dirname "$f")"
             mv "$target" "$backup/$f"
@@ -295,9 +298,25 @@ do_dotfiles() {
     [ $moved -gt 0 ] && info "backed up $moved existing file(s) to $backup"
 
     # .zshrc in the repo is the macOS one (Homebrew paths); Linux gets .zsh_linux
-    (cd "$REPO_DIR" && stow --no-folding -t "$HOME" --ignore='^\.zshrc$' .) >>"$LOG" 2>&1 \
+    (cd "$REPO_DIR" && stow --no-folding -t "$HOME" --ignore='^\.zshrc$' --ignore='\.config/quickshell' .) >>"$LOG" 2>&1 \
         && info "stowed $REPO_DIR into ~" \
         || warn "stow reported problems, see $LOG"
+    # The shell's folder is linked as a whole instead of file by file (stow
+    # skips it above), so files added by a later `git pull` show up without
+    # re-running this script. Nothing writes into it at runtime; state lives
+    # in ~/.local/state/fluid.
+    local qs_dir="$HOME/.config/quickshell/fluid"
+    mkdir -p "$HOME/.config/quickshell"
+    if [ -d "$qs_dir" ] && [ ! -L "$qs_dir" ]; then
+        if [ -z "$(find "$qs_dir" ! -type l ! -type d)" ]; then
+            rm -rf -- "$qs_dir"          # only old per-file links from an earlier install
+        else
+            mkdir -p "$backup/.config/quickshell" && mv "$qs_dir" "$backup/.config/quickshell/"
+        fi
+    fi
+    ln -sfn "$REPO_DIR/.config/quickshell/fluid" "$qs_dir"
+    info "~/.config/quickshell/fluid -> repo"
+
     if [ -e "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
         mkdir -p "$backup" && mv "$HOME/.zshrc" "$backup/.zshrc"
     fi
