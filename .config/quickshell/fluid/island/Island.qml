@@ -32,9 +32,9 @@ Item {
     readonly property var viewSizes: ({
         "launcher": Qt.size(600, 480),
         "clipboard": Qt.size(600, 480),
-        "media": Qt.size(480, 200),
-        "calendar": Qt.size(380, 380),
-        "theme": Qt.size(1000, 580),
+        "media": Qt.size(560, 440),
+        "calendar": Qt.size(1120, 620),
+        "theme": Qt.size(1180, 600),
         "keys": Qt.size(1040, 640)
     })
     readonly property real restWidth: restRow.implicitWidth + 26
@@ -180,6 +180,8 @@ Item {
                 NumberAnimation { duration: Anim.fast }
             }
         }
-        source: island.shownView ? island.shownView.charAt(0).toUpperCase() + island.shownView.slice(1) + "View.qml" : ""
+        readonly property var files: ({ launcher: "LauncherView.qml", clipboard: "ClipboardView.qml", media: "MediaView.qml",
+                                         calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml" })
+        source: island.shownView ? files[island.shownView] : ""
     }
 }

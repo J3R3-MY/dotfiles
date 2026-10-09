@@ -2,43 +2,40 @@ import QtQuick
 import Quickshell
 import "../common"
 
-// Month calendar (replaces waybar's clock tooltip calendar).
-// Scroll or use the arrows to change month, click the title to jump to today.
+// Month grid, Monday first. Scroll or the arrows change month; clicking the
+// title jumps back to today. Optional `heat` colours days by a 0..1 value
+// (used by the screen-time heatmap) and `selected`/`daySelected` make it pickable.
 Item {
     id: root
 
-    SystemClock { id: clock; precision: SystemClock.Minutes }
-
     property int monthOffset: 0
+    property var heat: null              // function(Date) -> 0..1, or null
+    property var selected: null          // Date
+    signal daySelected(date d)
+
+    SystemClock { id: clock; precision: SystemClock.Minutes }
     readonly property date today: clock.date
     readonly property date shown: new Date(today.getFullYear(), today.getMonth() + monthOffset, 1)
-    // Monday-first grid start
     readonly property date gridStart: {
         const d = new Date(shown);
         d.setDate(1 - ((shown.getDay() + 6) % 7));
         return d;
     }
 
-    Keys.onEscapePressed: Fluid.closeAll()
-    Keys.onLeftPressed: monthOffset--
-    Keys.onRightPressed: monthOffset++
-    Component.onCompleted: forceActiveFocus()
+    implicitWidth: 300
+    implicitHeight: col.implicitHeight
 
     Column {
-        anchors.fill: parent
-        spacing: 10
-
-        Text {
-            text: Qt.formatDateTime(clock.date, "HH:mm")
-            color: Theme.fg; font.family: Theme.font; font.pixelSize: 40; font.weight: Font.Light
-        }
+        id: col
+        width: parent.width
+        spacing: 8
 
         Item {
             width: parent.width; height: 28
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Qt.formatDate(root.shown, "MMMM yyyy")
-                color: Theme.clock; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
+                color: Theme.clock; font.family: Theme.font; font.pixelSize: Theme.fontSize; font.weight: Font.DemiBold
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.monthOffset = 0 }
             }
             Row {
@@ -67,10 +64,10 @@ Item {
                 model: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
                 Text {
                     required property string modelData
-                    width: grid.cell; height: 24
+                    width: grid.cell; height: 22
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
-                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
                 }
             }
 
@@ -82,21 +79,31 @@ Item {
                     readonly property date d: new Date(root.gridStart.getFullYear(), root.gridStart.getMonth(), root.gridStart.getDate() + index)
                     readonly property bool inMonth: d.getMonth() === root.shown.getMonth()
                     readonly property bool isToday: d.toDateString() === root.today.toDateString()
-                    width: grid.cell; height: 34
+                    readonly property bool isSelected: root.selected !== null && d.toDateString() === root.selected.toDateString()
+                    readonly property real heatValue: root.heat ? root.heat(d) : 0
+                    width: grid.cell; height: grid.cell * 0.8
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 30; height: 30; radius: 15
-                        color: day.isToday ? Theme.clock : "transparent"
-                        scale: day.isToday ? 1 : 0.6
-                        Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                        width: Math.min(parent.width, parent.height) - 4; height: width; radius: root.heat ? 6 : width / 2
+                        color: day.isToday && !root.heat ? Theme.clock
+                             : root.heat && day.heatValue > 0 ? Qt.rgba(Theme.clock.r, Theme.clock.g, Theme.clock.b, 0.15 + 0.85 * day.heatValue)
+                             : "transparent"
+                        border.width: day.isSelected || (root.heat && day.isToday) ? 2 : 0
+                        border.color: Theme.fg
                     }
                     Text {
                         anchors.centerIn: parent
                         text: day.d.getDate()
-                        color: day.isToday ? Theme.onPill : Theme.fg
+                        color: (day.isToday && !root.heat) || day.heatValue > 0.55 ? Theme.onPill : Theme.fg
                         opacity: day.inMonth ? 1 : 0.3
-                        font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
+                        font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: root.heat !== null
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.daySelected(day.d)
                     }
                 }
             }

@@ -4,25 +4,27 @@ import Quickshell.Widgets
 import "../common"
 import "../services"
 
-// Theme selector: pick a wallpaper and the whole desktop is recoloured from it
-// (matugen); the panel on the right fine-tunes the generated palette live.
-// Arrow keys + Enter work in the grid.
+// Theme selector ($mod+t). A carousel of slanted wallpaper cards (the focused
+// one widens), colour dots to filter wallpapers by colour, and the palette
+// tweaks underneath. Picking a wallpaper recolours the desktop via matugen.
+//   ←/→ or scroll   move through wallpapers      Enter/click   apply
 Item {
     id: root
 
+    property string colorFilter: ""
+    readonly property var shown: colorFilter ? Wallpaper.files.filter(f => Wallpaper.bucket(f) === colorFilter) : Wallpaper.files
+
     Keys.onEscapePressed: Fluid.closeAll()
-    Keys.onLeftPressed: grid.moveCurrentIndexLeft()
-    Keys.onRightPressed: grid.moveCurrentIndexRight()
-    Keys.onUpPressed: grid.moveCurrentIndexUp()
-    Keys.onDownPressed: grid.moveCurrentIndexDown()
-    Keys.onReturnPressed: Wallpaper.apply(Wallpaper.files[grid.currentIndex])
+    Keys.onLeftPressed: carousel.decrementCurrentIndex()
+    Keys.onRightPressed: carousel.incrementCurrentIndex()
+    Keys.onReturnPressed: if (shown[carousel.currentIndex]) Wallpaper.apply(shown[carousel.currentIndex])
     Component.onCompleted: {
         Wallpaper.rescan();
         if (Wallpaper.sourceColors.length === 0) Wallpaper.probeSources();
         forceActiveFocus();
     }
 
-    // ---- Header --------------------------------------------------------------
+    // ---- Top: title, colour filter, live palette ------------------------------
     Item {
         id: topRow
         width: parent.width
@@ -37,7 +39,6 @@ Item {
                 text: "Wallpaper & theme"
                 color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
             }
-            // Small spinner dot while matugen runs
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 8; height: 8; radius: 4
@@ -53,16 +54,48 @@ Item {
             }
         }
 
-        // Live palette preview: the bar colours as they are right now
+        // Colour filter dots ("all" + 8 colours), like the reference picker
+        Rectangle {
+            anchors.centerIn: parent
+            height: 36; radius: 18
+            width: filterRow.implicitWidth + 16
+            color: Theme.surface
+            Row {
+                id: filterRow
+                anchors.centerIn: parent
+                spacing: 6
+                Rectangle {
+                    width: 26; height: 26; radius: 8
+                    color: root.colorFilter === "" ? Theme.clock : Theme.surfaceHi
+                    Glyph { anchors.centerIn: parent; text: Icons.g(0xf00a); size: 12; color: root.colorFilter === "" ? Theme.onPill : Theme.fg }
+                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.colorFilter = "" }
+                }
+                Repeater {
+                    model: Wallpaper.colorFilters
+                    Rectangle {
+                        required property var modelData
+                        readonly property bool on: root.colorFilter === modelData.id
+                        width: 26; height: 26; radius: 8
+                        color: modelData.color
+                        border.width: on ? 2 : 0
+                        border.color: Theme.fg
+                        scale: on ? 1.15 : (fArea.containsMouse ? 1.08 : 1)
+                        Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+                        MouseArea { id: fArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.colorFilter = parent.on ? "" : parent.modelData.id }
+                    }
+                }
+            }
+        }
+
         Row {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: 4
             Repeater {
-                model: [Theme.clock, Theme.battery, Theme.cpu, Theme.memory, Theme.backlight, Theme.network, Theme.audio, Theme.accent, Theme.bg, Theme.fg]
+                model: [Theme.clock, Theme.battery, Theme.cpu, Theme.memory, Theme.backlight, Theme.network, Theme.audio, Theme.bg, Theme.fg]
                 Rectangle {
                     required property color modelData
-                    width: 18; height: 18; radius: 9
+                    width: 16; height: 16; radius: 8
                     color: modelData
                     border.width: 1
                     border.color: Theme.border
@@ -71,94 +104,121 @@ Item {
         }
     }
 
-    // ---- Wallpaper grid -------------------------------------------------------
-    GridView {
-        id: grid
+    // ---- Carousel ---------------------------------------------------------------
+    ListView {
+        id: carousel
         anchors.top: topRow.bottom
-        anchors.topMargin: 12
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: panel.left
-        anchors.rightMargin: 14
+        anchors.topMargin: 16
+        width: parent.width
+        height: 280
+        orientation: ListView.Horizontal
+        spacing: -18                         // slanted cards overlap a little
         clip: true
-        cellWidth: width / 3
-        cellHeight: cellWidth * 0.62
+        model: root.shown
+        currentIndex: Math.max(0, root.shown.indexOf(Wallpaper.current))
+        highlightRangeMode: ListView.StrictlyEnforceRange
+        preferredHighlightBegin: width / 2 - 230
+        preferredHighlightEnd: width / 2 + 230
+        highlightMoveDuration: Anim.slow
         boundsBehavior: Flickable.StopAtBounds
-        model: Wallpaper.files
-        currentIndex: Math.max(0, Wallpaper.files.indexOf(Wallpaper.current))
+
+        WheelHandler {
+            onWheel: e => {
+                if ((e.angleDelta.y || e.angleDelta.x) < 0) carousel.incrementCurrentIndex();
+                else carousel.decrementCurrentIndex();
+            }
+        }
 
         delegate: Item {
-            id: cell
+            id: card
             required property string modelData
             required property int index
+            readonly property bool focused: ListView.isCurrentItem
             readonly property bool isCurrent: modelData === Wallpaper.current
-            readonly property bool isSelected: GridView.isCurrentItem
-            width: grid.cellWidth
-            height: grid.cellHeight
 
+            width: focused ? 460 : 150
+            height: carousel.height
+            z: focused ? 2 : 1
+            Behavior on width { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+
+            // Shear along x so every card is a parallelogram
             ClippingRectangle {
                 anchors.fill: parent
-                anchors.margins: 6
-                radius: 12
+                anchors.topMargin: card.focused ? 0 : 18
+                anchors.bottomMargin: card.focused ? 0 : 18
+                radius: 10
                 color: Theme.surfaceHi
-                scale: thumbArea.containsMouse || cell.isSelected ? 1.0 : 0.95
-                Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                transform: Matrix4x4 {
+                    matrix: Qt.matrix4x4(1, -0.2, 0, 0.2 * card.height / 2,
+                                         0, 1, 0, 0,
+                                         0, 0, 1, 0,
+                                         0, 0, 0, 1)
+                }
+                Behavior on anchors.topMargin { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+                Behavior on anchors.bottomMargin { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
                 Image {
-                    anchors.fill: parent
-                    source: "file://" + cell.modelData
-                    sourceSize.width: 360
+                    anchors.centerIn: parent
+                    // wider than the card so the shear never shows an edge
+                    width: 520; height: parent.height
+                    source: "file://" + card.modelData
+                    sourceSize.width: 640
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     cache: true
-                    opacity: status === Image.Ready ? 1 : 0
+                    opacity: status === Image.Ready ? (card.focused ? 1 : 0.75) : 0
                     Behavior on opacity { NumberAnimation { duration: Anim.normal } }
                 }
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: 12
+                    radius: 10
                     color: "transparent"
-                    border.width: cell.isCurrent ? 3 : (cell.isSelected ? 2 : 0)
-                    border.color: cell.isCurrent ? Theme.clock : Theme.fg
-                    Behavior on border.width { NumberAnimation { duration: Anim.fast } }
+                    border.width: card.isCurrent ? 3 : (card.focused ? 2 : 0)
+                    border.color: card.isCurrent ? Theme.clock : Theme.fg
                 }
             }
 
             MouseArea {
-                id: thumbArea
                 anchors.fill: parent
-                hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: { grid.currentIndex = cell.index; Wallpaper.apply(cell.modelData); }
+                onClicked: {
+                    if (!card.focused) carousel.currentIndex = card.index;
+                    else Wallpaper.apply(card.modelData);
+                }
+                onDoubleClicked: Wallpaper.apply(card.modelData)
             }
+        }
+
+        Text {
+            anchors.centerIn: parent
+            visible: root.shown.length === 0
+            text: root.colorFilter ? "No wallpapers in this colour" : "No wallpapers found in ~/.config/wallpapers"
+            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize
         }
     }
 
-    // ---- Tweak panel ----------------------------------------------------------
+    // ---- Tweaks -------------------------------------------------------------------
     Rectangle {
-        id: panel
-        anchors.top: topRow.bottom
-        anchors.topMargin: 12
+        anchors.top: carousel.bottom
+        anchors.topMargin: 16
         anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        width: 300
+        width: parent.width
         radius: 16
         color: Theme.surface
 
-        Flickable {
+        Row {
+            id: tweaks
             anchors.fill: parent
-            anchors.margins: 14
-            contentHeight: col.implicitHeight
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
+            anchors.margins: 16
+            spacing: 24
+            readonly property real colW: (width - 48) / 3
 
+            // Column 1: mode + base colour
             Column {
-                id: col
-                width: parent.width
+                width: tweaks.colW
                 spacing: 14
 
-                // Dark / light
                 Rectangle {
                     id: seg
                     width: parent.width; height: 32; radius: 16
@@ -189,12 +249,10 @@ Item {
                     }
                 }
 
-                // Which wallpaper colour seeds the palette
                 Column {
                     width: parent.width
                     spacing: 6
-                    visible: Wallpaper.sourceColors.length > 0
-                    Text { text: "Base colour"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                    Text { text: "Base colour from the wallpaper"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
                     Row {
                         spacing: 8
                         Repeater {
@@ -216,9 +274,19 @@ Item {
                                 }
                             }
                         }
+                        Text {
+                            visible: Wallpaper.sourceColors.length === 0
+                            text: "…"
+                            color: Theme.fgDim; font.pixelSize: Theme.fontSize
+                        }
                     }
                 }
+            }
 
+            // Column 2: sliders
+            Column {
+                width: tweaks.colW
+                spacing: 10
                 TweakSlider {
                     width: parent.width
                     label: "Hue shift"
@@ -231,45 +299,6 @@ Item {
                     }
                     onMoved: v => { Wallpaper.hueShift = v; Wallpaper.retheme(); }
                 }
-
-                // Palette style, calm -> loud
-                Column {
-                    width: parent.width
-                    spacing: 6
-                    Text { text: "Style"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-                    Flow {
-                        width: parent.width
-                        spacing: 6
-                        Repeater {
-                            model: Wallpaper.schemes
-                            Rectangle {
-                                required property var modelData
-                                readonly property bool chosen: Wallpaper.scheme === modelData.id
-                                height: 28; radius: 14
-                                width: chipText.implicitWidth + 22
-                                color: chosen ? Theme.clock : (chipArea.containsMouse ? Theme.surfaceHi : "transparent")
-                                border.width: chosen ? 0 : 1
-                                border.color: Theme.border
-                                Behavior on color { ColorAnimation { duration: Anim.fast } }
-                                Text {
-                                    id: chipText
-                                    anchors.centerIn: parent
-                                    text: parent.modelData.label
-                                    color: parent.chosen ? Theme.onPill : Theme.fg
-                                    font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
-                                }
-                                MouseArea {
-                                    id: chipArea
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: { Wallpaper.scheme = parent.modelData.id; Wallpaper.retheme(); }
-                                }
-                            }
-                        }
-                    }
-                }
-
                 TweakSlider {
                     width: parent.width
                     label: "Contrast"
@@ -277,15 +306,51 @@ Item {
                     value: Wallpaper.contrast
                     onMoved: v => { Wallpaper.contrast = v; Wallpaper.retheme(); }
                 }
-
                 TweakSlider {
                     width: parent.width
-                    label: Wallpaper.mode === "dark" ? "Brightness (dark)" : "Brightness (light)"
+                    label: "Brightness"
                     from: -0.3; to: 0.3; step: 0.05; decimals: 2
                     value: Wallpaper.lightness
                     onMoved: v => { Wallpaper.lightness = v; Wallpaper.retheme(); }
                 }
+            }
 
+            // Column 3: style + shuffle/reset
+            Column {
+                width: tweaks.colW
+                spacing: 10
+                Text { text: "Style"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Flow {
+                    width: parent.width
+                    spacing: 6
+                    Repeater {
+                        model: Wallpaper.schemes
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool chosen: Wallpaper.scheme === modelData.id
+                            height: 28; radius: 14
+                            width: chipText.implicitWidth + 22
+                            color: chosen ? Theme.clock : (chipArea.containsMouse ? Theme.surfaceHi : "transparent")
+                            border.width: chosen ? 0 : 1
+                            border.color: Theme.border
+                            Behavior on color { ColorAnimation { duration: Anim.fast } }
+                            Text {
+                                id: chipText
+                                anchors.centerIn: parent
+                                text: parent.modelData.label
+                                color: parent.chosen ? Theme.onPill : Theme.fg
+                                font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                            }
+                            MouseArea {
+                                id: chipArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: { Wallpaper.scheme = parent.modelData.id; Wallpaper.retheme(); }
+                            }
+                        }
+                    }
+                }
                 Row {
                     width: parent.width
                     spacing: 8
@@ -296,7 +361,7 @@ Item {
                         ]
                         Rectangle {
                             required property var modelData
-                            width: (col.width - 8) / 2; height: 36; radius: 12
+                            width: (tweaks.colW - 8) / 2; height: 34; radius: 12
                             color: btnArea.containsMouse ? Theme.surfaceHi : Theme.bg
                             border.width: 1
                             border.color: Theme.border
@@ -310,14 +375,6 @@ Item {
                             MouseArea { id: btnArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
                         }
                     }
-                }
-
-                Text {
-                    width: parent.width
-                    wrapMode: Text.Wrap
-                    text: "Double-click a slider to reset it. Tweaks are kept when you switch wallpapers; the base colour and hue reset."
-                    color: Theme.fgDim; opacity: 0.8
-                    font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
                 }
             }
         }

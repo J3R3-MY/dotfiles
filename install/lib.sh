@@ -90,6 +90,7 @@ PKGS_FONTS=(
 # Only for the fluid (Quickshell) variant
 PKGS_FLUID=(
     quickshell qt6-imageformats matugen
+    power-profiles-daemon   # Performance / Balanced / Saver in the power panel
 )
 
 # ----------------------------------------------------------
@@ -234,6 +235,7 @@ do_packages() {
 do_services() {
     step "Enabling services"
     enable_system NetworkManager.service bluetooth.service sddm.service fstrim.timer docker.service tailscaled.service
+    pacman -Qq power-profiles-daemon >/dev/null 2>&1 && enable_system power-profiles-daemon.service
     # PipeWire runs per user; the sockets start it on demand
     systemctl --user enable pipewire.socket pipewire-pulse.socket wireplumber.service >>"$LOG" 2>&1 \
         && info "enabled pipewire (user)" || warn "could not enable pipewire user units"

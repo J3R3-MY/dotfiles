@@ -22,6 +22,28 @@ Singleton {
     readonly property string script: Quickshell.shellDir + "/scripts/fluid-theme.sh"
 
     property var files: []
+    // Average (saturation-boosted) colour per wallpaper, for the colour filter
+    property var hues: ({})
+    readonly property var colorFilters: [
+        { id: "red", color: "#e5484d" }, { id: "orange", color: "#f76b15" }, { id: "yellow", color: "#ffc53d" },
+        { id: "green", color: "#46a758" }, { id: "blue", color: "#3e63dd" }, { id: "purple", color: "#8e4ec6" },
+        { id: "pink", color: "#d6409f" }, { id: "grey", color: "#8b8d98" }
+    ]
+
+    function bucket(path) {
+        const hex = hues[path];
+        if (!hex) return "";
+        const c = Qt.lighter(hex, 1.0);
+        if (c.hslSaturation < 0.18 || c.hslHue < 0) return "grey";
+        const h = c.hslHue * 360;
+        if (h < 15 || h >= 345) return "red";
+        if (h < 45) return "orange";
+        if (h < 70) return "yellow";
+        if (h < 170) return "green";
+        if (h < 255) return "blue";
+        if (h < 290) return "purple";
+        return "pink";
+    }
     property string current: ""
     readonly property bool busy: applier.running
 
@@ -126,8 +148,41 @@ Singleton {
         // name in several dirs) are dropped
         command: ["sh", "-c", "for d; do [ -d \"$d\" ] && find -L \"$d\" -maxdepth 1 -type f \\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \\) ! -name '._*' -printf '%T@\\t%f\\t%p\\n'; done | sort -rn | awk -F '\\t' '!seen[$2]++ { print $3 }'", "sh"].concat(root.dirs)
         stdout: StdioCollector {
-            onStreamFinished: root.files = text.split("\n").filter(l => l.length > 0)
+            onStreamFinished: {
+                root.files = text.split("\n").filter(l => l.length > 0);
+                hueProbe.run();
+            }
         }
+    }
+
+    // Fills `hues` for wallpapers not in the cache yet (ImageMagick, ~50 ms each)
+    Process {
+        id: hueProbe
+        function run() {
+            const missing = root.files.filter(f => !root.hues[f]);
+            if (missing.length === 0 || running) return;
+            command = ["sh", "-c", "for f; do printf '%s\\t%s\\n' \"$f\" \"$(magick \"$f\"[0] -resize 64x64 -modulate 100,180 -resize '1x1!' -format '%[hex:p{0,0}]' info: 2>/dev/null)\"; done", "sh"].concat(missing);
+            running = true;
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const h = Object.assign({}, root.hues);
+                for (const line of text.split("\n")) {
+                    const [path, hex] = line.split("\t");
+                    if (path && /^[0-9A-Fa-f]{6}/.test(hex || "")) h[path] = "#" + hex.slice(0, 6);
+                }
+                root.hues = h;
+                huesFile.setText(JSON.stringify(h));
+            }
+        }
+    }
+
+    FileView {
+        id: huesFile
+        path: root.stateDir + "/wallhues.json"
+        printErrors: false
+        atomicWrites: true
+        onLoaded: { try { root.hues = JSON.parse(text()); } catch (e) {} }
     }
 
     // Asks matugen which colours it would pick from the wallpaper

@@ -51,10 +51,11 @@ for_window [title="nmtui-connect"] floating enable
 #
 # Example configuration:
 #
+# fluid-lock.sh uses the fluid lock screen when the shell runs, swaylock otherwise
 exec swayidle -w \
-         timeout 180 'swaylock -f' \
+         timeout 180 '~/.config/quickshell/fluid/scripts/fluid-lock.sh' \
          timeout 240 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-         before-sleep 'swaylock -f'
+         before-sleep '~/.config/quickshell/fluid/scripts/fluid-lock.sh'
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off
 # your displays after another 300 seconds, and turn your screens back on when
@@ -117,7 +118,7 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # Basics:
 #
 	#Lock
-	bindsym $mod+Shift+s exec swaylock
+	bindsym $mod+Shift+s exec ~/.config/quickshell/fluid/scripts/fluid-lock.sh
 
 	#Logout
 	bindsym $mod+Shift+e exec "~/dotfiles/.config/scripts/wlogout-launch.sh"

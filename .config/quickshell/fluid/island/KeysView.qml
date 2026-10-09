@@ -98,8 +98,10 @@ Item {
 
         const known = [
             [/fluid ipc call fluid toggle (\w+)/, (_, v) => ({ launcher: "App launcher", clipboard: "Clipboard history", media: "Media player",
-                calendar: "Calendar", theme: "Wallpaper & theme picker", keys: "This cheat sheet" }[v] || v)],
+                calendar: "Dashboard (calendar, weather, screen time)", theme: "Wallpaper & theme picker", keys: "This cheat sheet" }[v] || v)],
             [/fluid ipc call fluid controlCenter/, () => "Control center"],
+            [/fluid ipc call fluid power/, () => "Power panel"],
+            [/fluid-lock\.sh/, () => "Lock screen"],
             [/fluid ipc call fluid close/, () => "Close panel"],
             [/fluid-launch\.sh classic/, () => "Switch to waybar"],
             [/fluid-launch\.sh fluid/, () => "Switch to fluid shell"],

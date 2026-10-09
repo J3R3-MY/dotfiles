@@ -11,6 +11,8 @@ ShellRoot {
     // the notification server must exist before anything opens them.
     property var _fluid: Fluid
     property var _notifs: Notifs
+    // Starts counting screen time right away, not when the dashboard opens
+    property var _screentime: ScreenTime
 
     Variants {
         model: Quickshell.screens
@@ -26,4 +28,6 @@ ShellRoot {
         model: Quickshell.screens
         Overlay {}
     }
+
+    LockScreen {}
 }

@@ -131,6 +131,7 @@ PanelWindow {
             label: Battery.percent + "%"
             icon: Icons.battery(Battery.percent, Battery.charging)
             detail: Battery.timeLeft
+            onClicked: Fluid.togglePower(bar.screenName)
         }
     }
 }

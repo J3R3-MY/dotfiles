@@ -3,10 +3,11 @@ import Quickshell
 import Quickshell.Widgets
 import "../common"
 import "../services"
+import "../island"
 
 // macOS-style control center. Opens by hovering the top-right corner, clicking
 // the bluetooth/audio/backlight/network pills, or $mod+i.
-// Pages (main / wifi / bluetooth) slide sideways; the panel height follows
+// Pages (main / wifi / bluetooth / displays) slide sideways; the panel height follows
 // the page so the shape morphs instead of jumping.
 Item {
     id: root
@@ -16,8 +17,13 @@ Item {
     property string page: "main"
     onOpenChanged: if (!open) page = "main"
 
-    width: 400
-    height: (page === "main" ? mainPage.implicitHeight : page === "wifi" ? wifiPage.implicitHeight : btPage.implicitHeight) + 32
+    readonly property var pageList: ["main", "wifi", "bt", "display"]
+    readonly property int pageIndex: Math.max(0, pageList.indexOf(page))
+    readonly property var pageItems: [mainPage, wifiPage, btPage, displayPage]
+
+    width: page === "main" ? 400 : 480
+    height: pageItems[pageIndex].implicitHeight + 32
+    Behavior on width { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
     Behavior on height { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
     // Grow out of the top-right corner
@@ -47,7 +53,7 @@ Item {
 
         Row {
             id: pages
-            x: root.page === "main" ? 0 : -(viewport.width + 32)
+            x: -root.pageIndex * (viewport.width + 32)
             spacing: 32
             Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
@@ -97,6 +103,24 @@ Item {
                         title: "Microphone"
                         subtitle: Audio.micMuted ? "Muted" : "On"
                         onClicked: Audio.toggleMic()
+                    }
+                    Toggle {
+                        width: (mainPage.width - 10) / 2
+                        on: false
+                        icon: Icons.g(0xf0379)
+                        title: "Displays"
+                        subtitle: Displays.outputs.length > 0 ? Displays.outputs.filter(o => o.active).length + " active" : "Resolution, refresh"
+                        hasMore: true
+                        onClicked: { Displays.refresh(); root.page = "display"; }
+                        onMore: { Displays.refresh(); root.page = "display"; }
+                    }
+                    Toggle {
+                        width: (mainPage.width - 10) / 2
+                        on: Fluid.powerOpen
+                        icon: Icons.battery(Battery.percent, Battery.charging)
+                        title: "Power"
+                        subtitle: Battery.available ? Battery.percent + "% · " + (Battery.charging ? "charging" : "battery") : "Profiles, uptime"
+                        onClicked: Fluid.togglePower(root.screenName)
                     }
                 }
 
@@ -206,7 +230,7 @@ Item {
                     spacing: 10
                     Repeater {
                         model: [
-                            { i: Icons.lock, tip: "Lock", cmd: ["swaylock", "-f"], confirm: false },
+                            { i: Icons.lock, tip: "Lock", cmd: null, confirm: false },
                             { i: Icons.moon, tip: "Suspend", cmd: ["systemctl", "suspend"], confirm: false },
                             { i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
                             { i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
@@ -230,7 +254,8 @@ Item {
                                 onClicked: {
                                     if (pbtn.modelData.confirm && !pbtn.armed) { pbtn.armed = true; disarm.restart(); return; }
                                     Fluid.closeAll();
-                                    Quickshell.execDetached(pbtn.modelData.cmd);
+                                    if (pbtn.modelData.cmd) Quickshell.execDetached(pbtn.modelData.cmd);
+                                    else Fluid.lockRequested();
                                 }
                             }
                         }
@@ -244,24 +269,30 @@ Item {
                 width: viewport.width
                 spacing: 8
 
-                PageHeader { title: "Wi-Fi"; onBack: root.page = "main"; busy: false }
-
-                Repeater {
-                    model: Network.networks.slice(0, 12)
-                    ListRowItem {
-                        required property var modelData
-                        width: wifiPage.width
-                        icon: Icons.wifi
-                        title: modelData.ssid
-                        subtitle: (modelData.active ? "Connected · " : "") + modelData.signal + "%" + (modelData.secure ? " · secured" : "")
-                        highlighted: modelData.active
-                        onClicked: if (!modelData.active) Network.connect(modelData.ssid)
-                    }
+                PageHeader {
+                    title: "Wi-Fi"
+                    onBack: root.page = "main"
+                    actionText: Network.wifiEnabled ? "Rescan" : ""
+                    onAction: Network.scan()
                 }
-                Text {
-                    visible: Network.networks.length === 0
-                    text: Network.wifiEnabled ? "Scanning…" : "Wi-Fi is off"
-                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+
+                Loader {
+                    width: parent.width
+                    active: root.page === "wifi"
+                    sourceComponent: OrbitView {
+                        width: wifiPage.width
+                        readonly property var others: Network.networks.filter(n => !n.active).slice(0, 8)
+                        busy: !Network.wifiEnabled ? false : Network.networks.length === 0
+                        center: ({
+                            title: !Network.wifiEnabled ? "Wi-Fi off" : (Network.connected ? Network.name : "Not connected"),
+                            subtitle: Network.connected ? (Network.type === "ethernet" ? "Ethernet" : Network.signal + "%  ·  " + Network.ip) : "tap to turn " + (Network.wifiEnabled ? "off" : "on"),
+                            icon: Network.type === "ethernet" ? Icons.ethernet : (Network.connected ? Icons.wifi : Icons.wifiOff),
+                            active: Network.connected
+                        })
+                        items: others.map(n => ({ title: n.ssid, subtitle: n.signal + "%" + (n.secure ? " · " + Icons.lock : ""), icon: Icons.wifi, active: false }))
+                        onItemClicked: i => Network.connect(others[i].ssid)
+                        onCenterClicked: if (!Network.connected) Network.setWifi(!Network.wifiEnabled)
+                    }
                 }
             }
 
@@ -271,28 +302,190 @@ Item {
                 width: viewport.width
                 spacing: 8
 
-                PageHeader { title: "Bluetooth"; onBack: root.page = "main" }
+                PageHeader {
+                    title: "Bluetooth"
+                    onBack: { if (Bt.adapter) Bt.adapter.discovering = false; root.page = "main"; }
+                    actionText: Bt.enabled ? (Bt.adapter && Bt.adapter.discovering ? "Stop scan" : "Scan") : ""
+                    onAction: if (Bt.adapter) Bt.adapter.discovering = !Bt.adapter.discovering
+                }
 
-                Repeater {
-                    model: Bt.paired
-                    ListRowItem {
-                        required property var modelData
+                Loader {
+                    width: parent.width
+                    active: root.page === "bt"
+                    sourceComponent: OrbitView {
                         width: btPage.width
-                        icon: modelData.connected ? Icons.btConnected : Icons.btOn
-                        title: modelData.name || modelData.address
-                        subtitle: modelData.connected
-                            ? "Connected" + (modelData.batteryAvailable ? " · " + Math.round(modelData.battery * 100) + "%" : "")
-                            : "Not connected"
-                        highlighted: modelData.connected
-                        onClicked: Bt.toggleDevice(modelData)
+                        readonly property var hubDevice: Bt.connected.length > 0 ? Bt.connected[0] : null
+                        // connected first, then paired, then newly discovered (named ones only)
+                        readonly property var others: Bt.devices
+                            .filter(d => d !== hubDevice && (d.paired || d.connected || d.name))
+                            .sort((a, b) => (b.connected - a.connected) || (b.paired - a.paired))
+                            .slice(0, 8)
+                        busy: !!(Bt.adapter && Bt.adapter.discovering)
+                        center: hubDevice ? ({
+                            title: hubDevice.name,
+                            subtitle: "Connected" + (hubDevice.batteryAvailable ? " · " + Math.round(hubDevice.battery * 100) + "%" : ""),
+                            icon: Icons.btConnected, active: true
+                        }) : ({ title: Bt.enabled ? "Bluetooth" : "Bluetooth off", subtitle: Bt.enabled ? "no device connected" : "tap to turn on",
+                                icon: Bt.enabled ? Icons.btOn : Icons.btOff, active: false })
+                        items: others.map(d => ({
+                            title: d.name || d.address,
+                            subtitle: d.connected ? "connected" : d.paired ? "paired" : "tap to pair",
+                            icon: Icons.btOn, active: d.connected
+                        }))
+                        onItemClicked: i => {
+                            const d = others[i];
+                            if (!d.paired && !d.connected) { d.trusted = true; d.pair(); }
+                            else Bt.toggleDevice(d);
+                        }
+                        onCenterClicked: hubDevice ? hubDevice.disconnect() : Bt.setEnabled(!Bt.enabled)
                     }
                 }
-                Text {
-                    visible: Bt.paired.length === 0
-                    text: "No paired devices — pair new ones with blueberry (right-click the bar pill)"
-                    wrapMode: Text.Wrap
+            }
+
+            // ================= Displays page =================
+            Column {
+                id: displayPage
+                width: viewport.width
+                spacing: 12
+
+                PageHeader { title: "Displays"; onBack: { Displays.revert(); root.page = "main"; } }
+
+                property int sel: 0
+                readonly property var out: Displays.outputs[Math.min(sel, Displays.outputs.length - 1)] || null
+                readonly property var resolutions: {
+                    if (!out) return [];
+                    const seen = {};
+                    return out.modes.filter(m => { const k = m.w + "x" + m.h; if (seen[k]) return false; seen[k] = true; return true; })
+                                    .sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 8);
+                }
+                property int pickW: out ? out.width : 0
+                property int pickH: out ? out.height : 0
+                property int pickR: out ? out.refresh : 0
+                property real pickScale: out ? out.scale : 1
+                onOutChanged: if (out) { pickW = out.width; pickH = out.height; pickR = out.refresh; pickScale = out.scale; }
+                readonly property var rates: out ? out.modes.filter(m => m.w === pickW && m.h === pickH).map(m => m.r).sort((a, b) => a - b) : []
+
+                // Output tabs
+                Flow {
                     width: parent.width
-                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+                    spacing: 6
+                    Repeater {
+                        model: Displays.outputs
+                        Rectangle {
+                            required property var modelData
+                            required property int index
+                            readonly property bool on: displayPage.sel === index
+                            height: 44; radius: 14
+                            width: oText.implicitWidth + 28
+                            color: on ? Theme.clock : Theme.surface
+                            Column {
+                                id: oText
+                                anchors.centerIn: parent
+                                Text { text: modelData.name; color: parent.parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2; font.weight: Font.DemiBold }
+                                Text { text: modelData.width + "×" + modelData.height + " @ " + Math.round(modelData.refresh / 1000) + " Hz"; color: parent.parent.on ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5 }
+                            }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: displayPage.sel = parent.index }
+                        }
+                    }
+                }
+
+                Text { text: "Resolution"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Grid {
+                    columns: 2
+                    columnSpacing: 6; rowSpacing: 6
+                    width: parent.width
+                    Repeater {
+                        model: displayPage.resolutions
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool on: displayPage.pickW === modelData.w && displayPage.pickH === modelData.h
+                            readonly property string tag: ({ "3840x2160": "4K", "2560x1440": "QHD", "2560x1600": "WQXGA", "1920x1200": "WUXGA",
+                                                             "1920x1080": "FHD", "1600x900": "HD+", "1280x720": "HD" })[modelData.w + "x" + modelData.h] || ""
+                            width: (displayPage.width - 6) / 2; height: 34; radius: 12
+                            color: on ? Theme.clock : (rArea.containsMouse ? Theme.surfaceHi : Theme.surface)
+                            Behavior on color { ColorAnimation { duration: Anim.fast } }
+                            Text { anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: parent.tag; color: parent.on ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4; font.weight: Font.DemiBold }
+                            Text { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: modelData.w + "×" + modelData.h; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            MouseArea {
+                                id: rArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    displayPage.pickW = modelData.w; displayPage.pickH = modelData.h;
+                                    const r = displayPage.rates;
+                                    displayPage.pickR = r.length ? r[r.length - 1] : displayPage.pickR;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                TweakSlider {
+                    width: parent.width
+                    visible: displayPage.rates.length > 1
+                    label: "Refresh rate"
+                    from: 0; to: Math.max(1, displayPage.rates.length - 1); step: 1; decimals: 0
+                    defaultValue: 0
+                    value: Math.max(0, displayPage.rates.indexOf(displayPage.pickR))
+                    valueText: Math.round(displayPage.pickR / 1000) + " Hz"
+                    onMoved: v => displayPage.pickR = displayPage.rates[Math.round(v)]
+                }
+
+                Row {
+                    spacing: 6
+                    Text { anchors.verticalCenter: parent.verticalCenter; text: "Scale"; width: 60; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                    Repeater {
+                        model: [1, 1.25, 1.5, 2]
+                        Rectangle {
+                            required property real modelData
+                            readonly property bool on: Math.abs(displayPage.pickScale - modelData) < 0.01
+                            width: 56; height: 30; radius: 10
+                            color: on ? Theme.clock : Theme.surface
+                            Text { anchors.centerIn: parent; text: parent.modelData + "×"; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: displayPage.pickScale = parent.modelData }
+                        }
+                    }
+                }
+
+                // Apply, then confirm within 15 s or it reverts
+                Rectangle {
+                    width: parent.width; height: 44; radius: 14
+                    readonly property bool confirming: Displays.pendingRevert !== null
+                    color: confirming ? Theme.surfaceHi : Theme.clock
+                    Behavior on color { ColorAnimation { duration: Anim.fast } }
+                    Text {
+                        visible: !parent.confirming
+                        anchors.centerIn: parent
+                        text: "Apply"
+                        color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        enabled: !parent.confirming && displayPage.out !== null
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Displays.apply(displayPage.out, displayPage.pickW, displayPage.pickH, displayPage.pickR, displayPage.pickScale)
+                    }
+                    Row {
+                        visible: parent.confirming
+                        anchors.fill: parent
+                        anchors.margins: 5
+                        spacing: 6
+                        Text {
+                            width: parent.width - 2 * 90 - 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            leftPadding: 8
+                            text: "Keep? Reverting in " + Displays.countdown + " s"
+                            color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                        }
+                        Repeater {
+                            model: [{ t: "Keep", f: () => Displays.keep(), main: true }, { t: "Revert", f: () => Displays.revert(), main: false }]
+                            Rectangle {
+                                required property var modelData
+                                width: 90; height: parent.height; radius: 10
+                                color: modelData.main ? Theme.clock : Theme.surface
+                                Text { anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -301,8 +494,9 @@ Item {
     component PageHeader: Item {
         id: ph
         property string title
-        property bool busy: false
+        property string actionText: ""
         signal back()
+        signal action()
         width: parent.width
         height: 36
         Rectangle {
@@ -319,31 +513,15 @@ Item {
             text: ph.title
             color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
         }
-    }
-
-    component ListRowItem: Rectangle {
-        id: lr
-        property string icon
-        property string title
-        property string subtitle
-        property bool highlighted: false
-        signal clicked()
-        height: 52
-        radius: 14
-        color: highlighted ? Theme.accent : (lrArea.containsMouse ? Theme.surfaceHi : Theme.surface)
-        Behavior on color { ColorAnimation { duration: Anim.fast } }
-        Row {
-            anchors.fill: parent
-            anchors.leftMargin: 14
-            spacing: 12
-            Glyph { anchors.verticalCenter: parent.verticalCenter; text: lr.icon; color: lr.highlighted ? Theme.onPill : Theme.fg }
-            Column {
-                anchors.verticalCenter: parent.verticalCenter
-                width: lr.width - 60
-                Text { width: parent.width; elide: Text.ElideRight; text: lr.title; color: lr.highlighted ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1 }
-                Text { width: parent.width; elide: Text.ElideRight; text: lr.subtitle; color: lr.highlighted ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-            }
+        Rectangle {
+            visible: ph.actionText.length > 0
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            height: 30; radius: 15
+            width: actText.implicitWidth + 24
+            color: actArea.containsMouse ? Theme.surfaceHi : Theme.surface
+            Text { id: actText; anchors.centerIn: parent; text: ph.actionText; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+            MouseArea { id: actArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ph.action() }
         }
-        MouseArea { id: lrArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: lr.clicked() }
     }
 }

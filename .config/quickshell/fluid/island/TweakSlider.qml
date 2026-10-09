@@ -14,6 +14,7 @@ Item {
     property real step: 0.05
     property string suffix: ""
     property int decimals: 2
+    property string valueText: ""     // overrides the number shown on the right
     // Hue mode: the track shows the colour wheel around `baseHue` (0..1),
     // so the knob sits on the colour you'll actually get
     property bool hueTrack: false
@@ -40,7 +41,7 @@ Item {
     }
     Text {
         anchors.right: parent.right
-        text: (root.value > 0 && root.from < 0 ? "+" : "") + root.value.toFixed(root.decimals) + root.suffix
+        text: root.valueText || (root.value > 0 && root.from < 0 ? "+" : "") + root.value.toFixed(root.decimals) + root.suffix
         color: Theme.fg
         font.family: Theme.font
         font.pixelSize: Theme.fontSize - 3

@@ -6,7 +6,7 @@ import Quickshell.I3
 
 // Global UI state + the IPC surface used by sway keybinds:
 //   qs -c fluid ipc call fluid toggle launcher|clipboard|media|calendar|theme|keys
-//   qs -c fluid ipc call fluid controlCenter
+//   qs -c fluid ipc call fluid controlCenter | power | lock
 //   qs -c fluid ipc call fluid osd volume|brightness
 //   qs -c fluid ipc call fluid reloadTheme
 Singleton {
@@ -19,16 +19,21 @@ Singleton {
     property string ccScreen: ""
     property bool ccOpen: false
     property bool dnd: false
+    property bool powerOpen: false
+    property string powerScreen: ""
+    property bool locked: false       // set by the lock screen
 
     readonly property string focusedScreen: I3.focusedMonitor ? I3.focusedMonitor.name : ""
     readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys"]
 
     signal osdRequested(string kind)
+    signal lockRequested()
     // Sent by fluid-theme.sh after matugen ran, in case the file watch missed it
     signal themeChanged()
 
     function openIsland(view, screenName) {
         root.ccOpen = false;
+        root.powerOpen = false;
         root.islandScreen = screenName || root.focusedScreen;
         root.islandView = view;
     }
@@ -38,8 +43,16 @@ Singleton {
         else openIsland(view, screenName);
     }
 
+    function togglePower(screenName) {
+        root.islandView = "";
+        root.ccOpen = false;
+        root.powerScreen = screenName || root.focusedScreen;
+        root.powerOpen = !root.powerOpen;
+    }
+
     function toggleControlCenter(screenName) {
         root.islandView = "";
+        root.powerOpen = false;
         root.ccScreen = screenName || root.focusedScreen;
         root.ccOpen = !root.ccOpen;
     }
@@ -47,6 +60,7 @@ Singleton {
     function closeAll() {
         root.islandView = "";
         root.ccOpen = false;
+        root.powerOpen = false;
     }
 
     IpcHandler {
@@ -60,6 +74,8 @@ Singleton {
             root.toggleIsland(view, "");
         }
         function controlCenter(): void { root.toggleControlCenter(""); }
+        function power(): void { root.togglePower(""); }
+        function lock(): void { root.lockRequested(); }
         function close(): void { root.closeAll(); }
         function osd(kind: string): void { root.osdRequested(kind); }
         function dnd(): void { root.dnd = !root.dnd; }

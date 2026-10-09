@@ -14,12 +14,22 @@ AGPL), so this stays under the repo's MIT licence.
 
 | Feature | Where | Notes |
 |---|---|---|
-| Fluid bar | top of every output | Waybar layout and colours. Sliding workspace highlight, pills widen on hover to show details (IP, sink name, RAM GiB, battery time) |
-| Dynamic island | the clock | Morphs into launcher, clipboard, media, calendar or theme picker. Shows a "live" equaliser while music plays; hover to see the track |
-| Control center | hover the top-right corner, click a status pill, or `$mod+i` | Wi-Fi/Bluetooth/DND/mic tiles with detail pages, volume + brightness sliders, media, notification history, power menu |
-| Theme selector | `$mod+t` | Pick a wallpaper; matugen recolours bar, panels, sway borders and WezTerm. Tweak panel: dark/light, base colour from the wallpaper, hue shift, palette style, contrast, brightness, shuffle and reset — all live |
-| OSD | bottom centre | Appears for any volume/brightness change, including the old pamixer/brightnessctl keys |
-| Notifications | top right | Replaces dunst while the shell runs |
+| Fluid bar | top of every output | Waybar layout and colours. Sliding workspace highlight, pills widen on hover to show details |
+| Dynamic island | the clock | Morphs into launcher, clipboard, media, dashboard, theme picker or cheat sheet. Live equaliser bars while music plays; hover to see the track |
+| Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: screen time |
+| Screen time | dashboard → Screen time | Per-app time, last 7 days, month heatmap, by-hour chart. Logged from sway focus events, paused when idle/locked, stored in `~/.local/state/fluid/screentime` |
+| Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert |
+| Power panel | click the battery pill | Battery ring, uptime, brightness/volume, lock/suspend/reboot/off, Performance/Balanced/Saver |
+| Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders and WezTerm. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
+| Media | `$mod+m`, right-click the clock | Spinning-record cover, seek bar, 10-band equalizer with presets (PipeWire filter-chain, no EasyEffects) |
+| Lock screen | `$mod+Shift+s`, idle, before sleep | Blurred wallpaper + clock, password pill on any key. Falls back to swaylock without the shell |
+| OSD | bottom centre | Appears for any volume/brightness change |
+| Notifications | top right | Replace dunst while the shell runs |
+| Cheat sheet | `$mod+?`, `$mod+F1` | Generated from the sway config |
+
+Weather comes from Open-Meteo. The location is guessed once from your IP via
+ipinfo.io and stored in `~/.local/state/fluid/location` as `lat,lon,City`;
+edit that file to set it yourself. Only those coordinates are sent to Open-Meteo.
 
 ## Keys
 
@@ -30,7 +40,7 @@ Old binds are untouched. New ones use keys that were unbound:
 | `$mod+p` | App launcher (wofi stays on `$mod+d`) |
 | `$mod+v` | Clipboard history (Enter copies, Shift+Del removes) |
 | `$mod+m` | Media |
-| `$mod+c` | Calendar |
+| `$mod+c` | Dashboard (calendar, weather, screen time) |
 | `$mod+t` | Wallpaper / theme picker |
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |
@@ -105,6 +115,13 @@ qs -c fluid                                  # run in the foreground to see erro
 tail -f ~/.local/state/fluid/fluid.log       # log when started by fluid-launch.sh
 qs -c fluid ipc call fluid toggle launcher   # drive it by hand
 ```
+
+## If the lock screen ever gets stuck
+
+Sway keeps the session locked if the shell crashes while locked, and the shell
+re-locks itself when it restarts. If that doesn't happen, switch to a TTY
+(Ctrl+Alt+F2), log in and run `WAYLAND_DISPLAY=wayland-1 swaylock`, then go
+back (Ctrl+Alt+F1) and unlock with swaylock.
 
 ## Not done yet
 

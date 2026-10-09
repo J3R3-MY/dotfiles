@@ -20,7 +20,7 @@ PanelWindow {
     WlrLayershell.namespace: "fluid-wallpaper"
 
     property bool useA: true
-    property Item pending: null
+    property Image pending: null
     readonly property string source: Wallpaper.current ? "file://" + Wallpaper.current : ""
     onSourceChanged: load()
 
