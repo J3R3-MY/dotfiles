@@ -99,15 +99,6 @@ packages=(
     "wireplumber"
     "wlogout"
     "flatpak"
-    # Fluid shell (Quickshell bar/island/control center for sway)
-    "quickshell"
-    "matugen"
-    "cliphist"
-    "swaybg"
-    "pavucontrol"
-    "libnotify"
-    "ttf-roboto"
-    "ttf-nerd-fonts-symbols"
 )
 
 # ----------------------------------------------------------

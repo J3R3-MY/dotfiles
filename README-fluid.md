@@ -42,13 +42,17 @@ on audio/backlight changes the level.
 
 ## Install (Arch)
 
+Run the main script first, then the fluid one:
+
 ```bash
-sudo pacman -S --needed quickshell matugen cliphist swaybg pavucontrol libnotify ttf-roboto ttf-nerd-fonts-symbols
-cd ~/dotfiles-fluid && stow .
-swaymsg reload   # or log out and back in
+./setup-arch.sh
+./setup-fluid.sh
 ```
 
-`setup-arch.sh` installs the same packages.
+`setup-fluid.sh` installs sway and the shell's dependencies, enables
+NetworkManager, bluetooth and PipeWire, stows the repo into `~` (it reports
+conflicts instead of overwriting), prepares `~/.local/state/fluid`, and starts
+the shell right away if you run it inside sway.
 
 ## Downwards compatibility
 
