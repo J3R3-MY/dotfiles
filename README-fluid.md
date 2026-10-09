@@ -27,6 +27,28 @@ AGPL), so this stays under the repo's MIT licence.
 | Notifications | top right | Replace dunst while the shell runs |
 | Cheat sheet | `$mod+?`, `$mod+F1` | Generated from the sway config |
 
+### From Omarchy plugins (rewritten small for this shell)
+
+| Feature | Where | Instead of |
+|---|---|---|
+| Net speed | bar pill `↓ ↑`, click for chart (5/15/30 min), link details, per-app usage | davedes.netspeed |
+| Connection health | same pill (hover shows the score) → Health tab: router and internet latency, jitter, loss, outage log, speed test | x3me.nexthop |
+| VPN | bar pill when a VPN exists → VPN tab: NetworkManager VPN/WireGuard, Tailscale (+ exit nodes), Mullvad | jkoestinger.vpn |
+| Port watch | bar pill while dev servers listen → Ports tab with stop buttons | zeru.portwatch |
+| AirPods | Bluetooth pill shows the pods' battery; Bluetooth page: L/R/case, noise mode, conversation awareness, auto-pause | thisisgm.omapods (own ~150-line Python bridge, no librepods) |
+| Spotify | `$mod+Shift+m` or "Library" in the media view: search, liked, playlists, Connect devices | quickshell.spotify (uses `spotify_player` as the backend, Premium needed) |
+| Bitwarden | `$mod+Shift+p`: unlock, search, copy password/username/TOTP | elevate08.qs-bitwarden-cli (official `bw` CLI) |
+| Lock designs | Power panel → Lock style: Classic, Minimal, Info, Split with live previews | sirjul1337.lock-explorer |
+| Monitor profiles | Control center → Displays: drag to arrange, save profiles that kanshi re-applies on hotplug | crmne.hyprmoncfg |
+
+Skipped: omdrop (needs Apple Silicon + Broadcom Wi-Fi) and herdr (not used).
+
+One-time setup for the accounts: Spotify → "Sign in" in the Spotify view
+(runs `spotify_player authenticate`); Bitwarden → "Log in" in the vault view
+(runs `bw login`). Copied passwords never pass through the shell, are removed
+from clipboard history and cleared after 30 s; the vault locks after 10 minutes
+or when the screen locks.
+
 Weather comes from Open-Meteo. The location is guessed once from your IP via
 ipinfo.io and stored in `~/.local/state/fluid/location` as `lat,lon,City`;
 edit that file to set it yourself. Only those coordinates are sent to Open-Meteo.
@@ -44,6 +66,9 @@ Old binds are untouched. New ones use keys that were unbound:
 | `$mod+t` | Wallpaper / theme picker |
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |
+| `$mod+Shift+m` | Spotify library |
+| `$mod+Shift+p` | Bitwarden passwords |
+| `$mod+Shift+n` | Network panel (traffic, health, VPN, ports) |
 | `$mod+?` / `$mod+F1` | Keybind cheat sheet (built from the sway config, so new binds appear automatically) |
 | `$mod+Alt+w` / `$mod+Alt+q` | Switch to the old waybar setup / back to the fluid shell |
 

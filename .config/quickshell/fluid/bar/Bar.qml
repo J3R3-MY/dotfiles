@@ -65,13 +65,44 @@ PanelWindow {
             NumberAnimation { properties: "x"; duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
         }
 
+        // Dev servers listening (Port Watch); hidden when there are none
+        Pill {
+            visible: Ports.count > 0
+            color: Theme.memory
+            icon: Icons.g(0xf0318)
+            label: String(Ports.count)
+            detail: Ports.dev.slice(0, 3).map(p => ":" + p.port).join(" ")
+            onClicked: Fluid.toggleNet("ports", bar.screenName)
+        }
+
+        // VPN: shown when some VPN is available, filled when connected
+        Pill {
+            visible: Vpn.available
+            color: Vpn.connected ? Theme.accent : Theme.bg
+            textColor: Vpn.connected ? Theme.onPill : Theme.fgDim
+            icon: Vpn.connected ? Icons.g(0xf0483) : Icons.g(0xf099c)
+            detail: Vpn.label
+            onClicked: Fluid.toggleNet("vpn", bar.screenName)
+        }
+
+        // Live throughput; hover shows the connection score (Nexthop)
+        Pill {
+            color: Health.score < 50 ? Theme.urgent : Theme.network
+            textColor: Health.score < 50 ? Theme.fg : Theme.onPill
+            label: "↓" + NetStats.fmt(NetStats.down) + " ↑" + NetStats.fmt(NetStats.up)
+            detail: "score " + Health.score + (Health.wan.last >= 0 ? " · " + Math.round(Health.wan.last) + " ms" : "")
+            onClicked: Fluid.toggleNet(Health.score < 70 ? "health" : "traffic", bar.screenName)
+        }
+
         Pill {
             visible: Bt.available
             color: Bt.enabled ? Theme.bluetooth : Theme.urgent
             textColor: Bt.enabled ? Theme.onPill : Theme.fg
             icon: !Bt.enabled ? Icons.btOff : (Bt.connected.length > 0 ? Icons.btConnected : Icons.btOn)
-            label: Bt.label
-            detail: Bt.connected.length > 1 ? `+${Bt.connected.length - 1}` : ""
+            // AirPods report their battery over their own channel (Pods)
+            label: Pods.connected && Pods.minPod >= 0 ? Pods.name + " " + Pods.minPod + "%" : Bt.label
+            detail: Pods.connected && Pods.level("case") >= 0 ? "case " + Pods.level("case") + "%"
+                  : Bt.connected.length > 1 ? `+${Bt.connected.length - 1}` : ""
             onClicked: m => m.button === Qt.RightButton
                 ? Quickshell.execDetached(["blueberry"])
                 : Fluid.toggleControlCenter(bar.screenName)

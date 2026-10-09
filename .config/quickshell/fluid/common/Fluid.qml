@@ -20,11 +20,14 @@ Singleton {
     property bool ccOpen: false
     property bool dnd: false
     property bool powerOpen: false
+    property bool netOpen: false
+    property string netScreen: ""
+    property string netTab: "traffic"     // traffic | health | vpn | ports
     property string powerScreen: ""
     property bool locked: false       // set by the lock screen
 
     readonly property string focusedScreen: I3.focusedMonitor ? I3.focusedMonitor.name : ""
-    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys"]
+    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys", "spotify", "vault", "lockstyle"]
 
     signal osdRequested(string kind)
     signal lockRequested()
@@ -34,6 +37,7 @@ Singleton {
     function openIsland(view, screenName) {
         root.ccOpen = false;
         root.powerOpen = false;
+        root.netOpen = false;
         root.islandScreen = screenName || root.focusedScreen;
         root.islandView = view;
     }
@@ -43,9 +47,20 @@ Singleton {
         else openIsland(view, screenName);
     }
 
+    function toggleNet(tab, screenName) {
+        const same = root.netOpen && root.netTab === tab;
+        root.islandView = "";
+        root.ccOpen = false;
+        root.powerOpen = false;
+        root.netScreen = screenName || root.focusedScreen;
+        root.netTab = tab;
+        root.netOpen = !same;
+    }
+
     function togglePower(screenName) {
         root.islandView = "";
         root.ccOpen = false;
+        root.netOpen = false;
         root.powerScreen = screenName || root.focusedScreen;
         root.powerOpen = !root.powerOpen;
     }
@@ -53,6 +68,7 @@ Singleton {
     function toggleControlCenter(screenName) {
         root.islandView = "";
         root.powerOpen = false;
+        root.netOpen = false;
         root.ccScreen = screenName || root.focusedScreen;
         root.ccOpen = !root.ccOpen;
     }
@@ -61,6 +77,7 @@ Singleton {
         root.islandView = "";
         root.ccOpen = false;
         root.powerOpen = false;
+        root.netOpen = false;
     }
 
     IpcHandler {
@@ -75,6 +92,7 @@ Singleton {
         }
         function controlCenter(): void { root.toggleControlCenter(""); }
         function power(): void { root.togglePower(""); }
+        function network(tab: string): void { root.toggleNet(tab || "traffic", ""); }
         function lock(): void { root.lockRequested(); }
         function close(): void { root.closeAll(); }
         function osd(kind: string): void { root.osdRequested(kind); }

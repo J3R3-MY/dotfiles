@@ -18,7 +18,7 @@ PanelWindow {
     readonly property string screenName: modelData.name
     readonly property bool isFocusedScreen: Fluid.focusedScreen === screenName || Fluid.focusedScreen === ""
 
-    readonly property bool modal: island.open || cc.open || power.open
+    readonly property bool modal: island.open || cc.open || power.open || net.open
 
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
@@ -34,6 +34,7 @@ PanelWindow {
         // control center would swallow clicks meant for windows underneath
         Region { item: cc.visible ? cc : null }
         Region { item: power.visible ? power : null }
+        Region { item: net.visible ? net : null }
         Region { item: hotCorner }
         Region { item: toasts.visible ? toasts : null }
     }
@@ -88,9 +89,18 @@ PanelWindow {
         anchors.rightMargin: 10
     }
 
+    NetPanel {
+        id: net
+        screenName: win.screenName
+        anchors.top: parent.top
+        anchors.topMargin: Theme.barHeight + 6
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+    }
+
     Toasts {
         id: toasts
-        visible: win.isFocusedScreen && !cc.open && !power.open
+        visible: win.isFocusedScreen && !cc.open && !power.open && !net.open
         anchors.top: parent.top
         anchors.topMargin: Theme.barHeight + 6
         anchors.right: parent.right

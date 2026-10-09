@@ -116,6 +116,22 @@ Item {
                     }
                     Toggle {
                         width: (mainPage.width - 10) / 2
+                        on: Vault.unlocked
+                        icon: Icons.g(0xf084)
+                        title: "Passwords"
+                        subtitle: Vault.unlocked ? "unlocked" : Vault.status === "missing" ? "bw not installed" : "Bitwarden"
+                        onClicked: Fluid.openIsland("vault", root.screenName)
+                    }
+                    Toggle {
+                        width: (mainPage.width - 10) / 2
+                        on: Spotify.state === "ready"
+                        icon: Icons.g(0xf1bc)
+                        title: "Spotify"
+                        subtitle: Spotify.state === "ready" ? "library & devices" : Spotify.state === "missing" ? "not installed" : "sign in"
+                        onClicked: Fluid.openIsland("spotify", root.screenName)
+                    }
+                    Toggle {
+                        width: (mainPage.width - 10) / 2
                         on: Fluid.powerOpen
                         icon: Icons.battery(Battery.percent, Battery.charging)
                         title: "Power"
@@ -340,6 +356,74 @@ Item {
                         onCenterClicked: hubDevice ? hubDevice.disconnect() : Bt.setEnabled(!Bt.enabled)
                     }
                 }
+
+                // AirPods (through scripts/fluid-pods.py): battery per pod + noise mode
+                Column {
+                    visible: Pods.connected
+                    width: parent.width
+                    spacing: 10
+
+                    Row {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: 22
+                        Repeater {
+                            model: (Pods.isMax ? ["headset"] : ["left", "right", "case"]).filter(p => Pods.level(p) >= 0)
+                            Column {
+                                required property string modelData
+                                spacing: 4
+                                Ring {
+                                    value: Pods.level(modelData) / 100
+                                    text: Pods.level(modelData) + "%"
+                                    color: Pods.charging(modelData) ? Theme.cpu : Pods.level(modelData) <= 20 ? Theme.urgent : Theme.clock
+                                }
+                                Text {
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    text: ({ left: "Left", right: "Right", case: "Case", headset: "Battery" })[modelData] + (Pods.charging(modelData) ? " " + Icons.bolt : "")
+                                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                                }
+                            }
+                        }
+                    }
+
+                    // Noise control, segmented
+                    Rectangle {
+                        id: ancSeg
+                        visible: Pods.anc !== ""
+                        width: parent.width; height: 40; radius: 14
+                        color: Theme.surface
+                        readonly property var modes: [{ m: "off", t: "Off" }, { m: "transparency", t: "Transparency" }, { m: "adaptive", t: "Adaptive" }, { m: "on", t: "Noise cancel" }]
+                        readonly property int sel: Math.max(0, modes.findIndex(x => x.m === Pods.anc))
+                        Rectangle {
+                            y: 4; height: parent.height - 8; radius: 11
+                            width: (ancSeg.width - 8) / ancSeg.modes.length
+                            x: 4 + ancSeg.sel * width
+                            color: Theme.clock
+                            Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
+                        }
+                        Row {
+                            anchors.fill: parent; anchors.margins: 4
+                            Repeater {
+                                model: ancSeg.modes
+                                Item {
+                                    required property var modelData
+                                    required property int index
+                                    width: (ancSeg.width - 8) / ancSeg.modes.length; height: parent.height
+                                    Text { anchors.centerIn: parent; text: parent.modelData.t; color: ancSeg.sel === parent.index ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Pods.setAnc(parent.modelData.m) }
+                                }
+                            }
+                        }
+                    }
+
+                    Toggle {
+                        width: parent.width
+                        on: Pods.ca
+                        icon: Icons.g(0xf0130)
+                        title: "Conversation Awareness"
+                        subtitle: "lowers media when you start talking"
+                        onClicked: Pods.setCa(!Pods.ca)
+                    }
+                }
             }
 
             // ================= Displays page =================
@@ -349,6 +433,109 @@ Item {
                 spacing: 12
 
                 PageHeader { title: "Displays"; onBack: { Displays.revert(); root.page = "main"; } }
+
+                // ---- Arrangement: drag screens, they snap edge to edge ----------
+                Rectangle {
+                    id: stage
+                    width: parent.width; height: 170; radius: 14
+                    color: Theme.surface
+                    clip: true
+
+                    readonly property var act: Displays.outputs.filter(o => o.active)
+                    // layout size of an output = pixels / scale
+                    function lw(o) { return o.width / o.scale; }
+                    function lh(o) { return o.height / o.scale; }
+                    readonly property var bounds: {
+                        if (!act.length) return { x: 0, y: 0, w: 1, h: 1 };
+                        const x0 = Math.min(...act.map(o => o.x)), y0 = Math.min(...act.map(o => o.y));
+                        const x1 = Math.max(...act.map(o => o.x + lw(o))), y1 = Math.max(...act.map(o => o.y + lh(o)));
+                        return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+                    }
+                    readonly property real k: Math.min((width - 40) / (bounds.w * 1.3), (height - 30) / (bounds.h * 1.3))
+                    property var moved: ({})                 // name -> { x, y } in layout pixels
+                    readonly property bool dirty: Object.keys(moved).length > 0
+                    onActChanged: moved = ({})
+
+                    function pos(o) { return moved[o.name] || { x: o.x, y: o.y }; }
+                    function snap(o, nx, ny) {
+                        const w = lw(o), h = lh(o), t = 60 / Math.max(0.05, k) * 0.15 + 40;
+                        let bx = nx, by = ny, dx = t, dy = t;
+                        for (const p of act) {
+                            if (p.name === o.name) continue;
+                            const q = pos(p), pw = lw(p), ph = lh(p);
+                            for (const cx of [q.x - w, q.x + pw, q.x, q.x + pw - w]) if (Math.abs(cx - nx) < dx) { dx = Math.abs(cx - nx); bx = cx; }
+                            for (const cy of [q.y, q.y + ph - h, q.y - h, q.y + ph]) if (Math.abs(cy - ny) < dy) { dy = Math.abs(cy - ny); by = cy; }
+                        }
+                        const m = Object.assign({}, moved);
+                        m[o.name] = { x: Math.round(bx), y: Math.round(by) };
+                        moved = m;
+                    }
+
+                    Repeater {
+                        model: stage.act
+                        Rectangle {
+                            id: mon
+                            required property var modelData
+                            readonly property var p: stage.pos(modelData)
+                            width: stage.lw(modelData) * stage.k
+                            height: stage.lh(modelData) * stage.k
+                            // laid out from the model; while dragging, the finger offset is added on top
+                            readonly property real baseX: 20 + (stage.width - 40 - stage.bounds.w * stage.k) / 2 + (p.x - stage.bounds.x) * stage.k
+                            readonly property real baseY: 15 + (stage.height - 30 - stage.bounds.h * stage.k) / 2 + (p.y - stage.bounds.y) * stage.k
+                            property point offset: Qt.point(0, 0)
+                            x: baseX + offset.x
+                            y: baseY + offset.y
+                            z: drag.active ? 2 : 1
+                            Behavior on x { enabled: !drag.active; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                            Behavior on y { enabled: !drag.active; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                            radius: 8
+                            color: drag.active ? Theme.clock : Theme.surfaceHi
+                            border.width: 2
+                            border.color: Theme.clock
+                            Column {
+                                anchors.centerIn: parent
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.name; color: drag.active ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4; font.weight: Font.DemiBold }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.width + "×" + mon.modelData.height; color: drag.active ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: 9 }
+                            }
+                            DragHandler {
+                                id: drag
+                                target: null
+                                onActiveTranslationChanged: if (active) mon.offset = Qt.point(activeTranslation.x, activeTranslation.y)
+                                onActiveChanged: if (!active) {
+                                    const nx = mon.p.x + mon.offset.x / stage.k, ny = mon.p.y + mon.offset.y / stage.k;
+                                    mon.offset = Qt.point(0, 0);
+                                    stage.snap(mon.modelData, nx, ny);
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.margins: 8
+                        visible: !stage.dirty
+                        text: "Drag screens to arrange them"
+                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+                    }
+                    Row {
+                        anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 8
+                        spacing: 6
+                        visible: stage.dirty
+                        Repeater {
+                            model: [{ t: "Apply", main: true }, { t: "Reset", main: false }]
+                            Rectangle {
+                                required property var modelData
+                                height: 26; radius: 9
+                                width: art.implicitWidth + 20
+                                color: modelData.main ? Theme.clock : Theme.surfaceHi
+                                Text { id: art; anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                                MouseArea {
+                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                                    onClicked: { if (parent.modelData.main) Displays.arrange(stage.moved); stage.moved = ({}); }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 property int sel: 0
                 readonly property var out: Displays.outputs[Math.min(sel, Displays.outputs.length - 1)] || null
@@ -485,6 +672,51 @@ Item {
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
                             }
                         }
+                    }
+                }
+
+                // ---- Profiles: re-applied automatically when the same screens connect ----
+                Text { text: "Profiles  ·  applied automatically on hotplug"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Flow {
+                    width: parent.width
+                    spacing: 6
+                    Repeater {
+                        model: Displays.profiles
+                        Rectangle {
+                            required property var modelData
+                            height: 30; radius: 15
+                            width: pn.implicitWidth + 46
+                            color: Theme.surface
+                            Text { id: pn; x: 14; anchors.verticalCenter: parent.verticalCenter; text: parent.modelData.name + "  (" + parent.modelData.outputs.filter(o => o.enabled).length + ")"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            Text {
+                                anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                                text: "×"; color: delArea.containsMouse ? Theme.urgent : Theme.fgDim; font.pixelSize: 16
+                                MouseArea { id: delArea; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Displays.deleteProfile(parent.parent.modelData.name) }
+                            }
+                        }
+                    }
+                }
+                Row {
+                    width: parent.width
+                    spacing: 6
+                    Rectangle {
+                        width: parent.width - saveBtn.width - 6; height: 36; radius: 12
+                        color: Theme.surface
+                        TextInput {
+                            id: profileName
+                            anchors.fill: parent; anchors.leftMargin: 14; anchors.rightMargin: 14
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+                            Keys.onReturnPressed: { Displays.saveProfile(text); text = ""; }
+                            Text { visible: !profileName.text; anchors.verticalCenter: parent.verticalCenter; text: "Name this setup (e.g. Desk, Docked)"; color: Theme.fgDim; font: profileName.font }
+                        }
+                    }
+                    Rectangle {
+                        id: saveBtn
+                        width: 110; height: 36; radius: 12
+                        color: Theme.clock
+                        Text { anchors.centerIn: parent; text: "Save current"; color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { Displays.saveProfile(profileName.text); profileName.text = ""; } }
                     }
                 }
             }

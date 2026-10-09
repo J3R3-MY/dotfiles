@@ -91,6 +91,10 @@ PKGS_FONTS=(
 PKGS_FLUID=(
     quickshell qt6-imageformats matugen
     power-profiles-daemon   # Performance / Balanced / Saver in the power panel
+    spotify-player          # Spotify view ($mod+Shift+m), needs Premium
+    bitwarden-cli           # Bitwarden view ($mod+Shift+p)
+    kanshi                  # monitor profiles applied on hotplug
+    iw                      # Wi-Fi link details in the network panel
 )
 
 # ----------------------------------------------------------
@@ -236,6 +240,11 @@ do_services() {
     step "Enabling services"
     enable_system NetworkManager.service bluetooth.service sddm.service fstrim.timer docker.service tailscaled.service
     pacman -Qq power-profiles-daemon >/dev/null 2>&1 && enable_system power-profiles-daemon.service
+    # Let the VPN panel switch Tailscale without sudo
+    if command -v tailscale >/dev/null; then
+        sudo systemctl start tailscaled.service >>"$LOG" 2>&1
+        sudo tailscale set --operator="$USER" >>"$LOG" 2>&1 && info "tailscale: $USER can switch it without sudo"
+    fi
     # PipeWire runs per user; the sockets start it on demand
     systemctl --user enable pipewire.socket pipewire-pulse.socket wireplumber.service >>"$LOG" 2>&1 \
         && info "enabled pipewire (user)" || warn "could not enable pipewire user units"

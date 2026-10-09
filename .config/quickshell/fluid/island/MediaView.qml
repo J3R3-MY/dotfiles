@@ -150,6 +150,18 @@ Item {
         }
     }
 
+    // Spotify library shortcut (when spotify_player is set up)
+    Rectangle {
+        visible: Spotify.state === "ready"
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: 28; radius: 14
+        width: libText.implicitWidth + 24
+        color: libArea.containsMouse ? Theme.clock : Theme.surface
+        Text { id: libText; anchors.centerIn: parent; text: Icons.g(0xf1bc) + "  Library"; color: libArea.containsMouse ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+        MouseArea { id: libArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Fluid.openIsland("spotify", Fluid.islandScreen) }
+    }
+
     // ---- Equalizer -------------------------------------------------------------
     Rectangle {
         anchors.top: player.bottom

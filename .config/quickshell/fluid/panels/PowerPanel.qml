@@ -40,9 +40,16 @@ Item {
         anchors.margins: 16
         spacing: 14
 
-        // Uptime
+        // Uptime + lock style
         Row {
             spacing: 8
+            Rectangle {
+                height: 28; radius: 10
+                width: lsText.implicitWidth + 20
+                color: lsArea.containsMouse ? Theme.surfaceHi : Theme.surface
+                Text { id: lsText; anchors.centerIn: parent; text: Icons.lock + "  Lock style"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                MouseArea { id: lsArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Fluid.openIsland("lockstyle", root.screenName) }
+            }
             Rectangle {
                 height: 28; radius: 10
                 width: up.implicitWidth + 20

@@ -35,7 +35,10 @@ Item {
         "media": Qt.size(560, 440),
         "calendar": Qt.size(1120, 620),
         "theme": Qt.size(1180, 600),
-        "keys": Qt.size(1040, 640)
+        "keys": Qt.size(1040, 640),
+        "spotify": Qt.size(720, 560),
+        "vault": Qt.size(680, 520),
+        "lockstyle": Qt.size(980, 700)
     })
     readonly property real restWidth: restRow.implicitWidth + 26
     readonly property size targetSize: open ? viewSizes[view]
@@ -181,7 +184,8 @@ Item {
             }
         }
         readonly property var files: ({ launcher: "LauncherView.qml", clipboard: "ClipboardView.qml", media: "MediaView.qml",
-                                         calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml" })
+                                         calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml",
+                                         spotify: "SpotifyView.qml", vault: "VaultView.qml", lockstyle: "LockStyleView.qml" })
         source: island.shownView ? files[island.shownView] : ""
     }
 }

@@ -12,9 +12,9 @@ Singleton {
 
     readonly property string saveFile: Quickshell.env("HOME") + "/.local/state/fluid/sway-outputs.conf"
 
-    // [{ name, make, model, active, width, height, refresh, scale, modes: [{w,h,r}] }]
+    // [{ name, make, model, serial, active, x, y, width, height, refresh, scale, modes: [{w,h,r}] }]
     property var outputs: []
-    property var pendingRevert: null   // { name, cmd } to undo the last change
+    property var pendingRevert: null   // { undo: [cmds], keep: [{ name, line }] }
     property int countdown: 0
 
     function refresh() { reader.running = true; }
@@ -22,10 +22,27 @@ Singleton {
     function modeString(w, h, r) { return w + "x" + h + "@" + (r / 1000).toFixed(3) + "Hz"; }
 
     function apply(o, w, h, r, scale) {
-        const before = "output " + o.name + " mode " + modeString(o.width, o.height, o.refresh) + " scale " + o.scale;
-        const after = "output " + o.name + " mode " + modeString(w, h, r) + " scale " + scale;
-        pendingRevert = { name: o.name, undo: before, keep: after };
-        Quickshell.execDetached(["swaymsg", after]);
+        change([{ name: o.name,
+                  undo: "output " + o.name + " mode " + modeString(o.width, o.height, o.refresh) + " scale " + o.scale,
+                  line: "output " + o.name + " mode " + modeString(w, h, r) + " scale " + scale }]);
+    }
+
+    // positions: { name: { x, y } } in layout pixels
+    function arrange(positions) {
+        const parts = [];
+        for (const o of outputs) {
+            const p = positions[o.name];
+            if (!p || !o.active || (p.x === o.x && p.y === o.y)) continue;
+            parts.push({ name: o.name, undo: "output " + o.name + " position " + o.x + " " + o.y,
+                         line: "output " + o.name + " position " + Math.round(p.x) + " " + Math.round(p.y) });
+        }
+        if (parts.length) change(parts);
+    }
+
+    function change(parts) {
+        if (pendingRevert) revert();
+        pendingRevert = { undo: parts.map(p => p.undo), keep: parts };
+        Quickshell.execDetached(["swaymsg", parts.map(p => p.line).join("; ")]);
         countdown = 15;
         revertTimer.restart();
         refreshLater.restart();
@@ -35,11 +52,13 @@ Singleton {
         if (!pendingRevert) return;
         revertTimer.stop();
         countdown = 0;
-        // Replace this output's line in the saved file, keep the others
-        const name = pendingRevert.name, line = pendingRevert.keep;
-        Quickshell.execDetached(["sh", "-c",
-            "f=\"$1\"; mkdir -p \"$(dirname \"$f\")\"; touch \"$f\"; grep -v \"^output $2 \" \"$f\" > \"$f.tmp\"; echo \"$3\" >> \"$f.tmp\"; mv \"$f.tmp\" \"$f\"",
-            "sh", root.saveFile, name, line]);
+        // Replace each changed output's line of this kind in the saved file
+        for (const k of pendingRevert.keep) {
+            const kind = k.line.split(" ")[2];          // "mode" or "position"
+            Quickshell.execDetached(["sh", "-c",
+                "f=\"$1\"; mkdir -p \"$(dirname \"$f\")\"; touch \"$f\"; grep -v \"^output $2 $3 \" \"$f\" > \"$f.tmp\"; echo \"$4\" >> \"$f.tmp\"; mv \"$f.tmp\" \"$f\"",
+                "sh", root.saveFile, k.name, kind, k.line]);
+        }
         pendingRevert = null;
     }
 
@@ -47,9 +66,63 @@ Singleton {
         if (!pendingRevert) return;
         revertTimer.stop();
         countdown = 0;
-        Quickshell.execDetached(["swaymsg", pendingRevert.undo]);
+        Quickshell.execDetached(["swaymsg", pendingRevert.undo.join("; ")]);
         pendingRevert = null;
         refreshLater.restart();
+    }
+
+    // ---- Profiles (kanshi) --------------------------------------------------
+    // Saved as JSON and rendered to a kanshi config. kanshi applies the profile
+    // matching the connected monitors on hotplug; monitors are matched by
+    // make/model/serial, so the port they're plugged into doesn't matter.
+    readonly property string profileFile: Quickshell.env("HOME") + "/.local/state/fluid/display-profiles.json"
+    readonly property string kanshiFile: Quickshell.env("HOME") + "/.local/state/fluid/kanshi.conf"
+    property var profiles: []          // [{ name, outputs: [{ id, enabled, mode, x, y, scale }] }]
+
+    function criteria(o) {
+        // laptop panels keep their connector name, external screens their identity
+        if (/^(eDP|LVDS|DSI)/.test(o.name)) return o.name;
+        return "\"" + [o.make, o.model, o.serial].join(" ") + "\"";
+    }
+
+    function saveProfile(name) {
+        name = name.trim().replace(/[^\w .-]/g, "") || ("Setup " + (profiles.length + 1));
+        const p = { name: name, outputs: outputs.map(o => ({
+            id: criteria(o), enabled: o.active,
+            mode: o.active ? o.width + "x" + o.height + "@" + (o.refresh / 1000).toFixed(3) + "Hz" : "",
+            x: o.x, y: o.y, scale: o.scale })) };
+        profiles = profiles.filter(x => x.name !== name).concat([p]);
+        writeProfiles();
+    }
+
+    function deleteProfile(name) {
+        profiles = profiles.filter(x => x.name !== name);
+        writeProfiles();
+    }
+
+    function writeProfiles() {
+        profileStore.setText(JSON.stringify(profiles));
+        let conf = "# Generated by the fluid shell (Control center > Displays). Edits get overwritten.\n";
+        for (const p of profiles) {
+            conf += "\nprofile \"" + p.name + "\" {\n";
+            for (const o of p.outputs) {
+                conf += o.enabled
+                    ? "    output " + o.id + " enable mode " + o.mode + " position " + o.x + "," + o.y + " scale " + o.scale + "\n"
+                    : "    output " + o.id + " disable\n";
+            }
+            conf += "}\n";
+        }
+        Quickshell.execDetached(["sh", "-c",
+            "printf '%s' \"$2\" > \"$1\"; if pgrep -x kanshi >/dev/null; then kanshictl reload; else setsid -f kanshi -c \"$1\"; fi",
+            "sh", root.kanshiFile, conf]);
+    }
+
+    FileView {
+        id: profileStore
+        path: root.profileFile
+        printErrors: false
+        atomicWrites: true
+        onLoaded: { try { root.profiles = JSON.parse(text()); } catch (e) {} }
     }
 
     Timer {
@@ -78,7 +151,9 @@ Singleton {
                             return true;
                         }).map(m => ({ w: m.width, h: m.height, r: m.refresh }));
                         const cur = o.current_mode || {};
-                        return { name: o.name, make: o.make, model: o.model, active: o.active,
+                        const r = o.rect || {};
+                        return { name: o.name, make: o.make, model: o.model, serial: o.serial, active: o.active,
+                                 x: r.x || 0, y: r.y || 0,
                                  width: cur.width || 0, height: cur.height || 0, refresh: cur.refresh || 0,
                                  scale: o.scale || 1, modes: modes };
                     });
