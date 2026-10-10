@@ -343,6 +343,9 @@ do_dotfiles() {
     ln -sfn "$REPO_DIR/.config/quickshell/fluid" "$qs_dir"
     info "~/.config/quickshell/fluid -> repo"
 
+    # Git hooks for the encrypted developer docs (docs/docs.sh)
+    git -C "$REPO_DIR" config core.hooksPath .githooks
+
     if [ -e "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
         mkdir -p "$backup" && mv "$HOME/.zshrc" "$backup/.zshrc"
     fi

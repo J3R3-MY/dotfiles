@@ -89,7 +89,7 @@ PanelWindow {
         Pill {
             color: Health.score < 50 ? Theme.urgent : Theme.network
             textColor: Health.score < 50 ? Theme.fg : Theme.onPill
-            label: "↓" + NetStats.fmt(NetStats.down) + " ↑" + NetStats.fmt(NetStats.up)
+            label: "↓" + NetStats.mb(NetStats.down) + " ↑" + NetStats.mb(NetStats.up) + " MB/s"
             detail: "score " + Health.score + (Health.wan.last >= 0 ? " · " + Math.round(Health.wan.last) + " ms" : "")
             onClicked: Fluid.toggleNet(Health.score < 70 ? "health" : "traffic", bar.screenName)
         }

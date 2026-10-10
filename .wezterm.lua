@@ -112,6 +112,34 @@ config.keys = {
 	}
 }
 
+-- Linux: Ctrl+Shift+V pastes files copied in a file manager as their
+-- (quoted) paths instead of nothing; everything else pastes normally
+if wezterm.target_triple:find('linux') then
+  table.insert(config.keys, {
+    mods = 'CTRL|SHIFT',
+    key = 'v',
+    action = wezterm.action_callback(function(win, pane)
+      local ok, types = wezterm.run_child_process { 'wl-paste', '--list-types' }
+      if ok and types:find('text/uri-list', 1, true) then
+        local _, uris = wezterm.run_child_process { 'wl-paste', '--no-newline', '--type', 'text/uri-list' }
+        local paths = {}
+        for line in (uris or ''):gmatch('[^\r\n]+') do
+          local path = line:match('^file://[^/]*(/.*)$')
+          if path then
+            path = path:gsub('%%(%x%x)', function(h) return string.char(tonumber(h, 16)) end)
+            table.insert(paths, wezterm.shell_quote_arg(path))
+          end
+        end
+        if #paths > 0 then
+          pane:send_paste(table.concat(paths, ' '))
+          return
+        end
+      end
+      win:perform_action(wezterm.action.PasteFrom 'Clipboard', pane)
+    end),
+  })
+end
+
 config.scrollback_lines = 3500
 
 -- config.color_scheme = 'tokyonight-storm'

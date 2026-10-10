@@ -28,3 +28,5 @@ setup-arch.sh
 ^/LICENSE.*
 ^/COPYING
 \.stow-global-ignore
+^/docs
+^/\.githooks

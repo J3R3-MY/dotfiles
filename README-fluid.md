@@ -31,7 +31,7 @@ AGPL), so this stays under the repo's MIT licence.
 
 | Feature | Where | Instead of |
 |---|---|---|
-| Net speed | bar pill `↓ ↑`, click for chart (5/15/30 min), link details, per-app usage | davedes.netspeed |
+| Net speed | bar pill `↓ ↑` in MB/s, click for chart (5/15/30 min), link details, per-app usage | davedes.netspeed |
 | Connection health | same pill (hover shows the score) → Health tab: router and internet latency, jitter, loss, outage log, speed test | x3me.nexthop |
 | VPN | bar pill when a VPN exists → VPN tab: NetworkManager VPN/WireGuard, Tailscale (+ exit nodes), Mullvad | jkoestinger.vpn |
 | Port watch | bar pill while dev servers listen → Ports tab with stop buttons | zeru.portwatch |
@@ -40,6 +40,7 @@ AGPL), so this stays under the repo's MIT licence.
 | Bitwarden | `$mod+Shift+p`: unlock, search, copy password/username/TOTP | elevate08.qs-bitwarden-cli (official `bw` CLI) |
 | Lock designs | Power panel → Lock style: Classic, Minimal, Info, Split with live previews | sirjul1337.lock-explorer |
 | Monitor profiles | Control center → Displays: drag to arrange, save profiles that kanshi re-applies on hotplug | crmne.hyprmoncfg |
+| Paste files as paths | copy files in Thunar, `Ctrl+Shift+V` in WezTerm pastes their quoted paths | Omarchy's file → terminal paste |
 
 Skipped: omdrop (needs Apple Silicon + Broadcom Wi-Fi) and herdr (not used).
 
@@ -134,6 +135,9 @@ Generated state (wallpaper, mode, colours, log) lives in `~/.local/state/fluid`,
 never in the repo.
 
 ## Debugging
+
+Developer docs (architecture, every log and what to look for, conventions)
+are in `docs/dev/`, encrypted on GitHub: `docs/docs.sh unlock` after cloning.
 
 ```bash
 qs -c fluid                                  # run in the foreground to see errors

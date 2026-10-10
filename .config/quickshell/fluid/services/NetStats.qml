@@ -24,11 +24,17 @@ Singleton {
     property var _prev: null
     property var _prevApps: ({})
 
-    function fmt(bps) {
-        const u = ["B", "K", "M", "G"];
+    // Sizes in decimal units (KB, MB, GB), like browsers and macOS
+    function fmt(bytes) {
+        const u = ["B", "KB", "MB", "GB", "TB"];
         let i = 0;
-        while (bps >= 1024 && i < u.length - 1) { bps /= 1024; i++; }
-        return (bps < 10 && i > 0 ? bps.toFixed(1) : Math.round(bps)) + u[i];
+        while (bytes >= 1000 && i < u.length - 1) { bytes /= 1000; i++; }
+        return (bytes < 10 && i > 0 ? bytes.toFixed(1) : Math.round(bytes)) + " " + u[i];
+    }
+    // Rates always in MB/s, so the bar doesn't jump between units
+    function mb(bps) {
+        const m = bps / 1e6;
+        return m < 10 ? m.toFixed(1) : Math.round(m).toString();
     }
 
     FileView {

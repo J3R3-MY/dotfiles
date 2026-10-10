@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# After a pull: if the encrypted docs changed (or were never decrypted here), offer to decrypt.
+repo="$(git rev-parse --show-toplevel)"
+[ -f "$repo/docs/dev.tar.gpg" ] || exit 0
+if [ -d "$repo/docs/dev" ] && git diff --quiet ORIG_HEAD HEAD -- docs/dev.tar.gpg 2>/dev/null; then
+    exit 0
+fi
+read -rp "post-merge: the encrypted docs changed. Decrypt them now? [Y/n] " a </dev/tty || exit 0
+[[ "$a" =~ ^[nN] ]] && exit 0
+"$repo/docs/docs.sh" unlock || true

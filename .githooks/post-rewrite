@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# git pull --rebase doesn't run post-merge; same check after a rebase.
+[ "$1" = rebase ] && exec "$(git rev-parse --show-toplevel)/.githooks/post-merge"
+exit 0

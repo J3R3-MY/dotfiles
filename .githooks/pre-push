@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Never push plaintext docs, and offer to encrypt docs that changed.
+repo="$(git rev-parse --show-toplevel)"
+docs="$repo/docs/docs.sh"
+
+if git ls-files --error-unmatch "$repo/docs/dev" >/dev/null 2>&1; then
+    echo "pre-push: docs/dev/ (plaintext) is tracked by git. Run: git rm -r --cached docs/dev" >&2
+    exit 1
+fi
+
+[ -d "$repo/docs/dev" ] && [ -x "$docs" ] || exit 0
+[ "$("$docs" status)" = changed ] || exit 0
+
+read -rp "pre-push: the docs changed since they were last encrypted. Encrypt and commit them now? [Y/n] " a </dev/tty
+[[ "$a" =~ ^[nN] ]] && exit 0
+
+"$docs" lock || exit 1
+git -C "$repo" add docs/dev.tar.gpg
+git -C "$repo" commit -q -m "docs: update encrypted developer docs" -- docs/dev.tar.gpg || exit 1
+echo "pre-push: committed the encrypted docs. Run git push again to include them." >&2
+exit 1

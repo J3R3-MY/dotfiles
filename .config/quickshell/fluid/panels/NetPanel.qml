@@ -162,8 +162,8 @@ DropPanel {
 
                 Row {
                     spacing: 24
-                    Column { Label { text: "Download" } Text { text: "↓ " + NetStats.fmt(NetStats.down) + "/s"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
-                    Column { Label { text: "Upload" } Text { text: "↑ " + NetStats.fmt(NetStats.up) + "/s"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { text: "Download" } Text { text: "↓ " + NetStats.mb(NetStats.down) + " MB/s"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { text: "Upload" } Text { text: "↑ " + NetStats.mb(NetStats.up) + " MB/s"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
                 }
 
                 Rectangle {
@@ -198,7 +198,7 @@ DropPanel {
                             draw("up", String(Theme.network), false);
                         }
                     }
-                    Label { anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.fmt(chartBox.peak) + "/s" }
+                    Label { anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.mb(chartBox.peak) + " MB/s" }
                 }
                 Row {
                     spacing: 6
@@ -236,8 +236,8 @@ DropPanel {
                         required property var modelData
                         width: parent.width
                         Value { width: parent.width - 160; elide: Text.ElideRight; text: modelData.name; font.pixelSize: Theme.fontSize - 3 }
-                        Label { width: 80; text: "↓ " + NetStats.fmt(modelData.down) + "/s" }
-                        Label { width: 80; text: "↑ " + NetStats.fmt(modelData.up) + "/s" }
+                        Label { width: 96; text: "↓ " + NetStats.mb(modelData.down) + " MB/s" }
+                        Label { width: 96; text: "↑ " + NetStats.mb(modelData.up) + " MB/s" }
                     }
                 }
             }
@@ -283,7 +283,7 @@ DropPanel {
                     Value {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: Health.speedDown >= 0
-                        text: "↓ " + Health.speedDown.toFixed(0) + " Mbit/s   ↑ " + Health.speedUp.toFixed(0) + " Mbit/s"
+                        text: "↓ " + (Health.speedDown / 8).toFixed(1) + " MB/s   ↑ " + (Health.speedUp / 8).toFixed(1) + " MB/s"
                         font.pixelSize: Theme.fontSize - 3
                     }
                 }

@@ -1,1 +1,5 @@
 **/.DS_Store
+
+# fluid developer docs: plaintext never goes to git (see docs/docs.sh)
+docs/dev/
+docs/dev.tar.gpg.tmp
