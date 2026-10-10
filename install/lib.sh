@@ -636,13 +636,34 @@ case "$1" in
                    /PM: (suspend|resume|hibernation|image)|complete after|took [0-9]|nvidia/' \
             | tail -n 20 | sed 's/^/        /'
         } >> "$log"
-        # did the shell survive? Checked 15 s later by a timer (a background
+        # did the shell and Wi-Fi survive? Checked 20 s later by a timer (a background
         # job would be killed together with systemd-sleep)
-        systemd-run --quiet --no-block --collect --on-active=15 "$0" check
+        systemd-run --quiet --no-block --collect --on-active=20 "$0" check
         ;;
     check)
+        now() { date '+%F %T'; }
         pgrep -f '(qs|quickshell) -c fluid' >/dev/null && r=running || r="NOT running"
-        echo "$(date '+%F %T')  shell  $r" >> "$log" ;;
+        echo "$(now)  shell  $r" >> "$log"
+        # Wi-Fi: the driver sometimes doesn't come back from hibernation (no
+        # networks at all). If Wi-Fi is switched on but has no usable device,
+        # log why, then reload the driver and NetworkManager.
+        wifi_ok() { nmcli -t -f TYPE,STATE device 2>/dev/null | grep -Eq '^wifi:(connected|connecting|disconnected)'; }
+        [ "$(nmcli radio wifi 2>/dev/null)" = enabled ] || exit 0
+        if wifi_ok; then echo "$(now)  wifi   ok ($(nmcli -t -f TYPE,STATE device | grep '^wifi:' | head -n1 | cut -d: -f2))" >> "$log"; exit 0; fi
+        { echo "$(now)  wifi   BROKEN: nm=$(nmcli -t -f STATE general) devices=$(nmcli -t -f DEVICE,TYPE,STATE device | tr '\n' ' ')"
+          rfkill -n -o TYPE,SOFT,HARD 2>/dev/null | grep -i wlan | sed 's/^/        rfkill /'
+          journalctl -b -k --since -10min --no-pager -o short-precise 2>/dev/null | grep -Ei 'iwl|wlan|wlp|ath|rtw|mt7|firmware' | tail -n 10 | sed 's/^/        /'
+          journalctl -b -u NetworkManager --since -10min --no-pager -o short-precise 2>/dev/null | grep -Ei 'wifi|wlan|wlp|sleep|supplicant|unavailable' | tail -n 8 | sed 's/^/        /'
+        } >> "$log"
+        mod=""
+        for d in /sys/class/net/*; do [ -d "$d/wireless" ] && mod="$(basename "$(readlink -f "$d/device/driver/module")")"; done
+        [ -z "$mod" ] && lsmod | grep -q '^iwlwifi' && mod=iwlwifi
+        if [ "$mod" = iwlwifi ]; then modprobe -r iwlmvm iwlwifi; modprobe iwlwifi
+        elif [ -n "$mod" ]; then modprobe -r "$mod"; modprobe "$mod"; fi
+        systemctl restart NetworkManager
+        sleep 15
+        wifi_ok && r="fixed (reloaded ${mod:-no driver} + NetworkManager)" || r="still broken after reloading ${mod:-no driver found} + NetworkManager"
+        echo "$(now)  wifi   $r" >> "$log" ;;
 esac
 exit 0
 HOOK
