@@ -8,10 +8,15 @@ import Quickshell.Io
 // view through MPRIS; this service adds search, library and Connect devices
 // via spotify_player's CLI, which talks to the running daemon.
 // One-time setup: `spotify_player authenticate` (needs Spotify Premium).
+// Each CLI call starts a new client (= a login prompt) when no instance is
+// running, so nothing calls the CLI until credentials are cached and the
+// daemon is up.
 Singleton {
     id: root
 
-    property string state: "unknown"        // missing | offline | ready
+    property string state: "unknown"        // missing | login | offline | ready
+    readonly property bool ready: state === "ready"
+    property bool _loadWhenReady: false
     property var results: ({ tracks: [], albums: [], artists: [], playlists: [] })
     property var playlists: []
     property var liked: []
@@ -22,15 +27,18 @@ Singleton {
     function artists(t) { return (t.artists || []).map(a => a.name).join(", "); }
 
     function check() { if (!checker.running) checker.running = true; }
+    // Used by the Spotify view: check, then load the library once it's reachable
+    function open() { _loadWhenReady = true; check(); }
 
     function search(q) {
+        if (!ready) return;
         if (!q.trim()) { results = { tracks: [], albums: [], artists: [], playlists: [] }; return; }
         loading = true;
         searchProc.command = ["spotify_player", "search", q];
         searchProc.running = true;
     }
     function loadLibrary() {
-        if (!libProc.running) libProc.running = true;
+        if (ready && !libProc.running) libProc.running = true;
     }
 
     function playTrack(t) { run(["playback", "start", "track", "--id", id(t.id)]); }
@@ -42,15 +50,23 @@ Singleton {
             "spotify_player authenticate && (pkill -x spotify_player; setsid -f spotify_player -d); echo; read -p 'Done. Press Enter' _"]);
     }
 
-    function run(args) { Quickshell.execDetached(["spotify_player"].concat(args)); }
+    function run(args) { if (ready) Quickshell.execDetached(["spotify_player"].concat(args)); }
 
     Timer { id: later; interval: 1500; onTriggered: root.loadLibrary() }
 
     Process {
         id: checker
         command: ["sh", "-c", "command -v spotify_player >/dev/null || { echo missing; exit; }; " +
-                              "timeout 5 spotify_player get key devices >/dev/null 2>&1 && echo ready || echo offline"]
-        stdout: StdioCollector { onStreamFinished: root.state = text.trim() || "offline" }
+                              "c=\"$HOME/.cache/spotify-player\"; ls \"$c\"/*_token.json >/dev/null 2>&1 && [ -f \"$c/credentials.json\" ] || { echo login; exit; }; " +
+                              "pgrep -x spotify_player >/dev/null || { setsid -f spotify_player -d >/dev/null 2>&1; sleep 3; }; " +
+                              "pgrep -x spotify_player >/dev/null && timeout 5 spotify_player get key devices >/dev/null 2>&1 && echo ready || echo offline"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.state = text.trim() || "offline";
+                if (root.ready && root._loadWhenReady) root.loadLibrary();
+                root._loadWhenReady = false;
+            }
+        }
     }
 
     Process {

@@ -32,14 +32,14 @@ Item {
         else Spotify.playContext(r.kind, r.item);
     }
 
-    Component.onCompleted: { Spotify.check(); Spotify.loadLibrary(); search.focusInput(); }
+    Component.onCompleted: { Spotify.open(); search.focusInput(); }
     Keys.onEscapePressed: Fluid.closeAll()
 
     // ---- Not available -----------------------------------------------------------
     Column {
         anchors.centerIn: parent
         spacing: 14
-        visible: Spotify.state === "missing" || Spotify.state === "offline"
+        visible: Spotify.state === "missing" || Spotify.state === "login" || Spotify.state === "offline"
         z: 2
         Glyph { anchors.horizontalCenter: parent.horizontalCenter; text: Icons.g(0xf1bc); size: 40; color: Theme.clock }
         Text {
@@ -48,7 +48,7 @@ Item {
             color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize
         }
         Rectangle {
-            visible: Spotify.state === "offline"
+            visible: Spotify.state === "login" || Spotify.state === "offline"
             anchors.horizontalCenter: parent.horizontalCenter
             width: 260; height: 40; radius: 14
             color: Theme.clock
@@ -57,7 +57,8 @@ Item {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "Needs Spotify Premium. Re-open this after signing in."
+            text: "Needs Spotify Premium. The browser asks twice, that's normal.\nRe-open this after signing in."
+            horizontalAlignment: Text.AlignHCenter
             color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
         }
     }

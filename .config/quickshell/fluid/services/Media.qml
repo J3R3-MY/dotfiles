@@ -6,7 +6,9 @@ import Quickshell.Services.Mpris
 Singleton {
     id: root
 
-    readonly property var players: Mpris.players.values
+    // Only players that actually have a track loaded (an idle spotify_player
+    // daemon is an MPRIS player too and may claim to be "playing" nothing)
+    readonly property var players: Mpris.players.values.filter(p => p.trackTitle)
     // Prefer whatever is playing, otherwise the first player
     readonly property var player: players.find(p => p.isPlaying) || players[0] || null
     readonly property bool active: !!player
