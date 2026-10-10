@@ -1,4 +1,4 @@
-// Fluid SDDM theme (Qt 6). Wallpaper with a frosted panel on the left: clock,
+// Fluid SDDM theme (Qt 6). Wallpaper with a frosted card in the middle: clock,
 // avatar, user + password, session picker and power buttons. Colours and the
 // wallpaper come from theme.conf, written by install/sddm.sh.
 import QtQuick
@@ -48,30 +48,45 @@ Item {
     }
     Rectangle { anchors.fill: parent; color: root.panel; visible: wall.status !== Image.Ready }
 
-    // Frosted panel: the same wallpaper blurred, clipped to the panel area
+    // Frosted card in the middle: the wallpaper blurred inside a rounded
+    // rectangle (mask), tinted with the panel colour
     Item {
         id: glass
-        width: Math.min(500, parent.width * 0.36)
-        height: parent.height
-        clip: true
-        MultiEffect {
-            width: root.width; height: root.height
-            source: wall
-            blurEnabled: true
-            blurMax: 64
-            blur: 1.0
-            brightness: -0.15
-        }
-        Rectangle { anchors.fill: parent; color: root.panel; opacity: 0.55 }
-        Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: root.fg; opacity: 0.12 }
+        anchors.centerIn: parent
+        width: 440
+        height: content.implicitHeight + 80
+    }
+    MultiEffect {
+        anchors.fill: parent
+        source: wall
+        blurEnabled: true
+        blurMax: 64
+        blur: 1.0
+        brightness: -0.15
+        maskEnabled: true
+        maskSource: cardMask
+    }
+    Item {
+        id: cardMask
+        anchors.fill: parent
+        layer.enabled: true
+        visible: false
+        Rectangle { x: glass.x; y: glass.y; width: glass.width; height: glass.height; radius: 28 }
+    }
+    Rectangle {
+        x: glass.x; y: glass.y; width: glass.width; height: glass.height
+        radius: 28
+        color: root.panel
+        opacity: 0.78          // readable on busy wallpapers even where blur isn't available
+        border.width: 1
+        border.color: Qt.rgba(1, 1, 1, 0.12)
     }
 
     // ---- Panel content ------------------------------------------------------------
     Column {
-        anchors.horizontalCenter: glass.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: -30
-        width: glass.width - 100
+        id: content
+        anchors.centerIn: glass
+        width: glass.width - 80
         spacing: 16
 
         Text {
@@ -90,7 +105,7 @@ Item {
             font.family: root.font; font.pixelSize: 20
         }
 
-        Item { width: 1; height: 30 }
+        Item { width: 1; height: 10 }
 
         // Avatar: the user's initial in an accent circle
         Rectangle {
@@ -183,7 +198,8 @@ Item {
                 anchors.centerIn: parent
                 color: root.fgDim
                 font.family: root.font; font.pixelSize: 14
-                text: "Session: " + (sessionNames.itemAt(root.sessionIndex) ? sessionNames.itemAt(root.sessionIndex).name : "")
+                // reading count makes this re-evaluate once the session items exist
+                text: "Session: " + (sessionNames.count > root.sessionIndex ? sessionNames.itemAt(root.sessionIndex).name : "")
                       + (sessionModel.rowCount() > 1 ? "  ›" : "")
             }
             MouseArea {
@@ -201,7 +217,7 @@ Item {
 
     // ---- Power buttons ---------------------------------------------------------------
     Row {
-        anchors.horizontalCenter: glass.horizontalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 40
         spacing: 12
@@ -215,7 +231,7 @@ Item {
                 required property var modelData
                 height: 36; radius: 18
                 width: pbText.implicitWidth + 32
-                color: pbArea.containsMouse ? root.accent : Qt.rgba(1, 1, 1, 0.08)
+                color: pbArea.containsMouse ? root.accent : Qt.rgba(root.panel.r, root.panel.g, root.panel.b, 0.78)
                 Text { id: pbText; anchors.centerIn: parent; text: parent.modelData.t; color: pbArea.containsMouse ? root.onAccent : root.fg; font.family: root.font; font.pixelSize: 14 }
                 MouseArea { id: pbArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
             }
