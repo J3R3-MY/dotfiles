@@ -113,6 +113,7 @@ Singleton {
         id: fetcher
         stdout: StdioCollector {
             onStreamFinished: {
+                if (!text.trim()) return;      // offline (e.g. right after wake): try again next round
                 try {
                     const j = JSON.parse(text);
                     const c = j.current;
