@@ -646,6 +646,8 @@ WantedBy=multi-user.target
 UNIT
     sudo systemctl daemon-reload
     enable_system fluid-sleep-boot.service
+    sudo touch /var/log/fluid-sleep.log && sudo chmod 644 /var/log/fluid-sleep.log
+    echo "$(date '+%F %T')  setup  sleep logging installed" | sudo tee -a /var/log/fluid-sleep.log >/dev/null
 
     if [ "$lid" = suspend-then-hibernate ]; then
         info "lid / 5 min idle: sleep, hibernate after 2 h asleep (hibernation works after the next reboot)"
