@@ -30,10 +30,8 @@ PKGS_BASE=(
 
 # Display manager (X11 greeter, so it needs xorg-server) + theme deps
 PKGS_LOGIN=(
-    sddm xorg-server
-    qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg
+    sddm xorg-server qt6-svg qt6-declarative
 )
-AUR_LOGIN=(sddm-astronaut-theme)
 
 # The sway session and everything .config/sway/config calls
 PKGS_SWAY=(
@@ -209,7 +207,6 @@ do_packages() {
     step "Installing packages (this takes a while; wezterm-git compiles from source)"
     install_pkgs "${PKGS_BASE[@]}"
     install_pkgs "${PKGS_LOGIN[@]}"
-    install_pkgs "${AUR_LOGIN[@]}"
     install_pkgs "${PKGS_SWAY[@]}"
     install_pkgs "${PKGS_CLI[@]}"
     install_pkgs "${PKGS_DEV[@]}"
@@ -253,14 +250,7 @@ do_services() {
 
 do_login_manager() {
     step "Configuring SDDM"
-    sudo mkdir -p /etc/sddm.conf.d
-    if [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
-        printf '[Theme]\nCurrent=sddm-astronaut-theme\n\n[General]\nInputMethod=qtvirtualkeyboard\n' \
-            | sudo tee /etc/sddm.conf.d/10-theme.conf >/dev/null
-        info "SDDM theme: sddm-astronaut-theme"
-    else
-        warn "astronaut theme missing, SDDM will use its default theme"
-    fi
+    do_sddm_theme ""
 
     # sway refuses to start on the proprietary NVIDIA driver without this flag
     if lspci 2>/dev/null | grep -qiE 'vga.*nvidia|3d.*nvidia'; then
@@ -375,6 +365,143 @@ do_shell_mode() {
         info "bar: fluid shell (Quickshell), waybar as fallback"
     else
         info "bar: waybar + dunst"
+    fi
+}
+
+# ----------------------------------------------------------
+# SDDM login theme (sddm/fluid in the repo, copied out so it doesn't depend
+# on the repo). Standalone: install/sddm.sh [image]
+# ----------------------------------------------------------
+
+do_sddm_theme() {
+    local img="$1" dest=/usr/share/sddm/themes/fluid
+    local state="$HOME/.local/state/fluid"
+
+    if [ -z "$img" ]; then
+        local walls=() current
+        current="$(cat "$state/wallpaper" 2>/dev/null)"
+        mapfile -t walls < <(find -L "$REPO_DIR/.config/wallpapers" -maxdepth 1 -type f \
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) ! -name '._*' | sort)
+        if [ -t 0 ] && command -v gum >/dev/null && [ ${#walls[@]} -gt 0 ]; then
+            echo "Pick the login screen wallpaper:"
+            img="$(printf '%s\n' "${current:+[current] $current}" "${walls[@]}" | sed '/^$/d' \
+                | gum choose --height 15 | sed 's/^\[current\] //')"
+        fi
+        [ -z "$img" ] && img="${current:-$REPO_DIR/.config/wallpapers/knight.JPG}"
+    fi
+    if [ ! -f "$img" ]; then warn "wallpaper $img not found, SDDM theme not installed"; return; fi
+
+    sudo rm -rf "$dest"
+    sudo mkdir -p "$dest"
+    sudo cp "$REPO_DIR/sddm/fluid/Main.qml" "$REPO_DIR/sddm/fluid/metadata.desktop" "$dest/"
+    # Scaled-down JPEG copy: loads fast, works for PNG/WebP sources too
+    if command -v magick >/dev/null; then
+        magick "$img[0]" -resize '2560x2560>' -quality 90 /tmp/fluid-sddm-bg.jpg && sudo mv /tmp/fluid-sddm-bg.jpg "$dest/background.jpg"
+    else
+        sudo cp "$img" "$dest/background.jpg"
+    fi
+
+    # Colours from the current fluid theme (matugen), else the waybar defaults
+    local c="$state/colors.json" accent="#c4bca4" on="#0e0c0c" panel="#0e0c0c" fg="#ffffff" dim="#a7a097"
+    if [ -s "$c" ] && command -v jq >/dev/null; then
+        accent=$(jq -r '.clock // "#c4bca4"' "$c"); on=$(jq -r '.onPill // "#0e0c0c"' "$c")
+        panel=$(jq -r '.bg // "#0e0c0c"' "$c"); fg=$(jq -r '.fg // "#ffffff"' "$c"); dim=$(jq -r '.fgDim // "#a7a097"' "$c")
+    fi
+    printf '[General]\nbackground=background.jpg\naccent=%s\nonAccent=%s\npanel=%s\nfg=%s\nfgDim=%s\nfont=Roboto\nclockFont=JetBrains Mono\n' \
+        "$accent" "$on" "$panel" "$fg" "$dim" | sudo tee "$dest/theme.conf" >/dev/null
+
+    sudo mkdir -p /etc/sddm.conf.d
+    printf '[Theme]\nCurrent=fluid\n' | sudo tee /etc/sddm.conf.d/10-theme.conf >/dev/null
+    if pacman -Qq sddm-astronaut-theme >/dev/null 2>&1; then
+        sudo pacman -Rns --noconfirm sddm-astronaut-theme >>"$LOG" 2>&1 && info "removed sddm-astronaut-theme"
+    fi
+    info "SDDM theme: fluid, wallpaper $(basename "$img") (preview: sddm-greeter-qt6 --test-mode --theme $dest)"
+}
+
+# ----------------------------------------------------------
+# Hibernation: swap >= RAM, resume support in the initramfs, lid -> hibernate.
+# Falls back to suspend (and says why) when hibernation can't work.
+# Standalone: install/hibernate.sh
+# ----------------------------------------------------------
+
+do_hibernate() {
+    step "Hibernation"
+    local lid=hibernate reason=""
+
+    if [ ! -d /sys/firmware/efi ]; then
+        lid=suspend; reason="not booted with UEFI (resume location would need manual kernel parameters)"
+    elif grep -qE '\[(integrity|confidentiality)\]' /sys/kernel/security/lockdown 2>/dev/null; then
+        lid=suspend; reason="kernel lockdown is on (Secure Boot), the kernel refuses to hibernate"
+    fi
+
+    if [ "$lid" = hibernate ]; then
+        # 1. Disk swap at least RAM + 2 GiB (zram doesn't count, it lives in RAM)
+        local ram_kb need_kb have_kb size_g file fs
+        ram_kb=$(awk '/MemTotal/{print $2}' /proc/meminfo)
+        need_kb=$(( ram_kb + 2 * 1024 * 1024 ))
+        have_kb=$(swapon --show=NAME,SIZE --bytes --noheadings 2>/dev/null | grep -v zram | awk '{s += $2} END {print int(s / 1024)}')
+        if [ "${have_kb:-0}" -lt "$need_kb" ]; then
+            size_g=$(( (need_kb + 1048575) / 1048576 ))
+            fs=$(findmnt -no FSTYPE /)
+            if [ "$(df --output=avail -k / | tail -n1)" -lt $(( need_kb + 5 * 1048576 )) ]; then
+                lid=suspend; reason="not enough free disk space for a ${size_g} GiB swap file"
+            else
+                info "creating a ${size_g} GiB swap file for hibernation"
+                sudo cp -n /etc/fstab /etc/fstab.before-fluid
+                if [ "$fs" = btrfs ]; then
+                    # own subvolume so snapshots skip it; btrfs needs its own mkswapfile
+                    [ -e /swap ] || sudo btrfs subvolume create /swap >>"$LOG" 2>&1
+                    file=/swap/swapfile
+                    [ -e "$file" ] || sudo btrfs filesystem mkswapfile --size "${size_g}g" "$file" >>"$LOG" 2>&1
+                else
+                    file=/swapfile
+                    [ -e "$file" ] || sudo mkswap -U clear --size "${size_g}G" --file "$file" >>"$LOG" 2>&1
+                fi
+                sudo chmod 600 "$file"
+                sudo swapon "$file" >>"$LOG" 2>&1 || warn "swapon $file failed, see $LOG"
+                grep -q "^$file " /etc/fstab || echo "$file none swap defaults 0 0" | sudo tee -a /etc/fstab >/dev/null
+            fi
+        else
+            info "existing swap is big enough"
+        fi
+    fi
+
+    if [ "$lid" = hibernate ]; then
+        # 2. Resume support in the initramfs. With systemd in the initramfs
+        #    (dracut, EndeavourOS' default) the resume location comes from an
+        #    EFI variable systemd writes when hibernating, so no kernel
+        #    parameters are needed, even for a swap file on btrfs.
+        if command -v dracut >/dev/null; then
+            echo 'add_dracutmodules+=" resume "' | sudo tee /etc/dracut.conf.d/fluid-resume.conf >/dev/null
+            info "rebuilding the initramfs (dracut)"
+            if command -v dracut-rebuild >/dev/null; then sudo dracut-rebuild >>"$LOG" 2>&1
+            elif command -v reinstall-kernels >/dev/null; then sudo reinstall-kernels >>"$LOG" 2>&1
+            else sudo dracut --regenerate-all --force >>"$LOG" 2>&1; fi \
+                || warn "initramfs rebuild reported errors, see $LOG"
+        elif [ -f /etc/mkinitcpio.conf ] && grep -qE '^HOOKS=.*\bsystemd\b' /etc/mkinitcpio.conf; then
+            info "mkinitcpio uses the systemd hook, resume is built in"
+        else
+            lid=suspend; reason="initramfs without systemd: hibernating from a swap file needs resume= kernel parameters"
+        fi
+    fi
+
+    # 3. Ask logind whether it agrees (checks swap size etc.)
+    if [ "$lid" = hibernate ] && ! busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+            org.freedesktop.login1.Manager CanHibernate 2>/dev/null | grep -q '"yes"'; then
+        lid=suspend; reason="logind says hibernation isn't possible yet (try again after a reboot)"
+    fi
+
+    # 4. Lid: hibernate (or suspend); docked with the lid closed keeps working
+    sudo mkdir -p /etc/systemd/logind.conf.d
+    printf '[Login]\nHandleLidSwitch=%s\nHandleLidSwitchExternalPower=%s\nHandleLidSwitchDocked=ignore\n' "$lid" "$lid" \
+        | sudo tee /etc/systemd/logind.conf.d/10-fluid-lid.conf >/dev/null
+    sudo systemctl kill -s HUP systemd-logind >>"$LOG" 2>&1
+
+    if [ "$lid" = hibernate ]; then
+        info "closing the lid or 5 min idle now hibernates (works after the next reboot)"
+    else
+        warn "hibernation not set up: $reason"
+        warn "closing the lid / 5 min idle will suspend instead"
     fi
 }
 

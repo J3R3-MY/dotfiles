@@ -1,0 +1,13 @@
+[SddmGreeterTheme]
+Name=Fluid
+Description=Login screen matching the fluid sway shell
+Author=J3R3-MY
+Type=sddm-theme
+Version=1.0
+Website=https://github.com/J3R3-MY/dotfiles
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Theme-Id=fluid
+Theme-API=2.0
+QtVersion=6

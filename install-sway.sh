@@ -20,6 +20,7 @@ do_update
 do_packages no
 do_services
 do_login_manager
+do_hibernate
 do_dotfiles
 do_user_setup
 do_shell_mode classic

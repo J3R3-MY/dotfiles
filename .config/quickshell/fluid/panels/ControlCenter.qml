@@ -246,8 +246,8 @@ Item {
                     spacing: 10
                     Repeater {
                         model: [
-                            { i: Icons.lock, tip: "Lock", cmd: null, confirm: false },
-                            { i: Icons.moon, tip: "Suspend", cmd: ["systemctl", "suspend"], confirm: false },
+                            // Hibernate (falls back to suspend); locking is $mod+Shift+s
+                            { i: Icons.moon, tip: "Hibernate", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
                             { i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
                             { i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
                             { i: Icons.power, tip: "Shut down", cmd: ["systemctl", "poweroff"], confirm: true }

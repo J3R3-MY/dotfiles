@@ -51,10 +51,12 @@ for_window [title="nmtui-connect"] floating enable
 #
 # Example configuration:
 #
+# lock at 3 min, screens off at 4, hibernate at 5 (fluid-sleep.sh falls back to suspend)
 # fluid-lock.sh uses the fluid lock screen when the shell runs, swaylock otherwise
 exec swayidle -w \
          timeout 180 '~/.config/quickshell/fluid/scripts/fluid-lock.sh' \
          timeout 240 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
+         timeout 300 '~/.config/quickshell/fluid/scripts/fluid-sleep.sh' \
          before-sleep '~/.config/quickshell/fluid/scripts/fluid-lock.sh'
 #
 # This will lock your screen after 300 seconds of inactivity, then turn off

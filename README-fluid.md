@@ -141,6 +141,24 @@ tail -f ~/.local/state/fluid/fluid.log       # log when started by fluid-launch.
 qs -c fluid ipc call fluid toggle launcher   # drive it by hand
 ```
 
+## Sleep, lid and login screen
+
+- **Idle:** lock after 3 min, screens off after 4, hibernate after 5.
+- **Lid closed:** hibernate (with external monitors connected, closing the lid
+  just turns the laptop screen off).
+- **Buttons:** the moon in the control center / power panel hibernates;
+  `$mod+Shift+s` locks.
+- `install/hibernate.sh` sets this up: a swap file at least as big as RAM (its
+  own subvolume on btrfs), resume support in the initramfs, and the lid
+  setting for logind. If something rules hibernation out (no UEFI, Secure Boot
+  lockdown, too little disk space) it falls back to suspend and says why. The
+  installers run it; it only works after the next reboot.
+- **Login screen:** `install/sddm.sh` installs the `fluid` SDDM theme (frosted
+  panel over one of your wallpapers, colours from the current theme). It is
+  copied to `/usr/share/sddm/themes/fluid`, so it doesn't depend on the repo.
+  Run it again to pick another wallpaper; preview with
+  `sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/fluid`.
+
 ## If the lock screen ever gets stuck
 
 Sway keeps the session locked if the shell crashes while locked, and the shell

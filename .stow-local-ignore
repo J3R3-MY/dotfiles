@@ -17,6 +17,7 @@ _darcs
 .DS_STORE
 setup-arch.sh
 ^/install.*
+^/sddm
 ^/README.*
 .gitconfig_appendix.txt
 

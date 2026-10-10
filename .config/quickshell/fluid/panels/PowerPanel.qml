@@ -131,14 +131,13 @@ Item {
             onIconClicked: Audio.toggleMute()
         }
 
-        // Session buttons; reboot / power off need a second click
+        // Hibernate, reboot, power off (the last two need a second click)
         Row {
             width: parent.width
             spacing: 8
             Repeater {
                 model: [
-                    { i: Icons.lock, cmd: null, confirm: false },
-                    { i: Icons.moon, cmd: ["systemctl", "suspend"], confirm: false },
+                    { i: Icons.moon, cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
                     { i: Icons.g(0xf0709), cmd: ["systemctl", "reboot"], confirm: true },
                     { i: Icons.power, cmd: ["systemctl", "poweroff"], confirm: true }
                 ]
@@ -146,7 +145,7 @@ Item {
                     id: sbtn
                     required property var modelData
                     property bool armed: false
-                    width: (col.width - 24) / 4; height: 46; radius: 14
+                    width: (col.width - 16) / 3; height: 46; radius: 14
                     color: armed ? Theme.urgent : (sArea.containsMouse ? Theme.surfaceHi : Theme.surface)
                     Behavior on color { ColorAnimation { duration: Anim.fast } }
                     Glyph { anchors.centerIn: parent; text: sbtn.armed ? "?" : sbtn.modelData.i }
