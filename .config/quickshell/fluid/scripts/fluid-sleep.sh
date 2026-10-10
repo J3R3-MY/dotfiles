@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# Hibernate if the system can (swap big enough, resume set up — see
-# install/hibernate.sh), otherwise suspend. The lock screen comes up through
-# swayidle's before-sleep hook either way.
+# Sleep like a Mac: suspend now, hibernate after 2 h asleep
+# (suspend-then-hibernate, set up by install/hibernate.sh). Plain suspend if
+# hibernation isn't available. The lock screen comes up through swayidle's
+# before-sleep hook either way.
 if busctl call org.freedesktop.login1 /org/freedesktop/login1 \
-        org.freedesktop.login1.Manager CanHibernate 2>/dev/null | grep -q '"yes"'; then
-    exec systemctl hibernate
+        org.freedesktop.login1.Manager CanSuspendThenHibernate 2>/dev/null | grep -q '"yes"'; then
+    exec systemctl suspend-then-hibernate
 else
     exec systemctl suspend
 fi

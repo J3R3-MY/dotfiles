@@ -143,16 +143,15 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
 
 ## Sleep, lid and login screen
 
-- **Idle:** lock after 3 min, screens off after 4, hibernate after 5.
-- **Lid closed:** hibernate (with external monitors connected, closing the lid
-  just turns the laptop screen off).
-- **Buttons:** the moon in the control center / power panel hibernates;
-  `$mod+Shift+s` locks.
+- **Sleep like a Mac:** closing the lid, 5 min idle (after locking at 3) or
+  the moon button suspend right away; after 2 h asleep the laptop hibernates
+  on its own so the battery isn't drained (`suspend-then-hibernate`). With
+  external monitors connected, closing the lid just turns the laptop screen off.
 - `install/hibernate.sh` sets this up: a swap file at least as big as RAM (its
-  own subvolume on btrfs), resume support in the initramfs, and the lid
-  setting for logind. If something rules hibernation out (no UEFI, Secure Boot
-  lockdown, too little disk space) it falls back to suspend and says why. The
-  installers run it; it only works after the next reboot.
+  own subvolume on btrfs), resume support in the initramfs, the 2 h delay and
+  the lid setting. If hibernation can't work (no UEFI, Secure Boot lockdown,
+  too little disk space) it uses plain suspend and says why. The installers
+  run it; hibernating works after the next reboot.
 - **Login screen:** `install/sddm.sh` installs the `fluid` SDDM theme (frosted
   panel over one of your wallpapers, colours from the current theme). It is
   copied to `/usr/share/sddm/themes/fluid`, so it doesn't depend on the repo.

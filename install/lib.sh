@@ -523,14 +523,15 @@ CONF
 }
 
 # ----------------------------------------------------------
-# Hibernation: swap >= RAM, resume support in the initramfs, lid -> hibernate.
-# Falls back to suspend (and says why) when hibernation can't work.
+# Sleep like a Mac: suspend instantly, hibernate after 2 h asleep
+# (suspend-then-hibernate). Needs swap >= RAM and resume in the initramfs;
+# falls back to plain suspend (and says why) when hibernation can't work.
 # Standalone: install/hibernate.sh
 # ----------------------------------------------------------
 
 do_hibernate() {
     step "Hibernation"
-    local lid=hibernate reason=""
+    local lid=suspend-then-hibernate reason=""
 
     if [ ! -d /sys/firmware/efi ]; then
         lid=suspend; reason="not booted with UEFI (resume location would need manual kernel parameters)"
@@ -538,7 +539,7 @@ do_hibernate() {
         lid=suspend; reason="kernel lockdown is on (Secure Boot), the kernel refuses to hibernate"
     fi
 
-    if [ "$lid" = hibernate ]; then
+    if [ "$lid" = suspend-then-hibernate ]; then
         # 1. Disk swap at least RAM + 2 GiB (zram doesn't count, it lives in RAM)
         local ram_kb need_kb have_kb size_g file fs
         ram_kb=$(awk '/MemTotal/{print $2}' /proc/meminfo)
@@ -570,7 +571,7 @@ do_hibernate() {
         fi
     fi
 
-    if [ "$lid" = hibernate ]; then
+    if [ "$lid" = suspend-then-hibernate ]; then
         # 2. Resume support in the initramfs. With systemd in the initramfs
         #    (dracut, EndeavourOS' default) the resume location comes from an
         #    EFI variable systemd writes when hibernating, so no kernel
@@ -590,22 +591,26 @@ do_hibernate() {
     fi
 
     # 3. Ask logind whether it agrees (checks swap size etc.)
-    if [ "$lid" = hibernate ] && ! busctl call org.freedesktop.login1 /org/freedesktop/login1 \
+    if [ "$lid" = suspend-then-hibernate ] && ! busctl call org.freedesktop.login1 /org/freedesktop/login1 \
             org.freedesktop.login1.Manager CanHibernate 2>/dev/null | grep -q '"yes"'; then
         lid=suspend; reason="logind says hibernation isn't possible yet (try again after a reboot)"
     fi
 
-    # 4. Lid: hibernate (or suspend); docked with the lid closed keeps working
+    # 4. How long to stay suspended before hibernating
+    sudo mkdir -p /etc/systemd/sleep.conf.d
+    printf '[Sleep]\nHibernateDelaySec=2h\n' | sudo tee /etc/systemd/sleep.conf.d/10-fluid.conf >/dev/null
+
+    # 5. Lid: sleep (docked with the lid closed keeps working)
     sudo mkdir -p /etc/systemd/logind.conf.d
     printf '[Login]\nHandleLidSwitch=%s\nHandleLidSwitchExternalPower=%s\nHandleLidSwitchDocked=ignore\n' "$lid" "$lid" \
         | sudo tee /etc/systemd/logind.conf.d/10-fluid-lid.conf >/dev/null
     sudo systemctl kill -s HUP systemd-logind >>"$LOG" 2>&1
 
-    if [ "$lid" = hibernate ]; then
-        info "closing the lid or 5 min idle now hibernates (works after the next reboot)"
+    if [ "$lid" = suspend-then-hibernate ]; then
+        info "lid / 5 min idle: sleep, hibernate after 2 h asleep (hibernation works after the next reboot)"
     else
         warn "hibernation not set up: $reason"
-        warn "closing the lid / 5 min idle will suspend instead"
+        warn "closing the lid / 5 min idle will just suspend"
     fi
 }
 

@@ -111,7 +111,7 @@ DropPanel {
             onIconClicked: Audio.toggleMute()
         }
 
-        // Hibernate, reboot, power off (the last two need a second click)
+        // Sleep, reboot, power off (the last two need a second click)
         Row {
             width: parent.width
             spacing: 8

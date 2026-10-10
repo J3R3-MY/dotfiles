@@ -223,7 +223,7 @@ Item {
         spacing: 12
         Repeater {
             model: [
-                { t: "Sleep", show: sddm.canHibernate || sddm.canSuspend, f: () => sddm.canHibernate ? sddm.hibernate() : sddm.suspend() },
+                { t: "Sleep", show: sddm.canHibernate || sddm.canSuspend, f: () => sddm.canSuspend ? sddm.suspend() : sddm.hibernate() },
                 { t: "Restart", show: sddm.canReboot, f: () => sddm.reboot() },
                 { t: "Shut down", show: sddm.canPowerOff, f: () => sddm.powerOff() }
             ].filter(b => b.show)

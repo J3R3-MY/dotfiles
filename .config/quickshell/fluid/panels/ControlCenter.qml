@@ -228,8 +228,8 @@ DropPanel {
                     spacing: 10
                     Repeater {
                         model: [
-                            // Hibernate (falls back to suspend); locking is $mod+Shift+s
-                            { i: Icons.moon, tip: "Hibernate", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
+                            // Sleep (hibernates after 2 h asleep); locking is $mod+Shift+s
+                            { i: Icons.moon, tip: "Sleep", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
                             { i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
                             { i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
                             { i: Icons.power, tip: "Shut down", cmd: ["systemctl", "poweroff"], confirm: true }

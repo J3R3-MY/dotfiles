@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Set up (or re-check) hibernation on its own: swap file >= RAM, resume in the
-# initramfs, lid switch -> hibernate. Reboot afterwards.
+# Set up (or re-check) sleep on its own: suspend, hibernating after 2 h asleep
+# (swap file >= RAM, resume in the initramfs, lid switch). Reboot afterwards.
 set -u
 source "$(dirname "$(realpath "$0")")/lib.sh"
 LOG="$HOME/hibernate-setup-$(date +%Y%m%d-%H%M%S).log"
