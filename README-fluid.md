@@ -164,8 +164,8 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
 - **MAC address:** random per Wi-Fi network (stable until reboot), random
   while scanning, hostname not sent over DHCP, temporary IPv6 addresses
   (`/etc/NetworkManager/conf.d/10-fluid-privacy.conf`).
-- **Firewall:** unsolicited incoming traffic is dropped, Tailscale allowed
-  (`/etc/nftables.conf`, own `inet fluid` table so Docker/Tailscale rules stay).
+- **Firewall:** EndeavourOS' firewalld (drops unsolicited incoming traffic),
+  made sure it's running, with the unused ssh opening closed.
 - **DNS:** Quad9 over TLS with DNSSEC via systemd-resolved
   (`/etc/systemd/resolved.conf.d/10-fluid-dot.conf`). Behind a hotel/airport
   login page run `resolvectl dnsovertls <interface> no` until you're through.

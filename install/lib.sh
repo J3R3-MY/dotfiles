@@ -19,7 +19,7 @@ FAILED_PKGS=()
 # Base system pieces a no-DE EndeavourOS install doesn't have
 PKGS_BASE=(
     base-devel git wget curl unzip unrar 7zip stow jq gum pciutils
-    nftables fwupd          # firewall, firmware updates (see do_hardening)
+    firewalld fwupd         # firewall, firmware updates (see do_hardening)
     xdg-user-dirs xdg-utils
     polkit polkit-gnome
     networkmanager network-manager-applet
@@ -476,29 +476,11 @@ ipv6.ip6-privacy=2
 CONF
     info "MAC randomization + no hostname over DHCP (applies on the next connect)"
 
-    # Firewall: drop unsolicited incoming traffic. Its own table, so Docker's
-    # and Tailscale's rules are left alone.
-    sudo cp -n /etc/nftables.conf /etc/nftables.conf.before-fluid 2>/dev/null
-    sudo tee /etc/nftables.conf >/dev/null <<'CONF'
-#!/usr/bin/nft -f
-# fluid firewall: nothing gets in unless it answers something you started.
-table inet fluid
-delete table inet fluid
-table inet fluid {
-    chain input {
-        type filter hook input priority filter; policy drop;
-        ct state established,related accept
-        ct state invalid drop
-        iif lo accept
-        iifname "tailscale0" accept
-        meta l4proto { icmp, ipv6-icmp } accept
-        ip6 saddr fe80::/10 udp dport 546 accept    # DHCPv6 replies
-    }
-}
-CONF
-    systemctl is-enabled firewalld >/dev/null 2>&1 && sudo systemctl disable --now firewalld >>"$LOG" 2>&1
-    enable_system nftables.service
-    sudo systemctl restart nftables.service >>"$LOG" 2>&1
+    # Firewall: EndeavourOS' firewalld already drops unsolicited incoming
+    # traffic; just make sure it runs, and close ssh (no ssh server here).
+    enable_system firewalld.service
+    sudo systemctl start firewalld.service >>"$LOG" 2>&1
+    sudo firewall-cmd -q --permanent --remove-service=ssh 2>/dev/null && sudo firewall-cmd -q --reload
 
     # DNS over TLS to Quad9 with DNSSEC. On a hotel/airport login page that
     # blocks it: `resolvectl dnsovertls <interface> no` until you're through.
