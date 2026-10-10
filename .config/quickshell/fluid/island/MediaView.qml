@@ -151,15 +151,12 @@ Item {
     }
 
     // Spotify library shortcut (when spotify_player is set up)
-    Rectangle {
+    Chip {
         visible: Spotify.state === "ready"
         anchors.right: parent.right
         anchors.top: parent.top
-        height: 28; radius: 14
-        width: libText.implicitWidth + 24
-        color: libArea.containsMouse ? Theme.clock : Theme.surface
-        Text { id: libText; anchors.centerIn: parent; text: Icons.g(0xf1bc) + "  Library"; color: libArea.containsMouse ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-        MouseArea { id: libArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Fluid.openIsland("spotify", Fluid.islandScreen) }
+        text: Icons.g(0xf1bc) + "  Library"
+        onClicked: Fluid.openIsland("spotify", Fluid.islandScreen)
     }
 
     // ---- Equalizer -------------------------------------------------------------
@@ -262,17 +259,13 @@ Item {
             spacing: 6
             Repeater {
                 model: Equalizer.presetNames
-                Rectangle {
+                Chip {
                     required property string modelData
-                    readonly property bool chosen: Equalizer.preset === modelData
-                    height: 26; radius: 13
-                    width: pText.implicitWidth + 20
-                    color: chosen ? Theme.clock : (pArea.containsMouse ? Theme.surfaceHi : "transparent")
-                    border.width: chosen ? 0 : 1
-                    border.color: Theme.border
-                    Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Text { id: pText; anchors.centerIn: parent; text: parent.modelData; color: parent.chosen ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                    MouseArea { id: pArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Equalizer.setPreset(parent.modelData) }
+                    text: modelData
+                    on: Equalizer.preset === modelData
+                    outlined: true
+                    size: Theme.fontSize - 4
+                    onClicked: Equalizer.setPreset(modelData)
                 }
             }
         }

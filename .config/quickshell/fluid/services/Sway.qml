@@ -21,9 +21,6 @@ Singleton {
         else I3.dispatch("workspace \"" + ws.name + "\"");
     }
 
-    function cycle(screenName, delta) {
-        I3.dispatch(delta > 0 ? "workspace next_on_output" : "workspace prev_on_output");
-    }
 
     I3IpcListener {
         subscriptions: ["mode"]

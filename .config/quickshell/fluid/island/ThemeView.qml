@@ -219,34 +219,11 @@ Item {
                 width: tweaks.colW
                 spacing: 14
 
-                Rectangle {
-                    id: seg
-                    width: parent.width; height: 32; radius: 16
-                    color: Theme.surfaceHi
-                    Rectangle {
-                        width: parent.width / 2 - 4; height: parent.height - 6; radius: height / 2
-                        y: 3
-                        x: Wallpaper.mode === "dark" ? 3 : parent.width / 2 + 1
-                        color: Theme.clock
-                        Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-                    }
-                    Row {
-                        anchors.fill: parent
-                        Repeater {
-                            model: [{ m: "dark", t: Icons.moon + "  Dark" }, { m: "light", t: Icons.sun + "  Light" }]
-                            Item {
-                                required property var modelData
-                                width: seg.width / 2; height: seg.height
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: parent.modelData.t
-                                    color: Wallpaper.mode === parent.modelData.m ? Theme.onPill : Theme.fg
-                                    font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
-                                }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Wallpaper.setMode(parent.modelData.m) }
-                            }
-                        }
-                    }
+                Segmented {
+                    width: parent.width
+                    options: [{ value: "dark", label: Icons.moon + "  Dark" }, { value: "light", label: Icons.sun + "  Light" }]
+                    current: Wallpaper.mode
+                    onPicked: v => Wallpaper.setMode(v)
                 }
 
                 Column {
@@ -325,29 +302,12 @@ Item {
                     spacing: 6
                     Repeater {
                         model: Wallpaper.schemes
-                        Rectangle {
+                        Chip {
                             required property var modelData
-                            readonly property bool chosen: Wallpaper.scheme === modelData.id
-                            height: 28; radius: 14
-                            width: chipText.implicitWidth + 22
-                            color: chosen ? Theme.clock : (chipArea.containsMouse ? Theme.surfaceHi : "transparent")
-                            border.width: chosen ? 0 : 1
-                            border.color: Theme.border
-                            Behavior on color { ColorAnimation { duration: Anim.fast } }
-                            Text {
-                                id: chipText
-                                anchors.centerIn: parent
-                                text: parent.modelData.label
-                                color: parent.chosen ? Theme.onPill : Theme.fg
-                                font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
-                            }
-                            MouseArea {
-                                id: chipArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: { Wallpaper.scheme = parent.modelData.id; Wallpaper.retheme(); }
-                            }
+                            text: modelData.label
+                            on: Wallpaper.scheme === modelData.id
+                            outlined: true
+                            onClicked: { Wallpaper.scheme = modelData.id; Wallpaper.retheme(); }
                         }
                     }
                 }

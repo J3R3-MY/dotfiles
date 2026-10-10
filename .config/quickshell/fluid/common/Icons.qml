@@ -15,7 +15,6 @@ Singleton {
     })
 
     readonly property string clock: g(0xf017)
-    readonly property string calendar: g(0xf073)
     readonly property string cpu: g(0xf4bc)
     readonly property string memory: g(0xefc5)
     readonly property string wifi: g(0xf1eb)
@@ -46,7 +45,6 @@ Singleton {
     readonly property string close: g(0xf00d)
     readonly property string power: g(0xf011)
     readonly property string lock: g(0xf023)
-    readonly property string sliders: g(0xf1de)
 
     function battery(pct, charging) {
         if (charging) return g(0xf0084);

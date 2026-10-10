@@ -35,7 +35,7 @@ PKGS_LOGIN=(
 
 # The sway session and everything .config/sway/config calls
 PKGS_SWAY=(
-    sway swaybg swayidle swaylock xorg-xwayland
+    swaybg swayidle swaylock xorg-xwayland
     grim slurp sway-contrib swappy   # sway-contrib provides grimshot
     wl-clipboard cliphist xclip
     waybar wofi rofi dunst libnotify
@@ -207,6 +207,7 @@ do_packages() {
     step "Installing packages (this takes a while; wezterm-git compiles from source)"
     install_pkgs "${PKGS_BASE[@]}"
     install_pkgs "${PKGS_LOGIN[@]}"
+    install_swayfx
     install_pkgs "${PKGS_SWAY[@]}"
     install_pkgs "${PKGS_CLI[@]}"
     install_pkgs "${PKGS_DEV[@]}"
@@ -230,6 +231,20 @@ do_packages() {
             warn "No NVIDIA driver loaded yet, running nvidia-inst"
             nvidia-inst || warn "nvidia-inst failed, run it manually after reboot"
         fi
+    fi
+}
+
+# SwayFX (sway + rounded corners, blur, shadows) from the AUR replaces sway.
+# It conflicts with the sway package, so sway is removed first and put back
+# if the SwayFX build fails, leaving you with a working compositor either way.
+install_swayfx() {
+    pacman -Qq swayfx >/dev/null 2>&1 && { info "already installed: swayfx"; return; }
+    pacman -Qq sway >/dev/null 2>&1 && sudo pacman -Rdd --noconfirm sway >>"$LOG" 2>&1
+    info "building swayfx (AUR)"
+    if ! yay -S --needed --noconfirm --answerdiff None --answerclean None swayfx >>"$LOG" 2>&1; then
+        warn "swayfx failed to build, using plain sway"
+        FAILED_PKGS+=(swayfx)
+        install_pkgs sway
     fi
 }
 

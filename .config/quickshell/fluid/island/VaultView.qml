@@ -43,13 +43,10 @@ Item {
             visible: Vault.unlocked
             Repeater {
                 model: [{ t: "Sync", f: () => Vault.sync() }, { t: Icons.lock + "  Lock", f: () => Vault.lock() }]
-                Rectangle {
+                Chip {
                     required property var modelData
-                    height: 28; radius: 14
-                    width: bt.implicitWidth + 22
-                    color: ba.containsMouse ? Theme.surfaceHi : Theme.surface
-                    Text { id: bt; anchors.centerIn: parent; text: parent.modelData.t; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-                    MouseArea { id: ba; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
+                    text: modelData.t
+                    onClicked: modelData.f()
                 }
             }
         }
@@ -190,13 +187,11 @@ Item {
                             { t: "pass", w: "password", show: row.modelData.type === 1 },
                             { t: "code", w: "totp", show: row.modelData.totp }
                         ].filter(a => a.show)
-                        Rectangle {
+                        Chip {
                             required property var modelData
-                            height: 26; radius: 9
-                            width: at.implicitWidth + 16
-                            color: aa.containsMouse ? Theme.clock : Theme.surface
-                            Text { id: at; anchors.centerIn: parent; text: parent.modelData.t; color: aa.containsMouse ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                            MouseArea { id: aa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Vault.copy(row.modelData, parent.modelData.w) }
+                            text: modelData.t
+                            size: Theme.fontSize - 4
+                            onClicked: Vault.copy(row.modelData, modelData.w)
                         }
                     }
                 }

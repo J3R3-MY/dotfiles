@@ -20,7 +20,6 @@ Singleton {
 
     function id(x) { return String(x || "").split(":").pop(); }
     function artists(t) { return (t.artists || []).map(a => a.name).join(", "); }
-    function secs(d) { return d ? (d.secs !== undefined ? d.secs : Math.round(d / 1000)) : 0; }
 
     function check() { if (!checker.running) checker.running = true; }
 

@@ -78,7 +78,9 @@ Rectangle {
             Text {
                 width: parent.width
                 visible: text.length > 0
-                text: card.notification ? card.notification.body : ""
+                // images are dropped: an <img src="https://…"> would be fetched and could
+                // tell the sender that (and from where) you read the notification
+                text: card.notification ? card.notification.body.replace(/<img[^>]*>/gi, "") : ""
                 textFormat: Text.StyledText
                 wrapMode: Text.Wrap
                 maximumLineCount: 4
@@ -93,13 +95,10 @@ Rectangle {
                 visible: card.extraActions.length > 0
                 Repeater {
                     model: card.extraActions
-                    Rectangle {
+                    Chip {
                         required property var modelData
-                        height: 28; radius: 10
-                        width: actText.implicitWidth + 20
-                        color: actArea.containsMouse ? Theme.accent : Theme.surfaceHi
-                        Text { id: actText; anchors.centerIn: parent; text: parent.modelData.text; color: actArea.containsMouse ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-                        MouseArea { id: actArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { parent.modelData.invoke(); card.close(); } }
+                        text: modelData.text
+                        onClicked: { modelData.invoke(); card.close(); }
                     }
                 }
             }

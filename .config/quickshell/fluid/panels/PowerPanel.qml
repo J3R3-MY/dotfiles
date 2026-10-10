@@ -7,32 +7,14 @@ import "../services"
 // Battery / power panel, opened from the battery pill.
 // Battery ring, uptime, brightness + volume, session buttons and power
 // profiles (power-profiles-daemon).
-Item {
+DropPanel {
     id: root
 
     required property string screenName
-    readonly property bool open: Fluid.powerOpen && Fluid.powerScreen === screenName
+    open: Fluid.powerOpen && Fluid.powerScreen === screenName
 
     width: 340
     height: col.implicitHeight + 32
-
-    transformOrigin: Item.TopRight
-    scale: open ? 1 : 0.85
-    opacity: open ? 1 : 0
-    visible: opacity > 0
-    Behavior on scale { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-    Behavior on opacity { NumberAnimation { duration: Anim.fast } }
-
-    Keys.onEscapePressed: Fluid.closeAll()
-    onVisibleChanged: if (visible) forceActiveFocus()
-
-    Rectangle {
-        anchors.fill: parent
-        radius: Theme.panelRadius
-        color: Theme.bg
-        border.width: 2
-        border.color: Theme.border
-    }
 
     Column {
         id: col
@@ -43,12 +25,10 @@ Item {
         // Uptime + lock style
         Row {
             spacing: 8
-            Rectangle {
-                height: 28; radius: 10
-                width: lsText.implicitWidth + 20
-                color: lsArea.containsMouse ? Theme.surfaceHi : Theme.surface
-                Text { id: lsText; anchors.centerIn: parent; text: Icons.lock + "  Lock style"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                MouseArea { id: lsArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Fluid.openIsland("lockstyle", root.screenName) }
+            Chip {
+                text: Icons.lock + "  Lock style"
+                size: Theme.fontSize - 4
+                onClicked: Fluid.openIsland("lockstyle", root.screenName)
             }
             Rectangle {
                 height: 28; radius: 10
@@ -167,43 +147,15 @@ Item {
         }
 
         // Power profiles
-        Rectangle {
-            id: prof
-            width: parent.width; height: 40; radius: 14
-            color: Theme.surface
-            readonly property var items: [
-                { p: PowerProfile.Performance, t: Icons.g(0xf0e7) + "  Perform", show: Battery.hasPerformance },
-                { p: PowerProfile.Balanced, t: Icons.g(0xf24e) + "  Balance", show: true },
-                { p: PowerProfile.PowerSaver, t: Icons.g(0xf06c) + "  Saver", show: true }
+        Segmented {
+            width: parent.width
+            options: [
+                { value: PowerProfile.Performance, label: Icons.g(0xf0e7) + "  Perform", show: Battery.hasPerformance },
+                { value: PowerProfile.Balanced, label: Icons.g(0xf24e) + "  Balance", show: true },
+                { value: PowerProfile.PowerSaver, label: Icons.g(0xf06c) + "  Saver", show: true }
             ].filter(x => x.show)
-            readonly property int sel: Math.max(0, items.findIndex(x => x.p === Battery.profile))
-
-            Rectangle {
-                y: 4; height: parent.height - 8; radius: 11
-                width: (prof.width - 8) / prof.items.length
-                x: 4 + prof.sel * width
-                color: Theme.clock
-                Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-            }
-            Row {
-                anchors.fill: parent
-                anchors.margins: 4
-                Repeater {
-                    model: prof.items
-                    Item {
-                        required property var modelData
-                        required property int index
-                        width: (prof.width - 8) / prof.items.length; height: parent.height
-                        Text {
-                            anchors.centerIn: parent
-                            text: parent.modelData.t
-                            color: prof.sel === parent.index ? Theme.onPill : Theme.fg
-                            font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
-                        }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Battery.setProfile(parent.modelData.p) }
-                    }
-                }
-            }
+            current: Battery.profile
+            onPicked: v => Battery.setProfile(v)
         }
     }
 }

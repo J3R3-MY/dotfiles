@@ -11,7 +11,6 @@ Singleton {
     readonly property bool enabled: available && adapter.enabled
     readonly property var devices: available ? adapter.devices.values : []
     readonly property var connected: devices.filter(d => d.connected)
-    readonly property var paired: devices.filter(d => d.paired || d.connected)
 
     // Same text the waybar module showed: alias (+ battery) when connected
     readonly property string label: {

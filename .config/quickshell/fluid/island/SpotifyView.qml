@@ -71,15 +71,12 @@ Item {
             spacing: 6
             Repeater {
                 model: [{ id: "search", t: "Search" }, { id: "liked", t: "Liked" }, { id: "playlists", t: "Playlists" }, { id: "devices", t: "Devices" }]
-                Rectangle {
+                Chip {
                     required property var modelData
-                    readonly property bool on: root.tab === modelData.id
-                    height: 30; radius: 15
-                    width: tt.implicitWidth + 26
-                    color: on ? Theme.clock : (ta.containsMouse ? Theme.surfaceHi : "transparent")
-                    Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Text { id: tt; anchors.centerIn: parent; text: parent.modelData.t; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
-                    MouseArea { id: ta; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.tab = parent.modelData.id; list.currentIndex = 0; } }
+                    text: modelData.t
+                    on: root.tab === modelData.id
+                    size: Theme.fontSize - 2
+                    onClicked: { root.tab = modelData.id; list.currentIndex = 0; }
                 }
             }
         }

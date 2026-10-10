@@ -27,21 +27,12 @@ Item {
         spacing: 6
         Repeater {
             model: [{ id: "today", t: "Today" }, { id: "screentime", t: "Screen time" }]
-            Rectangle {
+            Chip {
                 required property var modelData
-                readonly property bool active: root.tab === modelData.id
-                height: 30; radius: 15
-                width: tabText.implicitWidth + 28
-                color: active ? Theme.clock : (tabArea.containsMouse ? Theme.surfaceHi : "transparent")
-                Behavior on color { ColorAnimation { duration: Anim.fast } }
-                Text {
-                    id: tabText
-                    anchors.centerIn: parent
-                    text: parent.modelData.t
-                    color: parent.active ? Theme.onPill : Theme.fg
-                    font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
-                }
-                MouseArea { id: tabArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.tab = parent.modelData.id }
+                text: modelData.t
+                on: root.tab === modelData.id
+                size: Theme.fontSize - 2
+                onClicked: root.tab = modelData.id
             }
         }
     }

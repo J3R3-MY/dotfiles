@@ -312,6 +312,12 @@ bindsym $mod+r mode "resize"
 # Quickshell bar, or waybar exactly as before if Quickshell is unavailable.
 # exec waybar
 
+# Tiling like Hyprland's default (dwindle): new windows split the focused one
+# along its longer side
+exec ~/.config/quickshell/fluid/scripts/fluid-autotile.sh
+# SwayFX effects at Hyprland's default values; skipped on plain sway
+exec sh -c 'sway --version | grep -qi swayfx && swaymsg "corner_radius 10; shadows enable; shadow_blur_radius 4; blur enable; blur_passes 1; blur_radius 3"'
+
 # Aspecto
 default_border pixel 2px
 

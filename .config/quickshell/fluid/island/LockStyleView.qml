@@ -36,14 +36,11 @@ Item {
         }
     }
 
-    Rectangle {
+    Chip {
         anchors.right: parent.right
         anchors.verticalCenter: header.verticalCenter
-        height: 30; radius: 15
-        width: tryText.implicitWidth + 26
-        color: tryArea.containsMouse ? Theme.clock : Theme.surface
-        Text { id: tryText; anchors.centerIn: parent; text: "Try it  " + Icons.lock; color: tryArea.containsMouse ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-        MouseArea { id: tryArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { Fluid.closeAll(); Fluid.lockRequested(); } }
+        text: "Try it  " + Icons.lock
+        onClicked: { Fluid.closeAll(); Fluid.lockRequested(); }
     }
 
     Grid {

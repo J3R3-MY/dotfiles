@@ -13,8 +13,7 @@ Singleton {
     readonly property bool charging: available && (device.state === UPowerDeviceState.Charging
                                                    || device.state === UPowerDeviceState.FullyCharged
                                                    || device.state === UPowerDeviceState.PendingCharge)
-    // waybar states: warning 30, critical 15
-    readonly property bool warning: available && !charging && percent <= 30
+    // waybar's critical state (15 %)
     readonly property bool critical: available && !charging && percent <= 15
 
     readonly property string timeLeft: {

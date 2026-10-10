@@ -10,11 +10,11 @@ import "../services"
 //             outage log and an on-demand speed test
 //   VPN     – NetworkManager VPN/WireGuard profiles, Tailscale, Mullvad
 //   Ports   – listening dev servers with a kill button
-Item {
+DropPanel {
     id: root
 
     required property string screenName
-    readonly property bool open: Fluid.netOpen && Fluid.netScreen === screenName
+    open: Fluid.netOpen && Fluid.netScreen === screenName
     readonly property string tab: Fluid.netTab
 
     onOpenChanged: {
@@ -24,39 +24,9 @@ Item {
 
     width: 460
     height: Math.min(640, content.implicitHeight + 32)
-    Behavior on height { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
-
-    transformOrigin: Item.TopRight
-    scale: open ? 1 : 0.85
-    opacity: open ? 1 : 0
-    visible: opacity > 0
-    Behavior on scale { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-    Behavior on opacity { NumberAnimation { duration: Anim.fast } }
-
-    Keys.onEscapePressed: Fluid.closeAll()
-    onVisibleChanged: if (visible) forceActiveFocus()
-
-    Rectangle {
-        anchors.fill: parent
-        radius: Theme.panelRadius
-        color: Theme.bg
-        border.width: 2
-        border.color: Theme.border
-    }
 
     component Label: Text { color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
     component Value: Text { color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
-    component Chip: Rectangle {
-        property string text
-        property bool on: false
-        signal clicked()
-        height: 28; radius: 14
-        width: ct.implicitWidth + 24
-        color: on ? Theme.clock : (ca.containsMouse ? Theme.surfaceHi : Theme.surface)
-        Behavior on color { ColorAnimation { duration: Anim.fast } }
-        Text { id: ct; anchors.centerIn: parent; text: parent.text; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-        MouseArea { id: ca; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked() }
-    }
 
     component Node: Column {
         property string icon; property string name
@@ -343,7 +313,6 @@ Item {
                     text: "No VPN found. Add WireGuard/OpenVPN profiles to NetworkManager, or install Tailscale or Mullvad."
                 }
 
-
                 Repeater {
                     model: Vpn.profiles
                     VpnRow {
@@ -389,7 +358,6 @@ Item {
                 property bool showOther: false
 
                 Label { visible: Ports.count === 0; text: "Nothing of yours is listening right now" }
-
 
                 Repeater { model: Ports.dev; PortRow { required property var modelData; p: modelData } }
 

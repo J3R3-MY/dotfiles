@@ -9,11 +9,11 @@ import "../island"
 // the bluetooth/audio/backlight/network pills, or $mod+i.
 // Pages (main / wifi / bluetooth / displays) slide sideways; the panel height follows
 // the page so the shape morphs instead of jumping.
-Item {
+DropPanel {
     id: root
 
     required property string screenName
-    readonly property bool open: Fluid.ccOpen && Fluid.ccScreen === screenName
+    open: Fluid.ccOpen && Fluid.ccScreen === screenName
     property string page: "main"
     onOpenChanged: if (!open) page = "main"
 
@@ -24,26 +24,8 @@ Item {
     width: page === "main" ? 400 : 480
     height: pageItems[pageIndex].implicitHeight + 32
     Behavior on width { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
-    Behavior on height { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
-    // Grow out of the top-right corner
-    transformOrigin: Item.TopRight
-    scale: open ? 1 : 0.85
-    opacity: open ? 1 : 0
-    visible: opacity > 0
-    Behavior on scale { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-    Behavior on opacity { NumberAnimation { duration: Anim.fast } }
-
-    Keys.onEscapePressed: page === "main" ? Fluid.closeAll() : (page = "main")
-    onVisibleChanged: if (visible) forceActiveFocus()
-
-    Rectangle {
-        anchors.fill: parent
-        radius: Theme.panelRadius
-        color: Theme.bg
-        border.width: 2
-        border.color: Theme.border
-    }
+    function escape() { if (page === "main") Fluid.closeAll(); else page = "main"; }
 
     Item {
         id: viewport
@@ -386,33 +368,13 @@ Item {
                     }
 
                     // Noise control, segmented
-                    Rectangle {
-                        id: ancSeg
+                    Segmented {
                         visible: Pods.anc !== ""
-                        width: parent.width; height: 40; radius: 14
-                        color: Theme.surface
-                        readonly property var modes: [{ m: "off", t: "Off" }, { m: "transparency", t: "Transparency" }, { m: "adaptive", t: "Adaptive" }, { m: "on", t: "Noise cancel" }]
-                        readonly property int sel: Math.max(0, modes.findIndex(x => x.m === Pods.anc))
-                        Rectangle {
-                            y: 4; height: parent.height - 8; radius: 11
-                            width: (ancSeg.width - 8) / ancSeg.modes.length
-                            x: 4 + ancSeg.sel * width
-                            color: Theme.clock
-                            Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-                        }
-                        Row {
-                            anchors.fill: parent; anchors.margins: 4
-                            Repeater {
-                                model: ancSeg.modes
-                                Item {
-                                    required property var modelData
-                                    required property int index
-                                    width: (ancSeg.width - 8) / ancSeg.modes.length; height: parent.height
-                                    Text { anchors.centerIn: parent; text: parent.modelData.t; color: ancSeg.sel === parent.index ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                                    MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: Pods.setAnc(parent.modelData.m) }
-                                }
-                            }
-                        }
+                        width: parent.width
+                        options: [{ value: "off", label: "Off" }, { value: "transparency", label: "Transparency" },
+                                  { value: "adaptive", label: "Adaptive" }, { value: "on", label: "Noise cancel" }]
+                        current: Pods.anc
+                        onPicked: v => Pods.setAnc(v)
                     }
 
                     Toggle {
@@ -522,16 +484,12 @@ Item {
                         visible: stage.dirty
                         Repeater {
                             model: [{ t: "Apply", main: true }, { t: "Reset", main: false }]
-                            Rectangle {
+                            Chip {
                                 required property var modelData
-                                height: 26; radius: 9
-                                width: art.implicitWidth + 20
-                                color: modelData.main ? Theme.clock : Theme.surfaceHi
-                                Text { id: art; anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                                MouseArea {
-                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                    onClicked: { if (parent.modelData.main) Displays.arrange(stage.moved); stage.moved = ({}); }
-                                }
+                                text: modelData.t
+                                on: modelData.main
+                                size: Theme.fontSize - 4
+                                onClicked: { if (modelData.main) Displays.arrange(stage.moved); stage.moved = ({}); }
                             }
                         }
                     }
@@ -745,15 +703,12 @@ Item {
             text: ph.title
             color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
         }
-        Rectangle {
+        Chip {
             visible: ph.actionText.length > 0
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            height: 30; radius: 15
-            width: actText.implicitWidth + 24
-            color: actArea.containsMouse ? Theme.surfaceHi : Theme.surface
-            Text { id: actText; anchors.centerIn: parent; text: ph.actionText; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-            MouseArea { id: actArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ph.action() }
+            text: ph.actionText
+            onClicked: ph.action()
         }
     }
 }

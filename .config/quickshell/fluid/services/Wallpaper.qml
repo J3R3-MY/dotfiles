@@ -15,8 +15,7 @@ Singleton {
     // .stow-global-ignore, so the repo checkout paths are searched as well.
     readonly property var dirs: {
         const h = Quickshell.env("HOME");
-        return [h + "/.config/wallpapers", h + "/dotfiles-fluid/.config/wallpapers",
-                h + "/dotfiles/.config/wallpapers", h + "/Pictures/Wallpapers"];
+        return [h + "/.config/wallpapers", h + "/dotfiles/.config/wallpapers", h + "/Pictures/Wallpapers"];
     }
     readonly property string stateDir: Quickshell.env("HOME") + "/.local/state/fluid"
     readonly property string script: Quickshell.shellDir + "/scripts/fluid-theme.sh"
