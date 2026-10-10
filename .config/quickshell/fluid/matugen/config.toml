@@ -2,6 +2,18 @@
 # Every output goes to ~/.local/state/fluid so nothing writes into the repo.
 [config]
 
+# Real red/green/... for the terminal (WezTerm ANSI, starship). matugen nudges
+# each toward the wallpaper's hue and picks dark/light-mode tones; the
+# templates add saturation so they stay vivid instead of blending in.
+[config.custom_colors]
+red = "#ff4d5e"
+orange = "#ff8a3d"
+yellow = "#ffcc00"
+green = "#3ddc84"
+cyan = "#00d0e0"
+blue = "#3d8bff"
+magenta = "#c264ff"
+
 [templates.fluid]
 input_path = "templates/colors.json"
 output_path = "~/.local/state/fluid/colors.json"

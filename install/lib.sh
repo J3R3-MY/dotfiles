@@ -76,7 +76,7 @@ PKGS_APPS=(
 # Fonts used across waybar, wofi/rofi, dunst, wezterm, nvim
 PKGS_FONTS=(
     otf-font-awesome ttf-jetbrains-mono ttf-jetbrains-mono-nerd
-    ttf-fira-sans ttf-fira-code ttf-firacode-nerd ttf-nerd-fonts-symbols
+    ttf-fira-sans ttf-fira-code ttf-firacode-nerd ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
     ttf-roboto ttf-liberation noto-fonts noto-fonts-emoji
 )
 

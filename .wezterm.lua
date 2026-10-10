@@ -117,7 +117,9 @@ config.scrollback_lines = 3500
 -- config.color_scheme = 'tokyonight-storm'
 -- config.color_scheme = 'duskfox'
 config.color_scheme = 'Everforest Dark (Gogh)'
-config.font = wezterm.font 'JetBrains Mono'
+-- Icons come from the Nerd Font symbols font, named explicitly so the system
+-- never falls back to Font Awesome (same codepoints, different icons)
+config.font = wezterm.font_with_fallback { 'JetBrains Mono', 'Symbols Nerd Font Mono' }
 config.font_size = 19
 
 config.enable_tab_bar = false
