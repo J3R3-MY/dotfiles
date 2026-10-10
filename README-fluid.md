@@ -92,7 +92,7 @@ Both scripts share `install/lib.sh` and:
 - install everything the sway config, scripts, zsh/tmux/nvim setup and the
   apps from `setup-arch.sh` use (Hyprland-only packages are left out)
 - add snapper/btrfs-assistant on btrfs and run `nvidia-inst` on NVIDIA
-- enable NetworkManager, bluetooth, SDDM (astronaut theme), fstrim, docker,
+- enable NetworkManager, bluetooth, SDDM (own `fluid` theme, see below), fstrim, docker,
   tailscaled and PipeWire
 - stow the repo into `~` file by file, moving clashing files to
   `~/.dotfiles-backup-<date>` first

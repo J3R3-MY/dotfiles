@@ -198,9 +198,9 @@ _installPackages "${packages[@]}"
 # default shell
 chsh -s $(which zsh)
 
-# Enable sddm and get astronaut theme
+# Enable sddm with the repo's own login theme (copied out of the repo)
 sudo systemctl enable sddm
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/keyitdev/sddm-astronaut-theme/master/setup.sh)"
+"$(dirname "$(realpath "$0")")/install/sddm.sh"
 sudo systemctl enable bluetooth
 sudo systemctl enable fstrim.timer
 

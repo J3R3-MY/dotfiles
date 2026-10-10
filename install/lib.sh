@@ -221,7 +221,7 @@ do_packages() {
     # Hardware-specific extras
     if [ "$(findmnt -no FSTYPE /)" = "btrfs" ]; then
         info "btrfs root detected: adding snapshot tools"
-        install_pkgs snapper-support btrfs-assistant
+        install_pkgs btrfs-progs snapper-support btrfs-assistant   # btrfs-progs: hibernation swap file
     fi
     if lspci 2>/dev/null | grep -qiE 'vga.*nvidia|3d.*nvidia'; then
         info "NVIDIA GPU detected"
@@ -412,9 +412,14 @@ do_sddm_theme() {
 
     sudo mkdir -p /etc/sddm.conf.d
     printf '[Theme]\nCurrent=fluid\n' | sudo tee /etc/sddm.conf.d/10-theme.conf >/dev/null
+    # Old astronaut theme: AUR package (earlier installer) or copied files (setup-arch.sh)
     if pacman -Qq sddm-astronaut-theme >/dev/null 2>&1; then
         sudo pacman -Rns --noconfirm sddm-astronaut-theme >>"$LOG" 2>&1 && info "removed sddm-astronaut-theme"
+    elif [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
+        sudo rm -rf /usr/share/sddm/themes/sddm-astronaut-theme && info "removed the old astronaut theme files"
     fi
+    # its setup script set it in /etc/sddm.conf, which would override the drop-in
+    [ -f /etc/sddm.conf ] && sudo sed -i 's/^Current=sddm-astronaut-theme$/Current=fluid/' /etc/sddm.conf
     info "SDDM theme: fluid, wallpaper $(basename "$img") (preview: sddm-greeter-qt6 --test-mode --theme $dest)"
 }
 
