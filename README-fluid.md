@@ -20,7 +20,7 @@ AGPL), so this stays under the repo's MIT licence.
 | Screen time | dashboard → Screen time | Per-app time, last 7 days, month heatmap, by-hour chart. Logged from sway focus events, paused when idle/locked, stored in `~/.local/state/fluid/screentime` |
 | Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert |
 | Power panel | click the battery pill | Battery ring, uptime, brightness/volume, lock/suspend/reboot/off, Performance/Balanced/Saver |
-| Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders and WezTerm. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
+| Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders, WezTerm and (Linux only) the starship prompt. The same wallpaper + settings always give the same colours. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
 | Media | `$mod+m`, right-click the clock | Spinning-record cover, seek bar, 10-band equalizer with presets (PipeWire filter-chain, no EasyEffects) |
 | Lock screen | `$mod+Shift+s`, idle, before sleep | Blurred wallpaper + clock, password pill on any key. Falls back to swaylock without the shell |
 | OSD | bottom centre | Appears for any volume/brightness change |

@@ -7,8 +7,10 @@
 #   scheme     matugen --type, e.g. scheme-vibrant (default: scheme-tonal-spot)
 #   contrast   -1 .. 1                            (default: 0)
 #   lightness  e.g. -0.3 .. 0.3, darker..brighter (default: 0)
-#   seed       "#rrggbb" to build the palette from instead of the image
-#              (the theme picker passes the chosen wallpaper colour, hue-shifted)
+#   seed       what the palette is built from:
+#                N          the wallpaper's N-th dominant colour (0-3, default 0)
+#                #rrggbb    an explicit colour (the picker's hue-shifted base)
+#              Same arguments always give the same result.
 #
 # - remembers the wallpaper in ~/.local/state/fluid
 # - writes the sway background for the next login / the waybar fallback
@@ -51,12 +53,12 @@ if command -v matugen >/dev/null; then
     fi
     tweaks=(-c "$cfg" -m "$mode" -t "$scheme" --contrast "$contrast" "${light_flag[@]}")
 
-    if [ -n "$seed" ]; then
-        src=(color hex "$seed")
-    else
-        # --source-color-index skips matugen's interactive colour prompt
-        src=(image "$img" --source-color-index 0)
-    fi
+    case "$seed" in
+        \#*) src=(color hex "$seed") ;;
+        # --source-color-index also skips matugen's interactive colour prompt
+        [0-3]) src=(image "$img" --source-color-index "$seed") ;;
+        *) src=(image "$img" --source-color-index 0) ;;
+    esac
 
     # Older matugen versions lack some tweak flags: fall back to the basics
     matugen "${src[@]}" "${tweaks[@]}" >/dev/null 2>&1 \
@@ -66,6 +68,10 @@ if command -v matugen >/dev/null; then
 else
     echo "fluid-theme: matugen not installed, colours unchanged" >&2
 fi
+
+# Starship (Linux only): a copy of ~/.config/starship.toml that uses the
+# generated palette; .zsh_linux points STARSHIP_CONFIG at it.
+"$here/fluid-starship.sh"
 
 # Live-update sway border colours
 if [ -f "$state/sway-colors.conf" ]; then

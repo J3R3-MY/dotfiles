@@ -70,10 +70,14 @@ Singleton {
     ]
 
     // The seed colour actually used: chosen wallpaper colour, hue-rotated
+    // What the palette is built from, as passed to fluid-theme.sh. Without a
+    // hue shift it's the wallpaper colour's index, so matugen always takes
+    // the same route for the same settings (fresh pick or swatch click give
+    // identical results); with a shift, the shifted colour as hex.
     readonly property string seed: {
+        if (hueShift === 0) return String(Math.max(0, Math.min(3, sourceIndex)));
         const base = sourceColors[sourceIndex] || sourceColors[0] || "";
-        if (!base) return "";
-        return rotateHue(base, hueShift);
+        return base ? rotateHue(base, hueShift) : String(sourceIndex);
     }
 
     function rotateHue(hex, deg) {
@@ -117,7 +121,7 @@ Singleton {
 
     function shuffle() {
         scheme = schemes[Math.floor(Math.random() * schemes.length)].id;
-        hueShift = Math.round((Math.random() * 2 - 1) * 60);
+        hueShift = Math.round((Math.random() * 2 - 1) * 12) * 5;   // same 5° steps as the slider
         sourceIndex = sourceColors.length > 0 ? Math.floor(Math.random() * sourceColors.length) : 0;
         contrast = Math.round((Math.random() * 0.6 - 0.1) * 10) / 10;
         retheme();
@@ -126,8 +130,10 @@ Singleton {
     function run() {
         if (!root.current) return;
         if (applier.running) { pending = true; return; }
+        // fixed decimals: slider steps like 0.15000000000000002 must not
+        // make the same setting produce a (slightly) different palette
         applier.command = [root.script, root.current, root.mode, root.scheme,
-                           String(root.contrast), String(root.lightness), root.seed];
+                           root.contrast.toFixed(2), root.lightness.toFixed(2), root.seed];
         applier.running = true;
     }
     property bool pending: false

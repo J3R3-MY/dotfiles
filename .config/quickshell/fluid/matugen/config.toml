@@ -13,3 +13,7 @@ output_path = "~/.local/state/fluid/sway-colors.conf"
 [templates.wezterm]
 input_path = "templates/wezterm-colors.lua"
 output_path = "~/.local/state/fluid/wezterm-colors.lua"
+
+[templates.starship]
+input_path = "templates/starship-palette.toml"
+output_path = "~/.local/state/fluid/starship-palette.toml"

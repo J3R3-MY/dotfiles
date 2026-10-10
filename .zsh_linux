@@ -41,6 +41,13 @@ ex ()
   fi
 }
 
+# Starship colours follow the fluid theme picker (Linux only): the theme
+# script writes a copy of ~/.config/starship.toml using the wallpaper palette.
+# Without it (no wallpaper picked yet) the normal config is used.
+if [ -f "$HOME/.local/state/fluid/starship-palette.toml" ]; then
+    ~/.config/quickshell/fluid/scripts/fluid-starship.sh 2>/dev/null   # picks up starship.toml edits
+    export STARSHIP_CONFIG="$HOME/.local/state/fluid/starship.toml"
+fi
 eval "$(starship init zsh)"
 eval "$(fzf --zsh)"
 
