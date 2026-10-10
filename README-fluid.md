@@ -153,7 +153,7 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
   too little disk space) it uses plain suspend and says why. The installers
   run it; hibernating works after the next reboot.
 - **Sleep log:** every sleep, wake and boot is written to
-  `~/.local/state/fluid/sleep.log` automatically: lid closed/opened, the kind of sleep, battery and lid,
+  `~/.local/state/fluid/sleep.log` automatically: lid closed, the kind of sleep, battery and lid,
   the kernel's resume messages, whether the shell survived, and a
   `BOOT without a wake` line when a sleep never resumed.
 - **Login screen:** `install/sddm.sh` installs the `fluid` SDDM theme (frosted

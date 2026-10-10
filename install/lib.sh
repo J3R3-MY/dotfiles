@@ -627,11 +627,13 @@ case "$1" in
         { echo "$(date '+%F %T')  wake   $what  $(state)"
           journalctl -b -k --since -3min -g 'PM: |hibernat|resum' --no-pager -o short 2>/dev/null | tail -n 6 | sed 's/^/        /'
         } >> "$log"
-        # did the shell survive? (checked once things have settled)
-        ( sleep 15
-          pgrep -f '(qs|quickshell) -c fluid' >/dev/null && r=running || r="NOT running"
-          echo "$(date '+%F %T')  shell  $r" >> "$log" ) &
+        # did the shell survive? Checked 15 s later by a timer (a background
+        # job would be killed together with systemd-sleep)
+        systemd-run --quiet --no-block --collect --on-active=15 "$0" check
         ;;
+    check)
+        pgrep -f '(qs|quickshell) -c fluid' >/dev/null && r=running || r="NOT running"
+        echo "$(date '+%F %T')  shell  $r" >> "$log" ;;
 esac
 exit 0
 HOOK
