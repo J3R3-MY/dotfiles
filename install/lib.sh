@@ -622,10 +622,16 @@ log=@LOG@
 state() { echo "battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1)% ac=$(cat /sys/class/power_supply/A*/online 2>/dev/null | head -n1) lid=$(awk '{print $2}' /proc/acpi/button/lid/*/state 2>/dev/null)"; }
 what="$2${SYSTEMD_SLEEP_ACTION:+/$SYSTEMD_SLEEP_ACTION}"
 case "$1" in
-    pre)  echo "$(date '+%F %T')  sleep  $what  $(state)" >> "$log" ;;
+    pre)  # let the kernel log how long each step and each device takes
+          echo 1 > /sys/power/pm_print_times 2>/dev/null; echo 1 > /sys/power/pm_debug_messages 2>/dev/null
+          echo "$(date '+%F %T')  sleep  $what  $(state)" >> "$log" ;;
     post)
         { echo "$(date '+%F %T')  wake   $what  $(state)"
-          journalctl -b -k --since -3min -g 'PM: |hibernat|resum' --no-pager -o short 2>/dev/null | tail -n 6 | sed 's/^/        /'
+          # PM steps with their durations, plus any device slower than 0.2 s
+          journalctl -b -k --since -3min --no-pager -o short-precise 2>/dev/null \
+            | awk '/ after [0-9]+ usecs/ { for (i = 1; i < NF; i++) if ($(i+1) == "usecs" && $i > 200000) { print; break } next }
+                   /PM: (suspend|resume|hibernation|image)|complete after|took [0-9]|nvidia/' \
+            | tail -n 20 | sed 's/^/        /'
         } >> "$log"
         # did the shell survive? Checked 15 s later by a timer (a background
         # job would be killed together with systemd-sleep)
