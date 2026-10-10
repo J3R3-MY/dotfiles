@@ -606,14 +606,19 @@ do_hibernate() {
         | sudo tee /etc/systemd/logind.conf.d/10-fluid-lid.conf >/dev/null
     sudo systemctl kill -s HUP systemd-logind >>"$LOG" 2>&1
 
-    # 6. Automatic log of every sleep/wake/boot: /var/log/fluid-sleep.log
-    sudo mkdir -p /etc/systemd/system-sleep
-    sudo tee /etc/systemd/system-sleep/fluid-log >/dev/null <<'HOOK'
+    # 6. Automatic log of every sleep/wake/boot in ~/.local/state/fluid/sleep.log
+    #    (the lid lines come from the sway config). systemd only runs sleep
+    #    hooks from /usr/lib/systemd/system-sleep.
+    local slog="$HOME/.local/state/fluid/sleep.log"
+    mkdir -p "$(dirname "$slog")" && touch "$slog"
+    sudo rm -f /etc/systemd/system-sleep/fluid-log
+    sudo mkdir -p /usr/lib/systemd/system-sleep
+    sed "s|@LOG@|$slog|" <<'HOOK' | sudo tee /usr/lib/systemd/system-sleep/fluid-log >/dev/null
 #!/bin/sh
-# Logs each sleep and wake to /var/log/fluid-sleep.log (from install/lib.sh).
+# Logs each sleep and wake for the fluid setup (installed by install/lib.sh).
 # $1 = pre|post, $2 = suspend|hibernate|suspend-then-hibernate|...,
 # SYSTEMD_SLEEP_ACTION = the phase within suspend-then-hibernate.
-log=/var/log/fluid-sleep.log
+log=@LOG@
 state() { echo "battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1)% ac=$(cat /sys/class/power_supply/A*/online 2>/dev/null | head -n1) lid=$(awk '{print $2}' /proc/acpi/button/lid/*/state 2>/dev/null)"; }
 what="$2${SYSTEMD_SLEEP_ACTION:+/$SYSTEMD_SLEEP_ACTION}"
 case "$1" in
@@ -628,26 +633,23 @@ case "$1" in
           echo "$(date '+%F %T')  shell  $r" >> "$log" ) &
         ;;
 esac
-# keep it small
-[ "$(wc -l < "$log")" -gt 2000 ] && tail -n 1000 "$log" > "$log.tmp" && mv "$log.tmp" "$log"
 exit 0
 HOOK
-    sudo chmod 755 /etc/systemd/system-sleep/fluid-log
-    sudo tee /etc/systemd/system/fluid-sleep-boot.service >/dev/null <<'UNIT'
+    sudo chmod 755 /usr/lib/systemd/system-sleep/fluid-log
+    sed "s|@LOG@|$slog|" <<'UNIT' | sudo tee /etc/systemd/system/fluid-sleep-boot.service >/dev/null
 [Unit]
-Description=Note boots in /var/log/fluid-sleep.log (flags a sleep that never woke up)
+Description=Note boots in the fluid sleep log (flags a sleep that never woke up)
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'l=/var/log/fluid-sleep.log; touch $l; grep -E "^[0-9-]+ [0-9:]+  (sleep|wake|boot) " $l | tail -n1 | grep -q "  sleep " && echo "$(date "+%%F %%T")  BOOT without a wake: the last sleep did not resume, the machine booted fresh" >> $l; echo "$(date "+%%F %%T")  boot" >> $l'
+ExecStart=/bin/sh -c 'l=@LOG@; [ -f $l ] || exit 0; grep -E "^[0-9-]+ [0-9:]+  (sleep|wake|boot) " $l | tail -n1 | grep -q "  sleep " && echo "$(date "+%%F %%T")  BOOT without a wake: the last sleep did not resume, the machine booted fresh" >> $l; echo "$(date "+%%F %%T")  boot" >> $l; [ "$(wc -l < $l)" -gt 2000 ] && tail -n 1000 $l > $l.tmp && cat $l.tmp > $l && rm $l.tmp; exit 0'
 
 [Install]
 WantedBy=multi-user.target
 UNIT
     sudo systemctl daemon-reload
     enable_system fluid-sleep-boot.service
-    sudo touch /var/log/fluid-sleep.log && sudo chmod 644 /var/log/fluid-sleep.log
-    echo "$(date '+%F %T')  setup  sleep logging installed" | sudo tee -a /var/log/fluid-sleep.log >/dev/null
+    echo "$(date '+%F %T')  setup  sleep logging installed" >> "$slog"
 
     if [ "$lid" = suspend-then-hibernate ]; then
         info "lid / 5 min idle: sleep, hibernate after 2 h asleep (hibernation works after the next reboot)"
