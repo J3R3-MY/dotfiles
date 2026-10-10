@@ -199,6 +199,8 @@ do_packages() {
     install_pkgs "${PKGS_BASE[@]}"
     install_pkgs "${PKGS_LOGIN[@]}"
     install_swayfx
+    # stable wezterm replaces the wezterm-git build earlier installs used
+    pacman -Qq wezterm-git >/dev/null 2>&1 && sudo pacman -Rdd --noconfirm wezterm-git >>"$LOG" 2>&1
     install_pkgs "${PKGS_SWAY[@]}"
     install_pkgs "${PKGS_CLI[@]}"
     install_pkgs "${PKGS_DEV[@]}"
