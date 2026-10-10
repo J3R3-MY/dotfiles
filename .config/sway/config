@@ -51,6 +51,8 @@ for_window [title="nmtui-connect"] floating enable
 #
 # Example configuration:
 #
+# Closing the lid always locks, even when it doesn't sleep (e.g. docked)
+bindswitch --locked lid:on exec ~/.config/quickshell/fluid/scripts/fluid-lock.sh
 # lock at 3 min, screens off at 4, sleep at 5 (hibernates after 2 h asleep, see fluid-sleep.sh)
 # fluid-lock.sh uses the fluid lock screen when the shell runs, swaylock otherwise
 exec swayidle -w \
