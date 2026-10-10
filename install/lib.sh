@@ -606,6 +606,47 @@ do_hibernate() {
         | sudo tee /etc/systemd/logind.conf.d/10-fluid-lid.conf >/dev/null
     sudo systemctl kill -s HUP systemd-logind >>"$LOG" 2>&1
 
+    # 6. Automatic log of every sleep/wake/boot: /var/log/fluid-sleep.log
+    sudo mkdir -p /etc/systemd/system-sleep
+    sudo tee /etc/systemd/system-sleep/fluid-log >/dev/null <<'HOOK'
+#!/bin/sh
+# Logs each sleep and wake to /var/log/fluid-sleep.log (from install/lib.sh).
+# $1 = pre|post, $2 = suspend|hibernate|suspend-then-hibernate|...,
+# SYSTEMD_SLEEP_ACTION = the phase within suspend-then-hibernate.
+log=/var/log/fluid-sleep.log
+state() { echo "battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1)% ac=$(cat /sys/class/power_supply/A*/online 2>/dev/null | head -n1) lid=$(awk '{print $2}' /proc/acpi/button/lid/*/state 2>/dev/null)"; }
+what="$2${SYSTEMD_SLEEP_ACTION:+/$SYSTEMD_SLEEP_ACTION}"
+case "$1" in
+    pre)  echo "$(date '+%F %T')  sleep  $what  $(state)" >> "$log" ;;
+    post)
+        { echo "$(date '+%F %T')  wake   $what  $(state)"
+          journalctl -b -k --since -3min -g 'PM: |hibernat|resum' --no-pager -o short 2>/dev/null | tail -n 6 | sed 's/^/        /'
+        } >> "$log"
+        # did the shell survive? (checked once things have settled)
+        ( sleep 15
+          pgrep -f '(qs|quickshell) -c fluid' >/dev/null && r=running || r="NOT running"
+          echo "$(date '+%F %T')  shell  $r" >> "$log" ) &
+        ;;
+esac
+# keep it small
+[ "$(wc -l < "$log")" -gt 2000 ] && tail -n 1000 "$log" > "$log.tmp" && mv "$log.tmp" "$log"
+exit 0
+HOOK
+    sudo chmod 755 /etc/systemd/system-sleep/fluid-log
+    sudo tee /etc/systemd/system/fluid-sleep-boot.service >/dev/null <<'UNIT'
+[Unit]
+Description=Note boots in /var/log/fluid-sleep.log (flags a sleep that never woke up)
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'l=/var/log/fluid-sleep.log; touch $l; grep -E "^[0-9-]+ [0-9:]+  (sleep|wake|boot) " $l | tail -n1 | grep -q "  sleep " && echo "$(date "+%%F %%T")  BOOT without a wake: the last sleep did not resume, the machine booted fresh" >> $l; echo "$(date "+%%F %%T")  boot" >> $l'
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+    sudo systemctl daemon-reload
+    enable_system fluid-sleep-boot.service
+
     if [ "$lid" = suspend-then-hibernate ]; then
         info "lid / 5 min idle: sleep, hibernate after 2 h asleep (hibernation works after the next reboot)"
     else

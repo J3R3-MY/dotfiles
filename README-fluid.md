@@ -152,6 +152,10 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
   the lid setting. If hibernation can't work (no UEFI, Secure Boot lockdown,
   too little disk space) it uses plain suspend and says why. The installers
   run it; hibernating works after the next reboot.
+- **Sleep log:** every sleep, wake and boot is written to
+  `/var/log/fluid-sleep.log` automatically: the kind of sleep, battery and lid,
+  the kernel's resume messages, whether the shell survived, and a
+  `BOOT without a wake` line when a sleep never resumed.
 - **Login screen:** `install/sddm.sh` installs the `fluid` SDDM theme (frosted
   panel over one of your wallpapers, colours from the current theme). It is
   copied to `/usr/share/sddm/themes/fluid`, so it doesn't depend on the repo.
