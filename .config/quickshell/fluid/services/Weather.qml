@@ -4,9 +4,9 @@ import Quickshell
 import Quickshell.Io
 
 // Weather from Open-Meteo (free, no API key).
-// Location: ~/.local/state/fluid/location ("lat,lon,City"). If that file is
-// missing it is guessed once from your IP via ipinfo.io and written there,
-// so you can correct it by editing the file.
+// Location: ~/.local/state/fluid/location ("lat,lon,City"), set once by
+// typing your city in the dashboard (looked up with Open-Meteo's geocoder).
+// Nothing else about you is sent anywhere.
 Singleton {
     id: root
 
@@ -57,8 +57,17 @@ Singleton {
         return t[c] || "—";
     }
 
+    readonly property bool located: !isNaN(lat)
+
+    function setCity(name) {
+        if (!name.trim()) return;
+        locate.command = ["curl", "-fsS", "--max-time", "10", "-G", "https://geocoding-api.open-meteo.com/v1/search",
+                          "--data-urlencode", "name=" + name.trim(), "-d", "count=1"];
+        locate.running = true;
+    }
+
     function refresh() {
-        if (isNaN(lat)) { locate.running = true; return; }
+        if (!located) return;
         fetcher.command = ["curl", "-fsS", "--max-time", "15",
             "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
             "&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day" +
@@ -80,26 +89,22 @@ Singleton {
             }
             root.refresh();
         }
-        onLoadFailed: root.refresh()
     }
 
-    // One-time location guess, written to the location file
+    // City -> coordinates, written to the location file
     Process {
         id: locate
-        command: ["curl", "-fsS", "--max-time", "10", "https://ipinfo.io/json"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
-                    const j = JSON.parse(text);
-                    const ll = (j.loc || "").split(",");
-                    if (ll.length !== 2) return;
-                    root.lat = parseFloat(ll[0]);
-                    root.lon = parseFloat(ll[1]);
-                    root.city = j.city || "";
+                    const r = JSON.parse(text).results[0];
+                    root.lat = r.latitude;
+                    root.lon = r.longitude;
+                    root.city = r.name;
                     Quickshell.execDetached(["sh", "-c", "mkdir -p \"$(dirname \"$1\")\" && printf '%s\\n' \"$2\" > \"$1\"",
                         "sh", root.locFile, root.lat + "," + root.lon + "," + root.city]);
                     root.refresh();
-                } catch (e) {}
+                } catch (e) { root.city = ""; }
             }
         }
     }

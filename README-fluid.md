@@ -49,9 +49,9 @@ One-time setup for the accounts: Spotify → "Sign in" in the Spotify view
 from clipboard history and cleared after 30 s; the vault locks after 10 minutes
 or when the screen locks.
 
-Weather comes from Open-Meteo. The location is guessed once from your IP via
-ipinfo.io and stored in `~/.local/state/fluid/location` as `lat,lon,City`;
-edit that file to set it yourself. Only those coordinates are sent to Open-Meteo.
+Weather comes from Open-Meteo. On first use the dashboard asks for your city
+(looked up with Open-Meteo's geocoder) and stores `lat,lon,City` in
+`~/.local/state/fluid/location`; only those coordinates are sent.
 
 ## Keys
 
@@ -109,7 +109,7 @@ log is in `~/dotfiles-install-<date>.log`.
 - `fluid-launch.sh` starts the shell. If Quickshell isn't installed it starts
   waybar + dunst instead. If the shell crashes three times within 10 s of
   starting, it also falls back to waybar + dunst and sends a notification.
-- Nothing in the old waybar, rofi, wofi, wlogout or swaylock configs changed.
+- Nothing in the old waybar, rofi, wofi or swaylock configs changed; `$mod+Shift+e` opens the power panel (Sway's exit prompt in waybar mode).
 - Before you pick a wallpaper, the shell uses the old waybar colours and sway
   keeps its `output * bg` line. WezTerm keeps Everforest.
 - To remove it completely: comment out `include ~/.config/sway/fluid.conf`
@@ -158,6 +158,24 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
   copied to `/usr/share/sddm/themes/fluid`, so it doesn't depend on the repo.
   Run it again to pick another wallpaper; preview with
   `sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/fluid`.
+
+## Security and privacy (set up by the installers)
+
+- **MAC address:** random per Wi-Fi network (stable until reboot), random
+  while scanning, hostname not sent over DHCP, temporary IPv6 addresses
+  (`/etc/NetworkManager/conf.d/10-fluid-privacy.conf`).
+- **Firewall:** unsolicited incoming traffic is dropped, Tailscale allowed
+  (`/etc/nftables.conf`, own `inet fluid` table so Docker/Tailscale rules stay).
+- **DNS:** Quad9 over TLS with DNSSEC via systemd-resolved
+  (`/etc/systemd/resolved.conf.d/10-fluid-dot.conf`). Behind a hotel/airport
+  login page run `resolvectl dnsovertls <interface> no` until you're through.
+- **Kernel:** a few sysctl settings Arch doesn't default to
+  (`/etc/sysctl.d/90-fluid-hardening.conf`); firmware via `fwupdmgr update`.
+- **Docker** starts on demand and you're not in the `docker` group (that
+  group is passwordless root): use `sudo docker`.
+- **AUR:** only `yay-bin`, `scenefx0.5` and `swayfx`, built from the commits
+  pinned in `install/aur-pins` (with a checked hash for swayfx's source,
+  which its PKGBUILD doesn't verify).
 
 ## If the lock screen ever gets stuck
 

@@ -4,14 +4,14 @@ import Quickshell
 import Quickshell.Io
 
 // Connection health, split in two legs like Nexthop: this machine -> router
-// (the default gateway) and router -> internet (1.1.1.1). Pings both every
-// 5 s, keeps 10 minutes of history, scores 0-100 and logs outages to
+// (the default gateway) and router -> internet (Quad9, 9.9.9.9). Pings both
+// every 15 s, keeps 30 minutes of history, scores 0-100 and logs outages to
 // ~/.local/state/fluid/outages.json. The speed test is on demand only
 // (Cloudflare's speed endpoints via curl). No root, no extra packages.
 Singleton {
     id: root
 
-    readonly property string internetHost: "1.1.1.1"
+    readonly property string internetHost: "9.9.9.9"
     property string gateway: ""
 
     // per leg: { last (ms or -1), avg, jitter, loss (0..1), samples: [ms or -1] }
@@ -87,13 +87,13 @@ Singleton {
             }
         }
     }
-    Timer { interval: 5000; running: true; repeat: true; triggeredOnStart: true; onTriggered: pinger.running = true }
+    Timer { interval: 15000; running: true; repeat: true; triggeredOnStart: true; onTriggered: pinger.running = true }
 
     // 3 failures in a row on a leg = outage; it ends with the first success
     function trackOutage() {
         const failing = leg => { const s = root[leg].samples; return s.length >= 3 && s.slice(-3).every(v => v < 0); };
         const leg = failing("lan") ? "lan" : failing("wan") ? "wan" : "";
-        if (leg && !outageStart) { outageStart = Date.now() - 15000; outageLeg = leg; }
+        if (leg && !outageStart) { outageStart = Date.now() - 45000; outageLeg = leg; }
         if (!leg && outageStart && root.wan.last >= 0) {
             const o = outages.concat([{ start: outageStart, end: Date.now(), leg: outageLeg }]).slice(-50);
             outages = o;

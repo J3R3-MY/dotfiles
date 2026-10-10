@@ -147,8 +147,30 @@ Item {
         }
 
         // Right: current conditions
+        // First use: ask for the city instead of guessing it from the IP
+        Column {
+            visible: !Weather.located
+            anchors.right: parent.right
+            width: 250
+            spacing: 8
+            Text { text: "Weather for"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+            Rectangle {
+                width: parent.width; height: 40; radius: 14
+                color: Theme.surfaceHi
+                TextInput {
+                    id: cityInput
+                    anchors.fill: parent; anchors.leftMargin: 14; anchors.rightMargin: 14
+                    verticalAlignment: TextInput.AlignVCenter
+                    color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
+                    Keys.onReturnPressed: Weather.setCity(text)
+                    Text { visible: !cityInput.text; anchors.verticalCenter: parent.verticalCenter; text: "Your city, then Enter"; color: Theme.fgDim; font: cityInput.font }
+                }
+            }
+        }
+
         Column {
             id: current
+            visible: Weather.located
             anchors.right: parent.right
             width: 250
             spacing: 8
@@ -206,7 +228,7 @@ Item {
         Text {
             anchors.centerIn: centre
             anchors.verticalCenterOffset: 90
-            visible: !Weather.ready
+            visible: Weather.located && !Weather.ready
             text: "Loading weather…"
             color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
         }

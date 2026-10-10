@@ -103,9 +103,7 @@ PanelWindow {
             label: Pods.connected && Pods.minPod >= 0 ? Pods.name + " " + Pods.minPod + "%" : Bt.label
             detail: Pods.connected && Pods.level("case") >= 0 ? "case " + Pods.level("case") + "%"
                   : Bt.connected.length > 1 ? `+${Bt.connected.length - 1}` : ""
-            onClicked: m => m.button === Qt.RightButton
-                ? Quickshell.execDetached(["blueberry"])
-                : Fluid.toggleControlCenter(bar.screenName)
+            onClicked: Fluid.toggleControlCenter(bar.screenName)
         }
 
         Pill {

@@ -19,6 +19,7 @@ FAILED_PKGS=()
 # Base system pieces a no-DE EndeavourOS install doesn't have
 PKGS_BASE=(
     base-devel git wget curl unzip unrar 7zip stow jq gum pciutils
+    nftables fwupd          # firewall, firmware updates (see do_hardening)
     xdg-user-dirs xdg-utils
     polkit polkit-gnome
     networkmanager network-manager-applet
@@ -41,17 +42,11 @@ PKGS_SWAY=(
     waybar wofi rofi dunst libnotify
     xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
     qt5-wayland qt6-wayland
-    imagemagick            # wlogout-launch.sh blurs a screenshot
-    keepassxc              # autostarted by the sway config
+    imagemagick            # SDDM wallpaper copy, wallpaper colour filter
+    wezterm                # $term
     nautilus               # $mod+n
     ranger                 # $mod+o / $mod+u
     nwg-look papirus-icon-theme materia-gtk-theme adwaita-icon-theme
-)
-AUR_SWAY=(
-    wezterm-git            # $term (same as setup-arch.sh)
-    wlogout                # $mod+Shift+e
-    blueberry              # bluetooth GUI
-    dropbox                # autostarted by the sway config
 )
 
 # Shell + terminal tooling (.zsh_linux, .tmux.conf, starship, lazygit, ...)
@@ -151,13 +146,9 @@ preflight() {
     ( while true; do sudo -n true; sleep 50; kill -0 "$$" 2>/dev/null || exit; done ) 2>/dev/null &
 
     if ! command -v yay >/dev/null; then
-        info "yay not found, installing it"
+        info "yay not found, building it from the pinned AUR commit"
         sudo pacman -S --needed --noconfirm git base-devel
-        local tmp; tmp="$(mktemp -d)"
-        git clone https://aur.archlinux.org/yay-bin.git "$tmp/yay-bin" \
-            && (cd "$tmp/yay-bin" && makepkg -si --noconfirm) \
-            || die "Could not install yay."
-        rm -rf "$tmp"
+        aur_pinned yay-bin || die "Could not install yay."
     fi
 }
 
@@ -204,7 +195,7 @@ do_update() {
 
 do_packages() {
     local fluid="$1"
-    step "Installing packages (this takes a while; wezterm-git compiles from source)"
+    step "Installing packages (this takes a while; swayfx is built from source)"
     install_pkgs "${PKGS_BASE[@]}"
     install_pkgs "${PKGS_LOGIN[@]}"
     install_swayfx
@@ -214,10 +205,6 @@ do_packages() {
     install_pkgs "${PKGS_APPS[@]}"
     install_pkgs "${PKGS_FONTS[@]}"
     [ "$fluid" = "yes" ] && install_pkgs "${PKGS_FLUID[@]}"
-    # The dropbox AUR package verifies its download against this key
-    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys 1C61A2656FB57B7E4DE0F4C1FC918B335044912E >>"$LOG" 2>&1 \
-        || warn "could not import the Dropbox signing key; dropbox may fail to build"
-    install_pkgs "${AUR_SWAY[@]}"
 
     # Hardware-specific extras
     if [ "$(findmnt -no FSTYPE /)" = "btrfs" ]; then
@@ -240,17 +227,39 @@ do_packages() {
 install_swayfx() {
     pacman -Qq swayfx >/dev/null 2>&1 && { info "already installed: swayfx"; return; }
     pacman -Qq sway >/dev/null 2>&1 && sudo pacman -Rdd --noconfirm sway >>"$LOG" 2>&1
-    info "building swayfx (AUR)"
-    if ! yay -S --needed --noconfirm --answerdiff None --answerclean None swayfx >>"$LOG" 2>&1; then
+    info "building swayfx (pinned AUR commits)"
+    if ! { aur_pinned scenefx0.5 && aur_pinned swayfx; }; then
         warn "swayfx failed to build, using plain sway"
         FAILED_PKGS+=(swayfx)
         install_pkgs sway
     fi
 }
 
+# Build an AUR package from the commit pinned in install/aur-pins, checking
+# any extra source hash listed there before building.
+aur_pinned() {
+    local pkg="$1" line commit extra tmp
+    line=$(grep -E "^$pkg[[:space:]]" "$REPO_DIR/install/aur-pins") || { warn "$pkg is not pinned"; return 1; }
+    read -r _ commit extra <<<"$line"
+    tmp=$(mktemp -d)
+    (
+        set -e
+        cd "$tmp"
+        git clone -q "https://aur.archlinux.org/$pkg.git" "$pkg"
+        cd "$pkg"
+        git checkout -q --detach "$commit"
+        makepkg -o --noconfirm >>"$LOG" 2>&1              # download + extract
+        if [ -n "$extra" ]; then
+            echo "${extra#*=}  ${extra%%=*}" | sha256sum -c --quiet || { echo "hash mismatch for ${extra%%=*}" >&2; exit 1; }
+        fi
+        makepkg -si --noconfirm --needed >>"$LOG" 2>&1
+    ) || { warn "pinned build of $pkg failed, see $LOG"; rm -rf "$tmp"; return 1; }
+    rm -rf "$tmp"
+}
+
 do_services() {
     step "Enabling services"
-    enable_system NetworkManager.service bluetooth.service sddm.service fstrim.timer docker.service tailscaled.service
+    enable_system NetworkManager.service bluetooth.service sddm.service fstrim.timer docker.socket tailscaled.service
     pacman -Qq power-profiles-daemon >/dev/null 2>&1 && enable_system power-profiles-daemon.service
     # Let the VPN panel switch Tailscale without sudo
     if command -v tailscale >/dev/null; then
@@ -260,7 +269,8 @@ do_services() {
     # PipeWire runs per user; the sockets start it on demand
     systemctl --user enable pipewire.socket pipewire-pulse.socket wireplumber.service >>"$LOG" 2>&1 \
         && info "enabled pipewire (user)" || warn "could not enable pipewire user units"
-    sudo usermod -aG docker "$USER" && info "added $USER to the docker group"
+    # Docker starts on first use (socket). No docker group: membership is
+    # passwordless root, so use `sudo docker` (or set up rootless Docker).
 }
 
 do_login_manager() {
@@ -436,6 +446,96 @@ do_sddm_theme() {
     # its setup script set it in /etc/sddm.conf, which would override the drop-in
     [ -f /etc/sddm.conf ] && sudo sed -i 's/^Current=sddm-astronaut-theme$/Current=fluid/' /etc/sddm.conf
     info "SDDM theme: fluid, wallpaper $(basename "$img") (preview: sddm-greeter-qt6 --test-mode --theme $dest)"
+}
+
+# ----------------------------------------------------------
+# Hardening: MAC randomization, firewall, encrypted DNS, kernel settings,
+# firmware updates. Each part is a small drop-in file you can delete.
+# ----------------------------------------------------------
+
+do_hardening() {
+    step "Security and privacy"
+
+    # MAC: random per Wi-Fi network but stable on it until reboot (captive
+    # portals and router reservations keep working), random while scanning,
+    # no hostname in DHCP, temporary IPv6 addresses.
+    sudo mkdir -p /etc/NetworkManager/conf.d
+    sudo tee /etc/NetworkManager/conf.d/10-fluid-privacy.conf >/dev/null <<'CONF'
+[device]
+wifi.scan-rand-mac-address=yes
+
+[connection]
+wifi.cloned-mac-address=stable
+ethernet.cloned-mac-address=stable
+connection.stable-id=${CONNECTION}/${BOOT}
+ipv4.dhcp-send-hostname=false
+ipv6.dhcp-send-hostname=false
+ipv6.ip6-privacy=2
+CONF
+    info "MAC randomization + no hostname over DHCP (applies on the next connect)"
+
+    # Firewall: drop unsolicited incoming traffic. Its own table, so Docker's
+    # and Tailscale's rules are left alone.
+    sudo cp -n /etc/nftables.conf /etc/nftables.conf.before-fluid 2>/dev/null
+    sudo tee /etc/nftables.conf >/dev/null <<'CONF'
+#!/usr/bin/nft -f
+# fluid firewall: nothing gets in unless it answers something you started.
+table inet fluid
+delete table inet fluid
+table inet fluid {
+    chain input {
+        type filter hook input priority filter; policy drop;
+        ct state established,related accept
+        ct state invalid drop
+        iif lo accept
+        iifname "tailscale0" accept
+        meta l4proto { icmp, ipv6-icmp } accept
+        ip6 saddr fe80::/10 udp dport 546 accept    # DHCPv6 replies
+    }
+}
+CONF
+    systemctl is-enabled firewalld >/dev/null 2>&1 && sudo systemctl disable --now firewalld >>"$LOG" 2>&1
+    enable_system nftables.service
+    sudo systemctl restart nftables.service >>"$LOG" 2>&1
+
+    # DNS over TLS to Quad9 with DNSSEC. On a hotel/airport login page that
+    # blocks it: `resolvectl dnsovertls <interface> no` until you're through.
+    sudo mkdir -p /etc/systemd/resolved.conf.d
+    sudo tee /etc/systemd/resolved.conf.d/10-fluid-dot.conf >/dev/null <<'CONF'
+[Resolve]
+DNS=9.9.9.9#dns.quad9.net 149.112.112.112#dns.quad9.net 2620:fe::fe#dns.quad9.net 2620:fe::9#dns.quad9.net
+Domains=~.
+DNSOverTLS=yes
+DNSSEC=allow-downgrade
+FallbackDNS=
+CONF
+    enable_system systemd-resolved.service
+    sudo systemctl restart systemd-resolved.service >>"$LOG" 2>&1
+    sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+    info "DNS: Quad9 over TLS"
+
+    # Kernel: only settings Arch doesn't already default to
+    sudo tee /etc/sysctl.d/90-fluid-hardening.conf >/dev/null <<'CONF'
+kernel.kptr_restrict = 2
+kernel.dmesg_restrict = 1
+kernel.kexec_load_disabled = 1
+net.core.bpf_jit_harden = 2
+dev.tty.ldisc_autoload = 0
+fs.protected_fifos = 2
+fs.protected_regular = 2
+fs.suid_dumpable = 0
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+CONF
+    sudo sysctl --system >>"$LOG" 2>&1
+    info "kernel hardening settings applied"
+
+    # Firmware: refresh LVFS metadata daily; install updates with `fwupdmgr update`
+    enable_system fwupd-refresh.timer
 }
 
 # ----------------------------------------------------------

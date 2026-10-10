@@ -1,0 +1,9 @@
+# AUR packages the installer builds, pinned to reviewed commits.
+#   <package>  <AUR git commit>  [<file>=<sha256> for a source the PKGBUILD doesn't checksum]
+#
+# To update: git clone https://aur.archlinux.org/<package>.git, read
+#   git log -p <pinned commit>..HEAD
+# and only then put the new commit (and hash) here.
+yay-bin     13e0a4754d106a9252b7479bf1b370fbe454fc48
+scenefx0.5  ddd3e0c51b4d5d1b7a2c354664d064f490a99e2e
+swayfx      55c2e27f83e54eadd9d811bc123b868e6ba56866  swayfx-0.6.tar.gz=854f9d1468b8706718210e026d0bb0ddbc8370f750345fbbdd163f130c1b922d

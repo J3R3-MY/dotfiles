@@ -91,8 +91,6 @@ bindsym $mod+Shift+g exec grimshot --notify savecopy area
 #Hide cursor while typing
 seat * hide_cursor when-typing enable
 
-# AUTOSTART
-exec keepassxc -platform xcb & dropbox start -i &
 
 # SCREEN SHARING
 exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
@@ -123,7 +121,7 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 	bindsym $mod+Shift+s exec ~/.config/quickshell/fluid/scripts/fluid-lock.sh
 
 	#Logout
-	bindsym $mod+Shift+e exec "~/dotfiles/.config/scripts/wlogout-launch.sh"
+	bindsym $mod+Shift+e exec sh -c 'qs -c fluid ipc call fluid power || swaynag -t warning -m "Exit sway?" -B "Log out" "swaymsg exit"'
 
   # Start a terminal
   bindsym $mod+Return exec $term
