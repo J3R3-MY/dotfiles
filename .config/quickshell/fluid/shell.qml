@@ -1,3 +1,4 @@
+//@ pragma IconTheme Papirus-Dark
 // Fluid shell for sway. Run with `qs -c fluid` (started by fluid-launch.sh).
 import QtQuick
 import Quickshell

@@ -25,7 +25,7 @@ DropPanel {
     height: pageItems[pageIndex].implicitHeight + 32
     Behavior on width { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
-    function escape() { if (page === "main") Fluid.closeAll(); else page = "main"; }
+    function dismiss() { if (page === "main") Fluid.closeAll(); else page = "main"; }
 
     Item {
         id: viewport

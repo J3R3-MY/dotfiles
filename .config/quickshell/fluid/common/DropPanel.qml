@@ -17,8 +17,8 @@ Item {
     Behavior on height { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
     // Override to do something else on Esc (the control center goes back a page)
-    function escape() { Fluid.closeAll(); }
-    Keys.onEscapePressed: escape()
+    function dismiss() { Fluid.closeAll(); }
+    Keys.onEscapePressed: dismiss()
     onVisibleChanged: if (visible) forceActiveFocus()
 
     Rectangle {
