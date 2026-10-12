@@ -1,0 +1,5 @@
+#%PAM-1.0
+# Fingerprint only, used by LockScreen.qml next to the normal password check
+# (config "login"). Nothing system-wide: sudo, SDDM etc. stay password-only.
+auth     required  pam_fprintd.so max-tries=5 timeout=30
+account  required  pam_unix.so

@@ -1,8 +1,5 @@
-LockBackground 1.0 LockBackground.qml
-PasswordPill 1.0 PasswordPill.qml
+LockFace 1.0 LockFace.qml
+KeyRing 1.0 KeyRing.qml
 Avatar 1.0 Avatar.qml
 LockClassic 1.0 LockClassic.qml
-LockMinimal 1.0 LockMinimal.qml
-LockInfo 1.0 LockInfo.qml
-LockSplit 1.0 LockSplit.qml
 LockStatusRow 1.0 LockStatusRow.qml
