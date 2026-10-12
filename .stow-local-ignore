@@ -14,7 +14,7 @@ _darcs
 .git
 .gitignore
 .gitmodules
-.DS_STORE
+\.DS_Store
 ^/install.*
 ^/sddm
 ^/grub

@@ -5,6 +5,13 @@
 set -e
 cd "$(dirname "$0")"
 command -v stow >/dev/null || { echo "stow is missing: brew install stow"; exit 1; }
+# stow links everything in the folder, tracked by git or not: stop on stray files
+stray=$(git ls-files --others --exclude-standard)
+if [ -n "$stray" ]; then
+    printf 'Files in the repo that git does not track (stow would link them too):\n%s\n' "$stray"
+    read -rp "Link anyway? [y/N] " a
+    [[ "$a" =~ ^[yY] ]] || exit 1
+fi
 # a real ~/.config makes stow link per app instead of the whole folder
 mkdir -p "$HOME/.config"
 stow -v -t "$HOME" \
