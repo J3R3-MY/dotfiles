@@ -1,0 +1,6 @@
+# herdr (installed from the pinned AUR package herdr-bin, see install/aur-pins).
+# No background contact with herdr.dev: updates come through pacman/the pin,
+# not `herdr update`, and agent detection uses the rules built into this version.
+[update]
+version_check = false
+manifest_check = false
