@@ -109,19 +109,17 @@ DropPanel {
                 color: pr.p.reach === 2 ? Theme.clock : Theme.fgDim; size: "xs"
             }
         }
-        Rectangle {
+        Button {
             id: killBtn
             visible: pr.p.pid > 0
             anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
-            width: pr.armed ? 72 : 30; height: 30; radius: 15
-            color: pr.armed ? Theme.urgent : (ka.containsMouse ? Theme.surfaceHi : "transparent")
+            width: pr.armed ? 72 : 30; height: 30
+            text: pr.armed ? "Stop?" : Icons.close; font.pixelSize: Theme.fontSize - 3
+            baseColor: pr.armed ? Theme.urgent : "transparent"
+            hoverColor: pr.armed ? Theme.urgent : Theme.surfaceHi
             Behavior on width { NumberAnimation { duration: Anim.fast } }
-            Label { anchors.centerIn: parent; text: pr.armed ? "Stop?" : Icons.close; size: "sm" }
             Timer { id: disarm; interval: 3000; onTriggered: pr.armed = false }
-            MouseArea {
-                id: ka; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                onClicked: { if (!pr.armed) { pr.armed = true; disarm.restart(); } else Ports.kill(pr.p); }
-            }
+            onClicked: { if (!pr.armed) { pr.armed = true; disarm.restart(); } else Ports.kill(pr.p); }
         }
     }
 

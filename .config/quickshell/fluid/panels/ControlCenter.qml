@@ -144,12 +144,7 @@ DropPanel {
                         onIconClicked: Audio.toggleMute()
                     }
                     // Sound page: output device, microphone, per-app volume
-                    Rectangle {
-                        width: 40; height: 40; radius: 20
-                        color: soundMore.containsMouse ? Theme.surfaceHi : Theme.surface
-                        Text { anchors.centerIn: parent; text: "›"; color: Theme.fg; font.pixelSize: 22 }
-                        MouseArea { id: soundMore; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "sound" }
-                    }
+                    Button { width: 40; height: 40; text: "›"; font.pixelSize: 22; onClicked: root.page = "sound" }
                 }
 
                 // Night light strength: five steps, warmer to the right
@@ -162,22 +157,17 @@ DropPanel {
                     Glyph { width: 30; anchors.verticalCenter: parent.verticalCenter; text: Icons.g(0xf0594); color: Theme.fg }
                     Repeater {
                         model: NightLight.temps
-                        Rectangle {
+                        Button {
                             required property int index
                             readonly property bool chosen: index === NightLight.level
-                            width: (nightRow.width - 30 - 5 * 6) / 5; height: 40; radius: 20
+                            width: (nightRow.width - 30 - 5 * 6) / 5; height: 40
+                            text: index + 1; font.weight: Font.DemiBold
                             // from pale to the full clock colour = from barely to very warm
                             color: chosen ? Theme.clock : Qt.alpha(Theme.clock, 0.12 + index * 0.08)
-                            border.width: nArea.containsMouse && !chosen ? 1 : 0
+                            border.width: hovered && !chosen ? 1 : 0
                             border.color: Theme.clock
-                            Behavior on color { ColorAnimation { duration: Anim.fast } }
-                            Label {
-                                anchors.centerIn: parent
-                                text: index + 1
-                                color: parent.chosen ? Theme.onPill : Theme.fg
-                                font.weight: Font.DemiBold
-                            }
-                            MouseArea { id: nArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: NightLight.setLevel(index) }
+                            textColor: chosen ? Theme.onPill : Theme.fg
+                            onClicked: NightLight.setLevel(index)
                         }
                     }
                 }
@@ -219,11 +209,11 @@ DropPanel {
                                 { i: Media.playing ? Icons.pause : Icons.play, f: () => Media.toggle() },
                                 { i: Icons.next, f: () => Media.next() }
                             ]
-                            Item {
+                            Button {
                                 required property var modelData
-                                width: 36; height: 48
-                                Glyph { anchors.centerIn: parent; text: parent.modelData.i }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
+                                width: 36; height: 36; anchors.verticalCenter: parent.verticalCenter
+                                icon: modelData.i; baseColor: "transparent"
+                                onClicked: modelData.f()
                             }
                         }
                     }
@@ -277,36 +267,8 @@ DropPanel {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 10
                     Repeater {
-                        model: [
-                            // Sleep (hibernates after 12 h asleep or on low battery); locking is $mod+Shift+s
-                            { i: Icons.moon, tip: "Sleep", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
-                            { i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
-                            { i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
-                            { i: Icons.power, tip: "Shut down", cmd: ["systemctl", "poweroff"], confirm: true }
-                        ]
-                        Rectangle {
-                            id: pbtn
-                            required property var modelData
-                            property bool armed: false
-                            width: 64; height: 44; radius: 14
-                            color: armed ? Theme.urgent : (pArea.containsMouse ? Theme.surfaceHi : Theme.surface)
-                            Behavior on color { ColorAnimation { duration: Anim.fast } }
-                            Glyph { anchors.centerIn: parent; text: pbtn.armed ? "?" : pbtn.modelData.i }
-                            Timer { id: disarm; interval: 2500; onTriggered: pbtn.armed = false }
-                            MouseArea {
-                                id: pArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                // Destructive actions need a second click within 2.5s
-                                onClicked: {
-                                    if (pbtn.modelData.confirm && !pbtn.armed) { pbtn.armed = true; disarm.restart(); return; }
-                                    Fluid.closeAll();
-                                    if (pbtn.modelData.cmd) Quickshell.execDetached(pbtn.modelData.cmd);
-                                    else Fluid.lockRequested();
-                                }
-                            }
-                        }
+                        model: Fluid.powerActions
+                        PowerButton { required property var modelData; action: modelData; width: 64; height: 44; radius: 14 }
                     }
                 }
             }
@@ -633,13 +595,14 @@ DropPanel {
                     Label { anchors.verticalCenter: parent.verticalCenter; text: "Scale"; width: 60; dim: true; size: "sm" }
                     Repeater {
                         model: [1, 1.25, 1.5, 2]
-                        Rectangle {
+                        Button {
                             required property real modelData
                             readonly property bool on: Math.abs(displayPage.pickScale - modelData) < 0.01
                             width: 56; height: 30; radius: 10
-                            color: on ? Theme.clock : Theme.surface
-                            Label { anchors.centerIn: parent; text: parent.modelData + "×"; color: parent.on ? Theme.onPill : Theme.fg; size: "sm" }
-                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: displayPage.pickScale = parent.modelData }
+                            text: modelData + "×"; font.pixelSize: Theme.fontSize - 3
+                            baseColor: on ? Theme.clock : Theme.surface
+                            textColor: on ? Theme.onPill : Theme.fg
+                            onClicked: displayPage.pickScale = modelData
                         }
                     }
                 }
@@ -676,12 +639,13 @@ DropPanel {
                         }
                         Repeater {
                             model: [{ t: "Keep", f: () => Displays.keep(), main: true }, { t: "Revert", f: () => Displays.revert(), main: false }]
-                            Rectangle {
+                            Button {
                                 required property var modelData
                                 width: 90; height: parent.height; radius: 10
-                                color: modelData.main ? Theme.clock : Theme.surface
-                                Label { anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; size: "sm" }
-                                MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
+                                text: modelData.t; font.pixelSize: Theme.fontSize - 3
+                                baseColor: modelData.main ? Theme.clock : Theme.surface
+                                textColor: modelData.main ? Theme.onPill : Theme.fg
+                                onClicked: modelData.f()
                             }
                         }
                     }
@@ -723,12 +687,12 @@ DropPanel {
                             Text { visible: !profileName.text; anchors.verticalCenter: parent.verticalCenter; text: "Name this setup (e.g. Desk, Docked)"; color: Theme.fgDim; font: profileName.font }
                         }
                     }
-                    Rectangle {
+                    Button {
                         id: saveBtn
                         width: 110; height: 36; radius: 12
-                        color: Theme.clock
-                        Label { anchors.centerIn: parent; text: "Save current"; color: Theme.onPill; size: "sm" }
-                        MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { Displays.saveProfile(profileName.text); profileName.text = ""; } }
+                        text: "Save current"; font.pixelSize: Theme.fontSize - 3
+                        baseColor: Theme.clock; hoverColor: Theme.accent; textColor: Theme.onPill
+                        onClicked: { Displays.saveProfile(profileName.text); profileName.text = ""; }
                     }
                 }
             }
@@ -812,13 +776,7 @@ DropPanel {
         signal action()
         width: parent.width
         height: 36
-        Rectangle {
-            id: backBtn
-            width: 36; height: 36; radius: 18
-            color: backArea.containsMouse ? Theme.surfaceHi : "transparent"
-            Text { anchors.centerIn: parent; text: "‹"; color: Theme.fg; font.pixelSize: 24 }
-            MouseArea { id: backArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ph.back() }
-        }
+        Button { id: backBtn; width: 36; height: 36; text: "‹"; font.pixelSize: 24; baseColor: "transparent"; onClicked: ph.back() }
         Label {
             anchors.left: backBtn.right
             anchors.leftMargin: 8

@@ -85,16 +85,14 @@ Item {
             spacing: 8
             Repeater {
                 model: [{ t: "Cancel", main: false }, { t: "Authenticate", main: true }]
-                Rectangle {
+                Button {
                     required property var modelData
-                    width: label.implicitWidth + 28; height: 32; radius: 16
-                    color: modelData.main ? (area.containsMouse ? Theme.accent : Theme.clock) : (area.containsMouse ? Theme.surfaceHi : "transparent")
-                    Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Label { id: label; anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg }
-                    MouseArea {
-                        id: area; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: { if (parent.modelData.main) { Auth.submit(pw.text); pw.text = ""; } else Fluid.closeAll(); }
-                    }
+                    height: 32
+                    text: modelData.t
+                    baseColor: modelData.main ? Theme.clock : "transparent"
+                    hoverColor: modelData.main ? Theme.accent : Theme.surfaceHi
+                    textColor: modelData.main ? Theme.onPill : Theme.fg
+                    onClicked: { if (modelData.main) { Auth.submit(pw.text); pw.text = ""; } else Fluid.closeAll(); }
                 }
             }
         }

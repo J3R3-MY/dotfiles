@@ -303,19 +303,13 @@ Item {
                             { t: "🎲  Shuffle", f: () => Wallpaper.shuffle() },
                             { t: "↺  Reset", f: () => Wallpaper.reset() }
                         ]
-                        Rectangle {
+                        Button {
                             required property var modelData
-                            width: (tweaks.colW - 8) / 2; height: 34; radius: 12
-                            color: btnArea.containsMouse ? Theme.surfaceHi : Theme.bg
-                            border.width: 1
-                            border.color: Theme.border
-                            scale: btnArea.pressed ? 0.95 : 1
-                            Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
-                            Label {
-                                anchors.centerIn: parent
-                                text: parent.modelData.t
-                            }
-                            MouseArea { id: btnArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
+                            width: (tweaks.colW - 8) / 2; radius: 12
+                            text: modelData.t
+                            baseColor: Theme.bg
+                            border.width: 1; border.color: Theme.border
+                            onClicked: modelData.f()
                         }
                     }
                 }

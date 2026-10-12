@@ -43,12 +43,12 @@ Item {
                 spacing: 4
                 Repeater {
                     model: [{ t: "‹", d: -1 }, { t: "›", d: 1 }]
-                    Rectangle {
+                    Button {
                         required property var modelData
-                        width: 28; height: 28; radius: 14
-                        color: nav.containsMouse ? Theme.surfaceHi : "transparent"
-                        Text { anchors.centerIn: parent; text: parent.modelData.t; color: Theme.fg; font.pixelSize: 20 }
-                        MouseArea { id: nav; anchors.fill: parent; hoverEnabled: true; onClicked: root.monthOffset += parent.modelData.d }
+                        width: 28; height: 28
+                        text: modelData.t; font.pixelSize: 20
+                        baseColor: "transparent"
+                        onClicked: root.monthOffset += modelData.d
                     }
                 }
             }

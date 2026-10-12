@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.I3
+import "."
 
 // Global UI state + the IPC surface used by sway keybinds:
 //   qs -c fluid ipc call fluid toggle launcher|clipboard|media|calendar|theme|keys
@@ -45,6 +46,15 @@ Singleton {
 
     readonly property string focusedScreen: I3.focusedMonitor ? I3.focusedMonitor.name : ""
     readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys"]
+
+    // Power row of the control center and power panel (PowerButton). Sleep
+    // hibernates after 12 h asleep or on low battery; locking is $mod+Shift+s.
+    readonly property var powerActions: [
+        { id: "sleep", i: Icons.moon, tip: "Sleep", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
+        { id: "logout", i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
+        { id: "reboot", i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
+        { id: "poweroff", i: Icons.power, tip: "Shut down", cmd: ["systemctl", "poweroff"], confirm: true }
+    ]
 
     signal osdRequested(string kind)
     signal lockRequested()

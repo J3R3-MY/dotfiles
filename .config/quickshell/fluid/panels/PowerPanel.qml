@@ -111,33 +111,8 @@ DropPanel {
             width: parent.width
             spacing: 8
             Repeater {
-                model: [
-                    { i: Icons.moon, cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
-                    { i: Icons.g(0xf0709), cmd: ["systemctl", "reboot"], confirm: true },
-                    { i: Icons.power, cmd: ["systemctl", "poweroff"], confirm: true }
-                ]
-                Rectangle {
-                    id: sbtn
-                    required property var modelData
-                    property bool armed: false
-                    width: (col.width - 16) / 3; height: 46; radius: 14
-                    color: armed ? Theme.urgent : (sArea.containsMouse ? Theme.surfaceHi : Theme.surface)
-                    Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Glyph { anchors.centerIn: parent; text: sbtn.armed ? "?" : sbtn.modelData.i }
-                    Timer { id: disarm; interval: 2500; onTriggered: sbtn.armed = false }
-                    MouseArea {
-                        id: sArea
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (sbtn.modelData.confirm && !sbtn.armed) { sbtn.armed = true; disarm.restart(); return; }
-                            Fluid.closeAll();
-                            if (sbtn.modelData.cmd) Quickshell.execDetached(sbtn.modelData.cmd);
-                            else Fluid.lockRequested();
-                        }
-                    }
-                }
+                model: Fluid.powerActions.filter(a => a.id !== "logout")
+                PowerButton { required property var modelData; action: modelData; width: (col.width - 16) / 3; height: 46; radius: 14 }
             }
         }
 

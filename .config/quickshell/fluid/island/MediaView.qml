@@ -137,14 +137,14 @@ Item {
                         { icon: Media.playing ? Icons.pause : Icons.play, act: () => Media.toggle(), big: true },
                         { icon: Icons.next, act: () => Media.next(), big: false }
                     ]
-                    Rectangle {
+                    Button {
                         required property var modelData
-                        width: modelData.big ? 46 : 36; height: width; radius: width / 2
-                        color: modelData.big ? Theme.clock : (ctl.containsMouse ? Theme.surfaceHi : "transparent")
-                        scale: ctl.pressed ? 0.88 : 1
-                        Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
-                        Glyph { anchors.centerIn: parent; text: parent.modelData.icon; color: parent.modelData.big ? Theme.onPill : Theme.fg }
-                        MouseArea { id: ctl; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.act() }
+                        width: modelData.big ? 46 : 36; height: width
+                        icon: modelData.icon
+                        baseColor: modelData.big ? Theme.clock : "transparent"
+                        hoverColor: modelData.big ? Theme.clock : Theme.surfaceHi
+                        textColor: modelData.big ? Theme.onPill : Theme.fg
+                        onClicked: modelData.act()
                     }
                 }
             }

@@ -13,3 +13,5 @@ DropPanel 1.0 DropPanel.qml
 WaveGauge 1.0 WaveGauge.qml
 Blobs 1.0 Blobs.qml
 Label 1.0 Label.qml
+Button 1.0 Button.qml
+PowerButton 1.0 PowerButton.qml
