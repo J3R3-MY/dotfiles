@@ -14,7 +14,15 @@ if [ -n "$stray" ]; then
 fi
 # a real ~/.config makes stow link per app instead of the whole folder
 mkdir -p "$HOME/.config"
-stow -v -t "$HOME" \
-    --ignore='\.zsh_linux' \
-    --ignore='\.config/(sway|swaylock|waybar|wofi|dunst|pipewire|quickshell|scripts)' \
-    .
+opts=(-t "$HOME" --ignore='\.zsh_linux'
+      --ignore='\.config/(sway|swaylock|waybar|wofi|dunst|pipewire|quickshell|scripts)')
+# Files already in ~ where a link should go (stow refuses to replace them):
+# move them to a backup folder first, like the Linux installer does
+backup="$HOME/.dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+stow -n "${opts[@]}" . 2>&1 \
+    | sed -n -e 's/.*existing target is [^:]*: //p' -e 's/.*over existing target \(.*\) since.*/\1/p' \
+    | while IFS= read -r f; do
+        mkdir -p "$backup/$(dirname "$f")"
+        mv "$HOME/$f" "$backup/$f" && echo "moved ~/$f to $backup"
+    done
+stow -v "${opts[@]}" .
