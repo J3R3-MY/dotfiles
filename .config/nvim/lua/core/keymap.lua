@@ -34,14 +34,8 @@ vim.opt.showcmd = true    --show command in bottom bar
 --LSP keymaps
 local keymap = vim.keymap     -- for conciseness
 
-local diagnostics_active = true
 keymap.set('n', '<leader>td', function()
-  diagnostics_active = not diagnostics_active
-  if diagnostics_active then
-    vim.diagnostic.disable()
-  else
-    vim.diagnostic.enable()
-  end
+  vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end, { desc = "Toggle Diagnostics" })
 
 vim.api.nvim_create_autocmd("LspAttach", {

@@ -334,7 +334,7 @@ do_dotfiles() {
     # .zshrc in the repo is the macOS one (Homebrew paths); Linux gets .zsh_linux.
     # macOS-only configs are skipped (the Mac side is install-mac.sh).
     (cd "$REPO_DIR" && stow --no-folding -t "$HOME" --ignore='^\.zshrc$' --ignore='\.config/quickshell' \
-        --ignore='\.config/(aerospace|sketchybar|sketchybar_old)' .) >>"$LOG" 2>&1 \
+        --ignore='\.config/(aerospace|sketchybar)' .) >>"$LOG" 2>&1 \
         && info "stowed $REPO_DIR into ~" \
         || warn "stow reported problems, see $LOG"
     # The shell's folder is linked as a whole instead of file by file (stow
