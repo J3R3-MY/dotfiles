@@ -86,14 +86,14 @@ cd ~/dotfiles
 
 One branch (`main`) holds both systems. Each side skips the other's configs
 when linking: Linux leaves out aerospace/sketchybar and the macOS `.zshrc`,
-the Mac leaves out sway, waybar, Quickshell, hypr, `.zsh_linux` and co.
+the Mac leaves out sway, waybar, Quickshell, `.zsh_linux` and co.
 
 Reboot afterwards and pick **Sway** in SDDM (**Sway (NVIDIA)** on NVIDIA cards).
 
 Both scripts share `install/lib.sh` and:
 
 - install everything the sway config, scripts, zsh/nvim setup and the
-  apps from `setup-arch.sh` use (Hyprland-only packages are left out)
+  desktop apps use
 - add snapper/btrfs-assistant on btrfs and run `nvidia-inst` on NVIDIA
 - enable NetworkManager, bluetooth, SDDM (own `fluid` theme, see below), fstrim, docker,
   tailscaled and PipeWire
@@ -112,7 +112,7 @@ log is in `~/dotfiles-install-<date>.log`.
 - `fluid-launch.sh` starts the shell. If Quickshell isn't installed it starts
   waybar + dunst instead. If the shell crashes three times within 10 s of
   starting, it also falls back to waybar + dunst and sends a notification.
-- Nothing in the old waybar, rofi, wofi or swaylock configs changed; `$mod+Shift+e` opens the power panel (Sway's exit prompt in waybar mode).
+- Nothing in the old waybar, wofi or swaylock configs changed; `$mod+Shift+e` opens the power panel (Sway's exit prompt in waybar mode).
 - Before you pick a wallpaper, the shell uses the old waybar colours and sway
   keeps its `output * bg` line. WezTerm keeps Everforest.
 - To remove it completely: comment out `include ~/.config/sway/fluid.conf`

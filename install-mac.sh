@@ -9,5 +9,5 @@ command -v stow >/dev/null || { echo "stow is missing: brew install stow"; exit 
 mkdir -p "$HOME/.config"
 stow -v -t "$HOME" \
     --ignore='\.zsh_linux' \
-    --ignore='\.config/(sway|swaylock|waybar|wofi|rofi|dunst|hypr|wlogout|pipewire|quickshell|xdg-desktop-portal|scripts)' \
+    --ignore='\.config/(sway|swaylock|waybar|wofi|dunst|pipewire|quickshell|scripts)' \
     .

@@ -15,7 +15,6 @@ _darcs
 .gitignore
 .gitmodules
 .DS_STORE
-setup-arch.sh
 ^/install.*
 ^/sddm
 ^/grub

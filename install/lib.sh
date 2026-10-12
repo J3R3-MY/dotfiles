@@ -42,7 +42,7 @@ PKGS_SWAY=(
     grim slurp sway-contrib swappy   # sway-contrib provides grimshot
     tesseract tesseract-data-eng tesseract-data-deu   # $mod+Ctrl+g: text from the screen (fluid-ocr.sh)
     wl-clipboard cliphist xclip
-    waybar wofi rofi dunst libnotify
+    waybar wofi dunst libnotify
     xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
     qt5-wayland qt6-wayland
     imagemagick            # SDDM wallpaper copy, wallpaper colour filter
@@ -69,14 +69,14 @@ PKGS_DEV=(
     docker
 )
 
-# Desktop apps from setup-arch.sh that aren't Hyprland-specific
+# Desktop apps
 PKGS_APPS=(
     firefox thunderbird obsidian okular gwenview feh vlc ark gvfs
     thunar thunar-volman thunar-archive-plugin tumbler
     qalculate-gtk bitwarden tailscale
 )
 
-# Fonts used across waybar, wofi/rofi, dunst, wezterm, nvim
+# Fonts used across waybar, wofi, dunst, wezterm, nvim
 PKGS_FONTS=(
     otf-font-awesome ttf-jetbrains-mono ttf-jetbrains-mono-nerd
     ttf-fira-sans ttf-fira-code ttf-firacode-nerd ttf-nerd-fonts-symbols ttf-nerd-fonts-symbols-mono
@@ -457,7 +457,7 @@ do_sddm_theme() {
 
     sudo mkdir -p /etc/sddm.conf.d
     printf '[Theme]\nCurrent=fluid\n' | sudo tee /etc/sddm.conf.d/10-theme.conf >/dev/null
-    # Old astronaut theme: AUR package (earlier installer) or copied files (setup-arch.sh)
+    # Old astronaut theme: AUR package (earlier installer) or copied files (an old setup script)
     if pacman -Qq sddm-astronaut-theme >/dev/null 2>&1; then
         sudo pacman -Rns --noconfirm sddm-astronaut-theme >>"$LOG" 2>&1 && info "removed sddm-astronaut-theme"
     elif [ -d /usr/share/sddm/themes/sddm-astronaut-theme ]; then
