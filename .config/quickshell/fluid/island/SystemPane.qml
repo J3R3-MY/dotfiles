@@ -1,13 +1,11 @@
 import QtQuick
-import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import "../common"
 import "../services"
 
 // Dashboard "System" tab: liquid gauges for CPU, memory and temperatures
-// (SysStats), a 2-minute CPU graph and the busiest processes (ps, only while
-// shown).
+// (SysStats) and the busiest processes (ps, only while shown).
 Item {
     id: root
 
@@ -58,65 +56,6 @@ Item {
         }
     }
 
-    // CPU over the last 2 minutes (newest on the right): filled area that
-    // fades out downwards, with a brighter line on top
-    Rectangle {
-        id: graph
-        anchors.top: cardRow.bottom; anchors.topMargin: 12
-        width: parent.width; height: 120; radius: 18
-        color: Theme.surface
-        Text { x: 16; y: 10; text: "CPU usage · last 2 minutes"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3; font.weight: Font.DemiBold }
-        Text { anchors.right: parent.right; anchors.rightMargin: 16; y: 10; text: SysStats.cpu + "%"; color: Theme.cpu; font.family: "JetBrains Mono"; font.pixelSize: Theme.fontSize - 3 }
-
-        Shape {
-            id: plot
-            anchors.fill: parent
-            anchors.topMargin: 34; anchors.bottomMargin: 10
-            anchors.leftMargin: 16; anchors.rightMargin: 16
-            preferredRendererType: Shape.CurveRenderer
-            // the top of the graph follows the load (20 / 40 / ... / 100 %) so
-            // a quiet machine doesn't draw a flat line on the floor
-            readonly property int ceiling: Math.max(20, Math.ceil(Math.max(...SysStats.cpuHistory, 1) / 20) * 20)
-            readonly property var line: {
-                const h = SysStats.cpuHistory, n = Math.max(2, h.length);
-                return h.map((v, i) => Qt.point(34 + (width - 34) * (i + 60 - n) / 59, height * (1 - Math.min(v, ceiling) / ceiling)));
-            }
-            // guide lines at the top and the middle, labelled on the left
-            Repeater {
-                model: [0, 0.5]
-                Item {
-                    required property real modelData
-                    width: plot.width; y: plot.height * modelData
-                    Rectangle { x: 34; width: parent.width - 34; height: 1; color: Qt.alpha(Theme.fg, 0.08) }
-                    Text {
-                        anchors.verticalCenter: parent.top
-                        text: Math.round(plot.ceiling * (1 - parent.modelData)) + "%"
-                        color: Theme.fgDim; font.family: "JetBrains Mono"; font.pixelSize: 9
-                    }
-                }
-            }
-            ShapePath {
-                strokeColor: "transparent"
-                fillGradient: LinearGradient {
-                    y1: 0; y2: plot.height
-                    GradientStop { position: 0; color: Qt.alpha(Theme.cpu, 0.45) }
-                    GradientStop { position: 1; color: Qt.alpha(Theme.cpu, 0) }
-                }
-                PathPolyline {
-                    path: plot.line.length ? plot.line.concat([Qt.point(plot.width, plot.height), Qt.point(plot.line[0].x, plot.height)]) : []
-                }
-            }
-            ShapePath {
-                fillColor: "transparent"
-                strokeColor: Theme.cpu
-                strokeWidth: 2
-                joinStyle: ShapePath.RoundJoin
-                capStyle: ShapePath.RoundCap
-                PathPolyline { path: plot.line }
-            }
-        }
-    }
-
     // Busiest processes
     property var procs: []
     Process {
@@ -124,16 +63,17 @@ Item {
         // name last: it can contain spaces ("Isolated Web Co")
         command: ["ps", "-eo", "pid=,pcpu=,rss=,comm=", "--sort=-pcpu"]
         stdout: StdioCollector {
-            onStreamFinished: root.procs = text.trim().split("\n").slice(0, 5).map(l => {
+            // ps itself is always busy while it measures: leave it out
+            onStreamFinished: root.procs = text.trim().split("\n").map(l => {
                 const f = l.trim().split(/\s+/);
                 return { pid: f[0], cpu: parseFloat(f[1]), mem: parseInt(f[2]) / 1024, name: f.slice(3).join(" ") };
-            })
+            }).filter(p => p.name !== "ps").slice(0, 10)
         }
     }
     Timer { interval: 2000; repeat: true; triggeredOnStart: true; running: root.shown; onTriggered: ps.running = true }
 
     Rectangle {
-        anchors.top: graph.bottom; anchors.topMargin: 12
+        anchors.top: cardRow.bottom; anchors.topMargin: 12
         anchors.bottom: parent.bottom
         width: parent.width; radius: 18
         color: Theme.surface

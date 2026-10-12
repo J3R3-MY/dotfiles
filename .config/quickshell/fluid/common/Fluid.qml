@@ -44,7 +44,7 @@ Singleton {
     property bool locked: false       // set by the lock screen
 
     readonly property string focusedScreen: I3.focusedMonitor ? I3.focusedMonitor.name : ""
-    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys", "vault"]
+    readonly property var views: ["launcher", "clipboard", "media", "calendar", "theme", "keys"]
 
     signal osdRequested(string kind)
     signal lockRequested()

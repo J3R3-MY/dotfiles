@@ -13,7 +13,6 @@ Singleton {
     property int memory: 0
     property real memUsedGiB: 0
     property real memTotalGiB: 0
-    property var cpuHistory: []          // last 60 samples (2 min)
     property real cpuTemp: NaN           // °C, coretemp package
     property real diskTemp: NaN          // °C, NVMe
     property var fans: []                // rpm
@@ -50,7 +49,6 @@ Singleton {
                 const di = idle - root._prev.idle;
                 if (dt > 0) {
                     root.cpu = Math.round(100 * (1 - di / dt));
-                    root.cpuHistory = root.cpuHistory.concat([root.cpu]).slice(-60);
                 }
             }
             root._prev = { total: total, idle: idle };

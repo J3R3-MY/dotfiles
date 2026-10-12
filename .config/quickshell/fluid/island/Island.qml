@@ -37,7 +37,6 @@ Item {
         "calendar": Qt.size(1040, 480),
         "theme": Qt.size(1180, 600),
         "keys": Qt.size(1040, 640),
-        "vault": Qt.size(680, 520),
         "auth": Qt.size(460, 230)
     })
     readonly property real restWidth: restRow.implicitWidth + 26
@@ -233,8 +232,7 @@ Item {
                 }
             }
             readonly property var files: ({ launcher: "LauncherView.qml", clipboard: "ClipboardView.qml", media: "MediaView.qml",
-                                             calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml",
-                                             vault: "VaultView.qml", auth: "AuthView.qml" })
+                                             calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml", auth: "AuthView.qml" })
             source: island.shownView ? files[island.shownView] : ""
         }
     }

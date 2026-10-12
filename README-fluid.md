@@ -16,7 +16,7 @@ AGPL), so this stays under the repo's MIT licence.
 |---|---|---|
 | Fluid bar | top of every output | Waybar layout and colours. Workspaces show icons of the apps open on them (monochrome theme "yet-another-monochrome-icon-set", tinted with the theme accent), sliding highlight, pills widen on hover to show details |
 | Dynamic island | the clock | Morphs into launcher, clipboard, media, dashboard, theme picker or cheat sheet. Live equaliser bars while music plays; hover to see the track |
-| Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: System (gauges, CPU graph, top processes) |
+| Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: System (gauges, top processes) |
 | Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert. Sound page (click the volume pill, or `›` next to the volume slider): output device, microphone, volume per app. Tiles for Keep awake (no dim/lock/sleep on idle), Night light (screen warmer while on, 5 strengths; wlsunset) and Record screen. Bar: DE/US badge for the keyboard layout (click = switch). Dashboard has a System tab (CPU, memory, temperatures, fans, top processes) |
 | Power panel | click the battery pill | Battery ring, uptime, brightness/volume, lock/suspend/reboot/off, Performance/Balanced/Saver |
 | Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders, WezTerm, the login screen, GTK icons (Thunar, in the accent colour) and (Linux only) the starship prompt and Neovim (live, via mini.base16; everforest elsewhere). The same wallpaper + settings always give the same colours. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
@@ -37,17 +37,12 @@ AGPL), so this stays under the repo's MIT licence.
 | AirPods | Bluetooth pill shows the pods' battery; Bluetooth page: L/R/case, noise mode, conversation awareness, auto-pause | thisisgm.omapods (own ~150-line Python bridge, no librepods) |
 | Spotify | `$mod+Shift+m` or "Spotify" in the media view: goes to the official app on its own workspace "m" (starts it if needed, again = back); play/pause/next from the media view and island | official app via `spotify-launcher` |
 | Password prompts | automatic: when an app needs admin rights (pkexec, mounting, Network Manager, installers, ...) the island turns into a prompt that names the app and why. Esc / click outside cancels. Waybar mode uses polkit-gnome as before | Quickshell's polkit agent |
-| Bitwarden | `$mod+Shift+p`: unlock, search, copy password/username/TOTP | elevate08.qs-bitwarden-cli (official `bw` CLI) |
 | Monitor profiles | Control center → Displays: drag to arrange, save profiles that kanshi re-applies on hotplug | crmne.hyprmoncfg |
 | Paste files as paths | copy files in Thunar, `Ctrl+Shift+V` in WezTerm pastes their quoted paths | Omarchy's file → terminal paste |
 
 Skipped: omdrop (needs Apple Silicon + Broadcom Wi-Fi). herdr itself is installed (AUR `herdr-bin`, pinned), its bar widget is not.
 
-One-time setup for the accounts: Spotify → sign in once in the app;
-Bitwarden → "Log in" in the vault view
-(runs `bw login`). Copied passwords never pass through the shell, are removed
-from clipboard history and cleared after 30 s; the vault locks after 10 minutes
-or when the screen locks.
+One-time setup for the accounts: Spotify and Bitwarden → sign in once in the app.
 
 Weather comes from Open-Meteo. On first use the dashboard asks for your city
 (looked up with Open-Meteo's geocoder) and stores `lat,lon,City` in
@@ -67,7 +62,7 @@ Old binds are untouched. New ones use keys that were unbound:
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |
 | `$mod+Shift+m` | Spotify (its own workspace "m"; again = back) |
-| `$mod+Shift+p` | Bitwarden passwords |
+| `$mod+Shift+p` | Bitwarden (desktop app) |
 | `$mod+Shift+r` | Record an area of the screen (again = stop; whole screen from the control center tile). Island shows a red dot + time, click it to stop. Saved to ~/Videos, no audio |
 | `$mod+Ctrl+g` | Copy text from the screen: drag a box, OCR (offline, English + German) puts it in the clipboard |
 | `$mod+Shift+o` | All windows solid / see-through again (Obsidian, Thunar, Spotify at 85 %, WezTerm 75 %; rules in `fluid.conf`) |

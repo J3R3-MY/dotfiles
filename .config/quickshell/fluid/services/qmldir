@@ -18,7 +18,6 @@ singleton Health 1.0 Health.qml
 singleton Vpn 1.0 Vpn.qml
 singleton Ports 1.0 Ports.qml
 singleton Pods 1.0 Pods.qml
-singleton Vault 1.0 Vault.qml
 singleton Auth 1.0 Auth.qml
 singleton Files 1.0 Files.qml
 singleton NightLight 1.0 NightLight.qml

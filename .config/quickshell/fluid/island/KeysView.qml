@@ -98,8 +98,7 @@ Item {
 
         const known = [
             [/fluid ipc call fluid toggle (\w+)/, (_, v) => ({ launcher: "App launcher", clipboard: "Clipboard history", media: "Media player",
-                calendar: "Dashboard (calendar, weather, screen time)", theme: "Wallpaper & theme picker", keys: "This cheat sheet",
-                vault: "Bitwarden passwords" }[v] || v)],
+                calendar: "Dashboard (calendar, weather, system)", theme: "Wallpaper & theme picker", keys: "This cheat sheet" }[v] || v)],
             [/fluid ipc call fluid network/, () => "Network panel (traffic, health, VPN, ports)"],
             [/fluid ipc call fluid controlCenter/, () => "Control center"],
             [/fluid ipc call fluid power/, () => "Power panel"],

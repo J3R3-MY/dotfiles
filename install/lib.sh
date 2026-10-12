@@ -88,7 +88,6 @@ PKGS_FLUID=(
     quickshell qt6-imageformats matugen
     power-profiles-daemon   # Performance / Balanced / Saver in the power panel
     spotify-launcher        # official Spotify app ($mod+Shift+m)
-    bitwarden-cli           # Bitwarden view ($mod+Shift+p)
     kanshi                  # monitor profiles applied on hotplug
     iw                      # Wi-Fi link details in the network panel
     wlsunset                # night light (control center)
