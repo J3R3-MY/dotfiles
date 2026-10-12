@@ -19,9 +19,6 @@ set $term wezterm
 #set $menu dmenu_path | wmenu | xargs swaymsg exec --
 set $menu wofi --show drun --allow-images | xargs swaymsg exec --
 
-bindsym $mod+Alt+1 swaymsg exec sway
-bindsym $mod+Alt+2 swaymsg exec sway
-
 include /etc/sway/config-vars.d/*
 
 ### Output configuration
@@ -230,9 +227,15 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # Move a workspace to a different monitor
 bindsym $mod+Shift+b move workspace to output eDP-1
 bindsym $mod+Shift+a move workspace to output HDMI-A-1
-bindsym $mod+comma  move workspace to output $mon_right
-bindsym $mod+period move workspace to output eDP-1
-bindsym $mod+slash  move workspace to output $mon_left
+# The three keys right of M (, . - on German, , . / on US) = left, laptop,
+# right screen: $mod focuses it, $mod+Shift moves the workspace there.
+# bindcode = physical key, so the Caps Lock layout switch doesn't change them.
+bindcode $mod+59 focus output $mon_left
+bindcode $mod+60 focus output eDP-1
+bindcode $mod+61 focus output $mon_right
+bindcode $mod+Shift+59 move workspace to output $mon_left
+bindcode $mod+Shift+60 move workspace to output eDP-1
+bindcode $mod+Shift+61 move workspace to output $mon_right
 
 #
 # Layout stuff:
@@ -259,18 +262,6 @@ bindsym $mod+slash  move workspace to output $mon_left
 
     # Move focus to the parent container
     bindsym $mod+a focus parent
-#
-# Scratchpad:
-#
-    # Sway has a "scratchpad", which is a bag of holding for windows.
-    # You can send windows there and get them back later.
-
-    # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
-
-    # Show the next scratchpad window or hide the focused scratchpad window.
-    # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
 #
 # Resizing containers:
 #
