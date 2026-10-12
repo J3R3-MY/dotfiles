@@ -22,7 +22,8 @@ Rectangle {
     readonly property var extraActions: actionList.filter(a => a.identifier !== "default")
     readonly property string iconSource: {
         if (!notification) return "";
-        if (notification.image) return notification.image;
+        // local images only: a remote one would be fetched (see body below)
+        if (/^(\/|file:\/\/|image:\/\/)/.test(notification.image)) return notification.image;
         if (notification.appIcon) return notification.appIcon.startsWith("/") ? "file://" + notification.appIcon
                                                                                : Quickshell.iconPath(notification.appIcon, true);
         return "";
@@ -68,11 +69,13 @@ Rectangle {
             Text {
                 width: parent.width; elide: Text.ElideRight
                 text: card.notification ? card.notification.appName : ""
+                textFormat: Text.PlainText      // AutoText would render HTML (and fetch <img>)
                 color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
             }
             Text {
                 width: parent.width; elide: Text.ElideRight
                 text: card.notification ? card.notification.summary : ""
+                textFormat: Text.PlainText
                 color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
             }
             Text {
