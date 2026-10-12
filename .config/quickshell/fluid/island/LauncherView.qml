@@ -35,6 +35,7 @@ Item {
 
     // icon for a file: folder, or a guess from the extension
     function fileIcon(f) {
+        if (!f) return "text-x-generic";      // a row between two result lists
         if (f.isDir) return "folder";
         const ext = f.name.includes(".") ? f.name.split(".").pop().toLowerCase() : "";
         const kinds = { image: ["png", "jpg", "jpeg", "gif", "webp", "svg"], video: ["mp4", "mkv", "webm", "mov"],
@@ -104,13 +105,13 @@ Item {
                     width: row.width - 70
                     Label {
                         width: parent.width; elide: Text.ElideRight
-                        text: row.app ? row.app.name : row.file.name
+                        text: row.app ? row.app.name : row.file?.name ?? ""
                         size: "lg"
                     }
                     Label {
                         width: parent.width; elide: Text.ElideMiddle
                         visible: text.length > 0
-                        text: row.app ? (row.app.comment || row.app.genericName || "") : row.file.dir
+                        text: row.app ? (row.app.comment || row.app.genericName || "") : row.file?.dir ?? ""
                         dim: true; size: "sm"
                     }
                 }
