@@ -28,6 +28,7 @@ setup-arch.sh
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
-\.stow-global-ignore
 ^/docs
 ^/\.githooks
+^/\.config/AdditionalPackages\.txt
+^/\.config/LICENSE

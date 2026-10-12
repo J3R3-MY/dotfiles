@@ -81,7 +81,12 @@ git clone <this repo> ~/dotfiles
 cd ~/dotfiles
 ./install-sway.sh          # sway + waybar + dunst (the plain setup)
 ./install-sway-fluid.sh    # the same, plus the Quickshell fluid shell
+./install-mac.sh           # macOS: only links the shared + Mac configs
 ```
+
+One branch (`main`) holds both systems. Each side skips the other's configs
+when linking: Linux leaves out aerospace/sketchybar and the macOS `.zshrc`,
+the Mac leaves out sway, waybar, Quickshell, hypr, `.zsh_linux` and co.
 
 Reboot afterwards and pick **Sway** in SDDM (**Sway (NVIDIA)** on NVIDIA cards).
 
@@ -96,7 +101,7 @@ Both scripts share `install/lib.sh` and:
   `~/.dotfiles-backup-<date>` first
 - link `~/.zshrc` to `.zsh_linux` (the repo's `.zshrc` is the macOS one) and
   `~/dotfiles` to the repo (the sway config uses those paths)
-- set zsh as login shell, install tpm, install neovim through bob, append
+- set zsh as login shell, install neovim through bob, append
   `.gitconfig_appendix.txt` to `~/.gitconfig`
 
 They're safe to re-run. Packages that fail are listed at the end; the full
