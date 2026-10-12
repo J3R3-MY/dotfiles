@@ -208,6 +208,5 @@ back (Ctrl+Alt+F1) and unlock with swaylock.
 
 - Not tested on a real machine yet: written on macOS, where Quickshell can't run.
 - No system tray (the old waybar config didn't show one either).
-- The scratchpad counter from waybar isn't in the bar yet.
 - New secured Wi-Fi networks open `nmtui-connect` for the password; known
   networks connect directly.
