@@ -16,6 +16,12 @@ Singleton {
     property string layout: ""
     property int layoutCount: 0
     function nextLayout() { I3.dispatch("input type:keyboard xkb_switch_layout next"); }
+    // Theme icon for an app id via its desktop entry (bar fallback when the id
+    // itself has no icon)
+    function iconFor(id) {
+        const e = DesktopEntries.heuristicLookup(id);
+        return Quickshell.iconPath(e ? e.icon : id.toLowerCase(), "application-x-executable");
+    }
 
     I3IpcListener {
         subscriptions: ["input"]

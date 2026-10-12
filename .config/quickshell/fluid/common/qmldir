@@ -10,3 +10,5 @@ Ring 1.0 Ring.qml
 Chip 1.0 Chip.qml
 Segmented 1.0 Segmented.qml
 DropPanel 1.0 DropPanel.qml
+WaveGauge 1.0 WaveGauge.qml
+Blobs 1.0 Blobs.qml

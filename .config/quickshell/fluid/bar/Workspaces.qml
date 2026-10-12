@@ -105,7 +105,7 @@ Item {
                                 // the theme's icon named after the window first (the
                                 // Spotify app's desktop entry wants "spotify-launcher",
                                 // which only Papirus has, in colour)
-                                source: Quickshell.iconPath(parent.modelData, true) || ScreenTime.iconFor(parent.modelData)
+                                source: Quickshell.iconPath(parent.modelData, true) || Sway.iconFor(parent.modelData)
                                 sourceSize: Qt.size(40, 40)
                                 smooth: true
                                 mipmap: true

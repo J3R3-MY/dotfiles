@@ -34,7 +34,7 @@ Item {
         "launcher": Qt.size(600, 480),
         "clipboard": Qt.size(600, 480),
         "media": Qt.size(560, 440),
-        "calendar": Qt.size(1120, 620),
+        "calendar": Qt.size(1040, 480),
         "theme": Qt.size(1180, 600),
         "keys": Qt.size(1040, 640),
         "vault": Qt.size(680, 520),
@@ -62,6 +62,17 @@ Item {
         border.color: Theme.border
         Behavior on radius { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
         Behavior on color { ColorAnimation { duration: Anim.normal } }
+    }
+    // drifting colour blobs behind the open views (inside the 2 px border)
+    ClippingRectangle {
+        anchors.fill: parent
+        anchors.margins: 2
+        radius: body.radius - 2
+        color: "transparent"
+        opacity: island.open ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: Anim.normal } }
+        Blobs { anchors.fill: parent; strength: 0.16 }
     }
 
     HoverHandler { id: hover }

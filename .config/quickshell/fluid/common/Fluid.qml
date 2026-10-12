@@ -110,6 +110,7 @@ Singleton {
         }
         function controlCenter(): void { root.toggleControlCenter(""); }
         function sound(): void { root.toggleControlCenter("", "sound"); }
+        function page(name: string): void { root.toggleControlCenter("", name); }   // wifi, bt, display, sound
         function power(): void { root.togglePower(""); }
         function network(tab: string): void { root.toggleNet(tab || "traffic", ""); }
         function lock(): void { root.lockRequested(); }

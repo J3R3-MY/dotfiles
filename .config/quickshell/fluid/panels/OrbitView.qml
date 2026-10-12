@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import Quickshell
 import "../common"
 
@@ -6,8 +7,8 @@ import "../common"
 // circle in the middle, everything else orbits around it on thin spokes.
 //  - satellites are keyed by title, so a rescan moves existing ones instead of
 //    rebuilding them; position changes glide on a spring
-//  - spokes are rotated rectangles bound to the satellites' animated
-//    positions, so they follow every frame without canvas repaints
+//  - spokes are curves bound to the satellites' animated positions (no canvas
+//    repaints); each bends a little and sways slowly
 //  - the whole ring drifts slowly so the page never looks frozen
 Item {
     id: root
@@ -26,9 +27,11 @@ Item {
     readonly property real ry: height / 2 - 36
     property real spread: 0
     property real drift: 0
+    property real sway: 0
     Component.onCompleted: spread = 1
     Behavior on spread { NumberAnimation { duration: 650; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
     NumberAnimation on drift { from: 0; to: 2 * Math.PI; duration: 120000; loops: Animation.Infinite; running: root.visible }
+    NumberAnimation on sway { from: 0; to: 2 * Math.PI; duration: 7000; loops: Animation.Infinite; running: root.visible }
 
     function angleFor(i) {
         const n = Math.max(1, items.length);
@@ -49,7 +52,7 @@ Item {
             SequentialAnimation on scale {
                 loops: Animation.Infinite
                 running: root.visible
-                NumberAnimation { to: 1.04; duration: 2400 + index * 600; easing.type: Easing.InOutSine }
+                NumberAnimation { to: 1.1; duration: 2400 + index * 600; easing.type: Easing.InOutSine }
                 NumberAnimation { to: 1.0; duration: 2400 + index * 600; easing.type: Easing.InOutSine }
             }
         }
@@ -71,18 +74,29 @@ Item {
             readonly property real py: root.height / 2 + root.ry * root.spread * Math.sin(slot + root.drift)
             anchors.fill: parent
 
-            // Spoke from the centre to this satellite
-            Rectangle {
-                readonly property real dx: sat.px - root.width / 2
-                readonly property real dy: sat.py - root.height / 2
-                x: root.width / 2
-                y: root.height / 2
-                width: Math.sqrt(dx * dx + dy * dy)
-                height: 1
-                transformOrigin: Item.Left
-                rotation: Math.atan2(dy, dx) * 180 / Math.PI
-                color: sat.modelData.active ? Theme.clock : Theme.border
-                opacity: sat.modelData.active ? 0.9 : 0.6
+            // Spoke from the centre to this satellite: a quadratic curve whose
+            // control point sits off the midpoint, swinging slowly sideways
+            Shape {
+                id: spoke
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                readonly property real cx: root.width / 2
+                readonly property real cy: root.height / 2
+                readonly property real dx: sat.px - cx
+                readonly property real dy: sat.py - cy
+                readonly property real len: Math.max(1, Math.sqrt(dx * dx + dy * dy))
+                readonly property real bend: len * (0.12 + 0.07 * Math.sin(root.sway + sat.index * 1.7)) * (sat.index % 2 ? 1 : -1)
+                readonly property real ctrlX: cx + dx / 2 - dy / len * bend
+                readonly property real ctrlY: cy + dy / 2 + dx / len * bend
+
+                ShapePath {
+                    fillColor: "transparent"
+                    strokeColor: sat.modelData.active ? Theme.clock : Qt.alpha(Theme.fg, 0.2)
+                    strokeWidth: sat.modelData.active ? 1.5 : 1.2
+                    capStyle: ShapePath.RoundCap
+                    startX: spoke.cx; startY: spoke.cy
+                    PathQuad { x: sat.px; y: sat.py; controlX: spoke.ctrlX; controlY: spoke.ctrlY }
+                }
             }
 
             Rectangle {

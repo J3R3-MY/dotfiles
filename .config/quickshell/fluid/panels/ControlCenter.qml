@@ -14,6 +14,7 @@ DropPanel {
 
     required property string screenName
     open: Fluid.ccOpen && Fluid.ccScreen === screenName
+    lively: true
     property string page: "main"
     // the volume pill opens straight on the Sound page (Fluid.ccPage)
     onOpenChanged: page = open ? Fluid.ccPage : "main"
@@ -28,6 +29,15 @@ DropPanel {
 
     function dismiss() { if (page === "main") Fluid.closeAll(); else page = "main"; }
 
+    // Only the main page and one subpage sit in the row (the Row skips hidden
+    // pages), so every page change is a one-page slide. `sub` keeps the last
+    // subpage shown while sliding back. `slide` animates on its own so the
+    // panel's width change doesn't restart the slide every frame.
+    property string sub: "wifi"
+    onPageChanged: if (page !== "main") sub = page
+    property real slide: page === "main" ? 0 : 1
+    Behavior on slide { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+
     Item {
         id: viewport
         anchors.fill: parent
@@ -36,9 +46,8 @@ DropPanel {
 
         Row {
             id: pages
-            x: -root.pageIndex * (viewport.width + 32)
+            x: -root.slide * (viewport.width + 32)
             spacing: 32
-            Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
 
             // ================= Main page =================
             Column {
@@ -110,7 +119,7 @@ DropPanel {
                         on: NightLight.on
                         icon: Icons.g(0xf0594)
                         title: "Night light"
-                        subtitle: !NightLight.available ? "needs a weather location" : NightLight.on ? "sunset to sunrise" : "off"
+                        subtitle: !NightLight.available ? "wlsunset not installed" : NightLight.on ? "on" : "off"
                         onClicked: NightLight.toggle()
                     }
                     Toggle {
@@ -143,14 +152,34 @@ DropPanel {
                     }
                 }
 
-                // Night light strength (warmer to the right)
-                FSlider {
+                // Night light strength: five steps, warmer to the right
+                Row {
+                    id: nightRow
                     visible: NightLight.on
                     width: parent.width
-                    value: NightLight.strength
-                    icon: Icons.g(0xf0594)
-                    fillColor: Theme.clock
-                    onMoved: v => NightLight.setStrength(v)
+                    height: 40
+                    spacing: 6
+                    Glyph { width: 30; anchors.verticalCenter: parent.verticalCenter; text: Icons.g(0xf0594); color: Theme.fg }
+                    Repeater {
+                        model: NightLight.temps
+                        Rectangle {
+                            required property int index
+                            readonly property bool chosen: index === NightLight.level
+                            width: (nightRow.width - 30 - 5 * 6) / 5; height: 40; radius: 20
+                            // from pale to the full clock colour = from barely to very warm
+                            color: chosen ? Theme.clock : Qt.alpha(Theme.clock, 0.12 + index * 0.08)
+                            border.width: nArea.containsMouse && !chosen ? 1 : 0
+                            border.color: Theme.clock
+                            Behavior on color { ColorAnimation { duration: Anim.fast } }
+                            Text {
+                                anchors.centerIn: parent
+                                text: index + 1
+                                color: parent.chosen ? Theme.onPill : Theme.fg
+                                font.family: Theme.font; font.pixelSize: Theme.fontSize - 2; font.weight: Font.DemiBold
+                            }
+                            MouseArea { id: nArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: NightLight.setLevel(index) }
+                        }
+                    }
                 }
 
                 FSlider {
@@ -287,6 +316,7 @@ DropPanel {
             Column {
                 id: wifiPage
                 width: viewport.width
+                visible: root.sub === "wifi"
                 spacing: 8
 
                 PageHeader {
@@ -302,6 +332,7 @@ DropPanel {
                     sourceComponent: OrbitView {
                         width: wifiPage.width
                         readonly property var others: Network.networks.filter(n => !n.active).slice(0, 8)
+                        Component.onCompleted: Network.scan()
                         busy: !Network.wifiEnabled ? false : Network.networks.length === 0
                         center: ({
                             title: !Network.wifiEnabled ? "Wi-Fi off" : (Network.connected ? Network.name : "Not connected"),
@@ -320,6 +351,7 @@ DropPanel {
             Column {
                 id: btPage
                 width: viewport.width
+                visible: root.sub === "bt"
                 spacing: 8
 
                 PageHeader {
@@ -414,6 +446,7 @@ DropPanel {
             Column {
                 id: displayPage
                 width: viewport.width
+                visible: root.sub === "display"
                 spacing: 12
 
                 PageHeader { title: "Displays"; onBack: { Displays.revert(); root.page = "main"; } }
@@ -706,6 +739,7 @@ DropPanel {
             Column {
                 id: soundPage
                 width: viewport.width
+                visible: root.sub === "sound"
                 spacing: 8
 
                 PageHeader { title: "Sound"; onBack: root.page = "main" }

@@ -16,7 +16,7 @@ Rectangle {
     implicitHeight: 58
     implicitWidth: 150
     radius: 16
-    color: on ? Theme.accent : Theme.surfaceHi
+    color: on ? Theme.accent : Qt.alpha(Theme.surfaceHi, 0.6)
     Behavior on color { ColorAnimation { duration: Anim.normal } }
     scale: area.pressed ? 0.96 : 1
     Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }

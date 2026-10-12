@@ -3,8 +3,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Night light (blue light filter): wlsunset makes the screen warmer from
-// sunset to sunrise, computed locally from the weather location (no network).
+// Night light (blue light filter): while on, wlsunset keeps the screen warm
+// (day and night temperature 1 K apart = no schedule, warm right away; the
+// location is only there because wlsunset wants one).
 // On/off and strength live in ~/.local/state/fluid/nightlight.json; the
 // control center tile and slider change them. Stopping wlsunset restores the
 // normal colours.
@@ -12,30 +13,51 @@ Singleton {
     id: root
 
     property bool on: false
-    property real strength: 0.5           // 0 = barely warm (5500 K) .. 1 = very warm (2500 K)
-    readonly property int temp: Math.round(5500 - strength * 3000)
-    readonly property bool available: !isNaN(Weather.lat)
+    // five strengths, 0 = barely warm .. 4 = very warm
+    readonly property var temps: [4800, 4200, 3700, 3200, 2700]
+    property int level: 2
+    readonly property int temp: temps[level]
+    property bool available: true         // false = wlsunset not installed
 
     function toggle() { on = !on; save(); }
-    function setStrength(v) { strength = Math.max(0, Math.min(1, v)); save(); restart.restart(); }
+    // wlsunset can't change temperature while running: stop it, and start the
+    // new one only once the old one has exited (it holds the gamma control;
+    // starting too early fails and leaves the screen at normal colours)
+    function setLevel(i) {
+        if (i === level) return;
+        level = Math.max(0, Math.min(4, i));
+        save();
+        if (sunset.running) restarting = true;
+    }
+    property bool restarting: false
+    Timer { interval: 2000; running: root.restarting; onTriggered: root.restarting = false }   // safety net
 
     readonly property string file: Quickshell.env("HOME") + "/.local/state/fluid/nightlight.json"
-    function save() { store.setText(JSON.stringify({ on: root.on, strength: root.strength })); }
+    function save() { store.setText(JSON.stringify({ on: root.on, level: root.level })); }
     FileView {
         id: store
         path: root.file
         onLoaded: {
-            try { const j = JSON.parse(text()); root.strength = j.strength ?? 0.5; root.on = !!j.on; } catch (e) {}
+            try {
+                const j = JSON.parse(text());
+                root.level = j.level ?? Math.round((j.strength ?? 0.5) * 4);   // older files had a 0..1 strength
+                root.on = !!j.on;
+            } catch (e) {}
         }
     }
 
-    // a new strength restarts wlsunset (debounced, the slider moves a lot)
-    Timer { id: restart; interval: 400; onTriggered: if (sunset.running) { sunset.running = false; again.start(); } }
-    Timer { id: again; interval: 200; onTriggered: sunset.running = Qt.binding(() => root.on && root.available) }
+    Process {
+        running: true
+        command: ["sh", "-c", "command -v wlsunset"]
+        onExited: code => root.available = code === 0
+    }
 
     Process {
         id: sunset
-        running: root.on && root.available
-        command: ["wlsunset", "-l", String(Weather.lat), "-L", String(Weather.lon), "-t", String(root.temp), "-T", "6500"]
+        running: root.on && root.available && !root.restarting
+        // --pdeathsig: wlsunset exits with the shell (a leftover one would
+        // keep the gamma control and block the next start)
+        command: ["setpriv", "--pdeathsig", "TERM", "wlsunset", "-l", "0", "-L", "0", "-t", String(root.temp), "-T", String(root.temp + 1)]
+        onExited: root.restarting = false
     }
 }

@@ -24,7 +24,7 @@ Item {
         forceActiveFocus();
     }
 
-    // ---- Top: title, colour filter, live palette ------------------------------
+    // ---- Top: title, colour filter ------------------------------------------
     Item {
         id: topRow
         width: parent.width
@@ -83,22 +83,6 @@ Item {
                         Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
                         MouseArea { id: fArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.colorFilter = parent.on ? "" : parent.modelData.id }
                     }
-                }
-            }
-        }
-
-        Row {
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 4
-            Repeater {
-                model: [Theme.clock, Theme.battery, Theme.cpu, Theme.memory, Theme.backlight, Theme.network, Theme.audio, Theme.bg, Theme.fg]
-                Rectangle {
-                    required property color modelData
-                    width: 16; height: 16; radius: 8
-                    color: modelData
-                    border.width: 1
-                    border.color: Theme.border
                 }
             }
         }

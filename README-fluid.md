@@ -16,9 +16,8 @@ AGPL), so this stays under the repo's MIT licence.
 |---|---|---|
 | Fluid bar | top of every output | Waybar layout and colours. Workspaces show icons of the apps open on them (monochrome theme "yet-another-monochrome-icon-set", tinted with the theme accent), sliding highlight, pills widen on hover to show details |
 | Dynamic island | the clock | Morphs into launcher, clipboard, media, dashboard, theme picker or cheat sheet. Live equaliser bars while music plays; hover to see the track |
-| Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: screen time |
-| Screen time | dashboard → Screen time | Per-app time, last 7 days, month heatmap, by-hour chart. Logged from sway focus events, paused when idle/locked, stored in `~/.local/state/fluid/screentime` |
-| Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert. Sound page (click the volume pill, or `›` next to the volume slider): output device, microphone, volume per app. Tiles for Keep awake (no dim/lock/sleep on idle), Night light (warmer from sunset to sunrise, strength slider; wlsunset with the weather location) and Record screen. Bar: DE/US badge for the keyboard layout (click = switch). Dashboard has a System tab (CPU, memory, temperatures, fans, top processes) |
+| Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: System (gauges, CPU graph, top processes) |
+| Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert. Sound page (click the volume pill, or `›` next to the volume slider): output device, microphone, volume per app. Tiles for Keep awake (no dim/lock/sleep on idle), Night light (screen warmer while on, 5 strengths; wlsunset) and Record screen. Bar: DE/US badge for the keyboard layout (click = switch). Dashboard has a System tab (CPU, memory, temperatures, fans, top processes) |
 | Power panel | click the battery pill | Battery ring, uptime, brightness/volume, lock/suspend/reboot/off, Performance/Balanced/Saver |
 | Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders, WezTerm, the login screen, GTK icons (Thunar, in the accent colour) and (Linux only) the starship prompt and Neovim (live, via mini.base16; everforest elsewhere). The same wallpaper + settings always give the same colours. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
 | Media | `$mod+m`, right-click the clock | Spinning-record cover, seek bar, 10-band equalizer with presets (PipeWire filter-chain, no EasyEffects) |
@@ -63,7 +62,7 @@ Old binds are untouched. New ones use keys that were unbound:
 | `$mod+p` | Launcher: apps, then files and folders in your home (fd, from 2 letters; Enter open, Shift+Enter show in Thunar, Ctrl+Enter copy path). wofi stays on `$mod+d` |
 | `$mod+v` | Clipboard history (Enter copies, Shift+Del removes) |
 | `$mod+m` | Media |
-| `$mod+c` | Dashboard (calendar, weather, screen time) |
+| `$mod+c` | Dashboard (calendar, weather, system) |
 | `$mod+t` | Wallpaper / theme picker |
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |

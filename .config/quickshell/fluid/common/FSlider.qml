@@ -20,7 +20,7 @@ Item {
         id: track
         anchors.fill: parent
         radius: height / 2
-        color: Theme.surfaceHi
+        color: Qt.alpha(Theme.surfaceHi, 0.6)
         clip: true
 
         Rectangle {
