@@ -95,6 +95,8 @@ Both scripts share `install/lib.sh` and:
 - install everything the sway config, scripts, zsh/nvim setup and the
   desktop apps use
 - add snapper/btrfs-assistant on btrfs and run `nvidia-inst` on NVIDIA
+- remove EndeavourOS defaults the setup replaces (glances, firewall-applet;
+  `install/cleanup.sh` on its own)
 - enable NetworkManager, bluetooth, SDDM (own `fluid` theme, see below), fstrim, docker,
   tailscaled and PipeWire
 - stow the repo into `~` file by file, moving clashing files to

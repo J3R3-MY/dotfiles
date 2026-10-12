@@ -262,6 +262,26 @@ aur_pinned() {
     rm -rf "$tmp"
 }
 
+# ----------------------------------------------------------
+# EndeavourOS installs a few apps this setup replaces; remove them if present.
+# Standalone: install/cleanup.sh
+# ----------------------------------------------------------
+
+EOS_UNUSED=(
+    glances                 # htop is used (bar, dashboard)
+    firewall-applet         # tray app; firewalld is set up by do_hardening
+)
+
+do_cleanup() {
+    step "Removing EndeavourOS defaults this setup replaces"
+    local p present=()
+    for p in "${EOS_UNUSED[@]}"; do pacman -Qq "$p" >/dev/null 2>&1 && present+=("$p"); done
+    if [ ${#present[@]} -eq 0 ]; then info "nothing to remove"; return; fi
+    sudo pacman -Rns --noconfirm "${present[@]}" >>"$LOG" 2>&1 \
+        && info "removed: ${present[*]}" \
+        || warn "could not remove ${present[*]}, see $LOG"
+}
+
 do_services() {
     step "Enabling services"
     enable_system NetworkManager.service bluetooth.service sddm.service fstrim.timer docker.socket tailscaled.service

@@ -18,6 +18,7 @@ confirm "DO YOU WANT TO START THE INSTALLATION NOW?" || { echo ":: Installation 
 preflight
 do_update
 do_packages no
+do_cleanup
 do_services
 do_login_manager
 do_hibernate
