@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import Quickshell.Widgets
 import "../common"
 import "../services"
@@ -150,13 +151,12 @@ Item {
         }
     }
 
-    // Spotify library shortcut (when spotify_player is set up)
+    // Opens the Spotify app (library, search, playlists)
     Chip {
-        visible: Spotify.state === "ready"
         anchors.right: parent.right
         anchors.top: parent.top
-        text: Icons.g(0xf1bc) + "  Library"
-        onClicked: Fluid.openIsland("spotify", Fluid.islandScreen)
+        text: Icons.g(0xf1bc) + "  Spotify"
+        onClicked: { Fluid.closeAll(); Quickshell.execDetached([Quickshell.shellDir + "/scripts/fluid-spotify.sh"]); }
     }
 
     // ---- Equalizer -------------------------------------------------------------
