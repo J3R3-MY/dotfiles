@@ -1,4 +1,4 @@
-//@ pragma IconTheme Papirus-Dark
+//@ pragma IconTheme yet-another-monochrome-icon-set
 // Fluid shell for sway. Run with `qs -c fluid` (started by fluid-launch.sh).
 import QtQuick
 import Quickshell
@@ -14,6 +14,10 @@ ShellRoot {
     property var _notifs: Notifs
     // Starts counting screen time right away, not when the dashboard opens
     property var _screentime: ScreenTime
+    // System password prompts (polkit agent) go to the island
+    property var _auth: Auth
+    // Night light runs from login, not only once the control center opened
+    property var _night: NightLight
 
     Variants {
         model: Quickshell.screens

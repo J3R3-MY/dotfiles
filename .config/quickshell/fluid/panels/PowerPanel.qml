@@ -22,14 +22,9 @@ DropPanel {
         anchors.margins: 16
         spacing: 14
 
-        // Uptime + lock style
+        // Uptime
         Row {
             spacing: 8
-            Chip {
-                text: Icons.lock + "  Lock style"
-                size: Theme.fontSize - 4
-                onClicked: Fluid.openIsland("lockstyle", root.screenName)
-            }
             Rectangle {
                 height: 28; radius: 10
                 width: up.implicitWidth + 20

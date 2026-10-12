@@ -153,6 +153,16 @@ config.font_size = 19
 config.enable_tab_bar = false
 
 config.window_background_opacity = 0.75
+-- Linux: $mod+Shift+o (fluid-opacity.sh) makes every window solid, this one too
+if wezterm.target_triple:find('linux') then
+  local mode = wezterm.home_dir .. '/.local/state/fluid/opacity'
+  local f = io.open(mode)
+  if f then
+    if f:read('l') == 'solid' then config.window_background_opacity = 1.0 end
+    f:close()
+  end
+  wezterm.add_to_config_reload_watch_list(mode)
+end
 -- config.macos_window_background_blur = 10
 
 -- Fluid theme picker: once a wallpaper has been picked, follow its colours.

@@ -8,12 +8,6 @@ Singleton {
     function g(cp) { return String.fromCodePoint(cp); }
 
     // Workspace icons copied from the old waybar "format-icons"
-    readonly property var workspaces: ({
-        "1": g(0xf269), "2": g(0xf121), "3": g(0xf02d), "4": g(0xf07b),
-        "5": g(0xf02bb), "6": g(0xf0e0), "7": g(0xf120), "8": g(0xf120),
-        "9": g(0xf120)
-    })
-
     readonly property string clock: g(0xf017)
     readonly property string cpu: g(0xf4bc)
     readonly property string memory: g(0xefc5)

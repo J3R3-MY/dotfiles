@@ -16,6 +16,8 @@
 # - writes the sway background for the next login / the waybar fallback
 # - runs matugen, which writes colours for the shell, sway borders and wezterm
 # - pushes the new border colours to the running sway session
+# - copies wallpaper + colours to the SDDM login screen (fluid-sddm-sync.sh)
+# - recolours the GTK icons to the accent (fluid-icons.sh), GTK dark/light
 set -u
 
 img="${1:?usage: fluid-theme.sh <image> [mode] [scheme] [contrast] [lightness] [seed]}"
@@ -69,6 +71,23 @@ else
     echo "fluid-theme: matugen not installed, colours unchanged" >&2
 fi
 
+# GTK apps follow dark/light: GTK3 (Thunar, dialogs) via the dark flag in its
+# settings.ini (there's no built-in "Adwaita-dark" theme, that name falls back
+# to light), GTK4/libadwaita, portals and Electron (Obsidian) via color-scheme
+if command -v gsettings >/dev/null; then
+    [ "$mode" = light ] && dark=0 scheme_pref=prefer-light || dark=1 scheme_pref=prefer-dark
+    ini="$HOME/.config/gtk-3.0/settings.ini"
+    mkdir -p "${ini%/*}"
+    [ -f "$ini" ] || printf '[Settings]\n' > "$ini"
+    if grep -q '^gtk-application-prefer-dark-theme' "$ini"; then
+        sed -i "s/^gtk-application-prefer-dark-theme.*/gtk-application-prefer-dark-theme=$dark/" "$ini"
+    else
+        sed -i "/^\[Settings\]/a gtk-application-prefer-dark-theme=$dark" "$ini"
+    fi
+    gsettings set org.gnome.desktop.interface gtk-theme Adwaita
+    gsettings set org.gnome.desktop.interface color-scheme "$scheme_pref"
+fi
+
 # Starship (Linux only): a copy of ~/.config/starship.toml that uses the
 # generated palette; .zsh_linux points STARSHIP_CONFIG at it.
 "$here/fluid-starship.sh"
@@ -79,6 +98,11 @@ if [ -f "$state/sway-colors.conf" ]; then
         swaymsg "$line" >/dev/null
     done
 fi
+
+# Login screen: same wallpaper and colours (background: the JPEG takes a second)
+"$here/fluid-sddm-sync.sh" >/dev/null 2>&1 &
+# Thunar & co: icons in the accent colour, like the bar
+"$here/fluid-icons.sh" >/dev/null 2>&1 &
 
 # Tell the running shell to re-read colors.json (no-op if it isn't running)
 qs -c fluid ipc call fluid reloadTheme >/dev/null 2>&1 \

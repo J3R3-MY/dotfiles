@@ -135,7 +135,7 @@ Item {
             onDown: list.incrementCurrentIndex()
             onAccepted: root.pick("password")
             onShortcut: (key, mods) => {
-                if (key === Qt.Key_Return) root.pick("username");
+                if (key === Qt.Key_Return && (mods & Qt.ShiftModifier)) root.pick("username");
                 else if (key === Qt.Key_T) root.pick("totp");
             }
         }

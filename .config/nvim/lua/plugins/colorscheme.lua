@@ -1,3 +1,37 @@
+-- Linux (fluid desktop): colours made from the wallpaper by matugen
+-- (~/.local/state/fluid/nvim-colors.lua, written by fluid-theme.sh), applied
+-- with mini.base16 and re-applied in every running Neovim when the theme
+-- changes. Without that file (Mac, no theme yet): everforest.
+local fluid = vim.fn.expand("~/.local/state/fluid/nvim-colors.lua")
+
+local function apply_fluid()
+  if vim.fn.has("linux") == 0 then return false end
+  local ok, palette = pcall(dofile, fluid)
+  if not ok or type(palette) ~= "table" then return false end
+  require("mini.base16").setup({ palette = palette, use_cterm = true })
+  vim.g.colors_name = "fluid"
+  -- see-through like everforest's transparent_background_level = 2
+  for _, group in ipairs({ "Normal", "NormalNC", "SignColumn", "LineNr", "FoldColumn", "EndOfBuffer" }) do
+    local hl = vim.api.nvim_get_hl(0, { name = group })
+    hl.bg, hl.ctermbg = nil, nil
+    vim.api.nvim_set_hl(0, group, hl)
+  end
+  vim.api.nvim_exec_autocmds("ColorScheme", { pattern = "fluid" }) -- lualine 'auto' follows
+  return true
+end
+
+-- matugen replaces the file, so watch its folder
+local function watch_fluid()
+  local w = vim.uv.new_fs_event()
+  if not w then return end
+  local pending = false
+  w:start(vim.fn.fnamemodify(fluid, ":h"), {}, vim.schedule_wrap(function(_, name)
+    if name ~= "nvim-colors.lua" or pending then return end
+    pending = true
+    vim.defer_fn(function() pending = false; apply_fluid() end, 200)
+  end))
+end
+
 return {
   --Tokyo night
   -- {
@@ -25,7 +59,7 @@ return {
   --      vim.cmd.colorscheme 'fluoromachine'
   --     end
   -- },
-  -- Everforest
+  -- Everforest (fallback), fluid colours on Linux
   {
     "neanias/everforest-nvim",
     version = false,
@@ -36,7 +70,11 @@ return {
       require("everforest").setup({
         transparent_background_level = 2,
       })
-      vim.cmd.colorscheme 'everforest'
+      if apply_fluid() then
+        watch_fluid()
+      else
+        vim.cmd.colorscheme 'everforest'
+      end
     end,
   }
   -- Bamboo

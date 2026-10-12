@@ -7,7 +7,7 @@ import "../services"
 // One bar per output. Same layout as the old waybar:
 //   left:   sway/workspaces, sway/mode
 //   center: clock (drawn by the island in Overlay.qml, sitting on top of this bar)
-//   right:  bluetooth, pulseaudio, backlight, cpu, memory, network, battery
+//   right:  bluetooth, pulseaudio, backlight, memory, network, battery
 PanelWindow {
     id: bar
 
@@ -65,13 +65,22 @@ PanelWindow {
             NumberAnimation { properties: "x"; duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
         }
 
+        // Keyboard layout (Caps Lock switches it); only with more than one layout
+        Pill {
+            visible: Sway.layoutCount > 1
+            color: Theme.bg
+            textColor: Theme.fgDim
+            label: Sway.layout
+            onClicked: Sway.nextLayout()
+        }
+
         // Dev servers listening (Port Watch); hidden when there are none
         Pill {
             visible: Ports.count > 0
             color: Theme.memory
             icon: Icons.g(0xf0318)
             label: String(Ports.count)
-            detail: Ports.dev.slice(0, 3).map(p => ":" + p.port).join(" ")
+            detail: Ports.dev.slice(0, 3).map(p => p.name + " :" + p.port).join(" · ")
             onClicked: Fluid.toggleNet("ports", bar.screenName)
         }
 
@@ -89,7 +98,7 @@ PanelWindow {
         Pill {
             color: Health.score < 50 ? Theme.urgent : Theme.network
             textColor: Health.score < 50 ? Theme.fg : Theme.onPill
-            label: "↓" + NetStats.mb(NetStats.down) + " ↑" + NetStats.mb(NetStats.up) + " MB/s"
+            label: "↓" + NetStats.mbps(NetStats.down) + " ↑" + NetStats.mbps(NetStats.up) + " Mbps"
             detail: "score " + Health.score + (Health.wan.last >= 0 ? " · " + Math.round(Health.wan.last) + " ms" : "")
             onClicked: Fluid.toggleNet(Health.score < 70 ? "health" : "traffic", bar.screenName)
         }
@@ -116,7 +125,7 @@ PanelWindow {
             onClicked: m => {
                 if (m.button === Qt.RightButton) Quickshell.execDetached(["pavucontrol"]);   // old on-click
                 else if (m.button === Qt.MiddleButton) Audio.toggleMute();
-                else Fluid.toggleControlCenter(bar.screenName);
+                else Fluid.toggleControlCenter(bar.screenName, "sound");   // output, mic, per-app volume
             }
         }
 
@@ -127,13 +136,6 @@ PanelWindow {
             icon: Brightness.percent > 50 ? Icons.sun : Icons.moon
             onScrolled: d => Brightness.set(Brightness.value + d * 0.05)
             onClicked: Fluid.toggleControlCenter(bar.screenName)
-        }
-
-        Pill {
-            color: Theme.cpu
-            label: SysStats.cpu + "%"
-            icon: Icons.cpu
-            onClicked: Quickshell.execDetached(["wezterm", "start", "--", "htop"])
         }
 
         Pill {

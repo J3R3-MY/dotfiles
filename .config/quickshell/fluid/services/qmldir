@@ -14,11 +14,12 @@ singleton Weather 1.0 Weather.qml
 singleton ScreenTime 1.0 ScreenTime.qml
 singleton Displays 1.0 Displays.qml
 singleton Equalizer 1.0 Equalizer.qml
-singleton LockStyle 1.0 LockStyle.qml
 singleton NetStats 1.0 NetStats.qml
 singleton Health 1.0 Health.qml
 singleton Vpn 1.0 Vpn.qml
 singleton Ports 1.0 Ports.qml
 singleton Pods 1.0 Pods.qml
 singleton Vault 1.0 Vault.qml
-singleton Spotify 1.0 Spotify.qml
+singleton Auth 1.0 Auth.qml
+singleton Files 1.0 Files.qml
+singleton NightLight 1.0 NightLight.qml

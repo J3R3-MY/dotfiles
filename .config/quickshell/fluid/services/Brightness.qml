@@ -14,6 +14,8 @@ Singleton {
     readonly property bool available: device.length > 0 && max > 0
     readonly property real value: available ? current / max : 0
     readonly property int percent: Math.round(value * 100)
+    // fluid-idle.sh is dimming the screen (keeps the OSD quiet)
+    property bool idleDimmed: false
 
     function set(v) {
         if (!available) return;
@@ -44,10 +46,18 @@ Singleton {
         onLoaded: root.current = parseInt(text()) || 0
     }
 
+    FileView {
+        id: dimFile
+        path: (Quickshell.env("XDG_RUNTIME_DIR") || "/tmp") + "/fluid-idle/dim"
+        printErrors: false
+        onLoaded: root.idleDimmed = true
+        onLoadFailed: root.idleDimmed = false
+    }
+
     Timer {
         interval: 250
         running: root.available
         repeat: true
-        onTriggered: curFile.reload()
+        onTriggered: { dimFile.reload(); curFile.reload(); }
     }
 }

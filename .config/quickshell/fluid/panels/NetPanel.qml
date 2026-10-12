@@ -102,8 +102,13 @@ DropPanel {
             anchors.left: portNum.right; anchors.leftMargin: 14
             anchors.right: killBtn.left; anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
-            Text { width: parent.width; elide: Text.ElideRight; text: pr.p.name + "  ·  " + pr.p.proto + (pr.p.pid ? "  ·  pid " + pr.p.pid : ""); color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-            Text { width: parent.width; elide: Text.ElideMiddle; text: pr.p.cwd ? pr.p.cwd + "  $ " + pr.p.cmd : pr.p.addr; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5 }
+            // what it is, then who can reach it and how it was started
+            Text { width: parent.width; elide: Text.ElideRight; text: [pr.p.name, pr.p.purpose, pr.p.pid ? "pid " + pr.p.pid : ""].filter(t => t).join("  ·  "); color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+            Text {
+                width: parent.width; elide: Text.ElideRight
+                text: [pr.p.scope, pr.p.proto, pr.p.cwd ? pr.p.cwd + "  $ " + pr.p.cmd : pr.p.desc].filter(t => t).join("  ·  ")
+                color: pr.p.reach === 2 ? Theme.clock : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+            }
         }
         Rectangle {
             id: killBtn
@@ -162,8 +167,8 @@ DropPanel {
 
                 Row {
                     spacing: 24
-                    Column { Label { text: "Download" } Text { text: "↓ " + NetStats.mb(NetStats.down) + " MB/s"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
-                    Column { Label { text: "Upload" } Text { text: "↑ " + NetStats.mb(NetStats.up) + " MB/s"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { text: "Download" } Text { text: "↓ " + NetStats.mbps(NetStats.down) + " Mbps"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { text: "Upload" } Text { text: "↑ " + NetStats.mbps(NetStats.up) + " Mbps"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
                 }
 
                 Rectangle {
@@ -198,7 +203,7 @@ DropPanel {
                             draw("up", String(Theme.network), false);
                         }
                     }
-                    Label { anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.mb(chartBox.peak) + " MB/s" }
+                    Label { anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.mbps(chartBox.peak) + " Mbps" }
                 }
                 Row {
                     spacing: 6
@@ -236,8 +241,8 @@ DropPanel {
                         required property var modelData
                         width: parent.width
                         Value { width: parent.width - 160; elide: Text.ElideRight; text: modelData.name; font.pixelSize: Theme.fontSize - 3 }
-                        Label { width: 96; text: "↓ " + NetStats.mb(modelData.down) + " MB/s" }
-                        Label { width: 96; text: "↑ " + NetStats.mb(modelData.up) + " MB/s" }
+                        Label { width: 96; text: "↓ " + NetStats.mbps(modelData.down) + " Mbps" }
+                        Label { width: 96; text: "↑ " + NetStats.mbps(modelData.up) + " Mbps" }
                     }
                 }
             }
@@ -283,7 +288,7 @@ DropPanel {
                     Value {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: Health.speedDown >= 0
-                        text: "↓ " + (Health.speedDown / 8).toFixed(1) + " MB/s   ↑ " + (Health.speedUp / 8).toFixed(1) + " MB/s"
+                        text: "↓ " + NetStats.mbit(Health.speedDown) + " Mbps   ↑ " + NetStats.mbit(Health.speedUp) + " Mbps"
                         font.pixelSize: Theme.fontSize - 3
                     }
                 }

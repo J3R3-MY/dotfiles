@@ -31,11 +31,10 @@ Singleton {
         while (bytes >= 1000 && i < u.length - 1) { bytes /= 1000; i++; }
         return (bytes < 10 && i > 0 ? bytes.toFixed(1) : Math.round(bytes)) + " " + u[i];
     }
-    // Rates always in MB/s, so the bar doesn't jump between units
-    function mb(bps) {
-        const m = bps / 1e6;
-        return m < 10 ? m.toFixed(1) : Math.round(m).toString();
-    }
+    // Rates always in Mbps (like speed tests), so the bar doesn't jump
+    // between units; two decimals below 1 so light traffic doesn't read as 0.0
+    function mbit(m) { return m < 1 ? m.toFixed(2) : m < 10 ? m.toFixed(1) : Math.round(m).toString(); }
+    function mbps(bps) { return mbit(bps * 8 / 1e6); }    // bytes/s in
 
     FileView {
         id: dev

@@ -4,6 +4,8 @@ import Quickshell
 import Quickshell.Io
 
 // CPU and memory from /proc, same numbers waybar's cpu/memory modules show.
+// Plus CPU history, temperatures and fans from /sys/class/hwmon for the
+// dashboard's System tab (the NVIDIA GPU isn't asked: that would wake it).
 Singleton {
     id: root
 
@@ -11,6 +13,28 @@ Singleton {
     property int memory: 0
     property real memUsedGiB: 0
     property real memTotalGiB: 0
+    property var cpuHistory: []          // last 60 samples (2 min)
+    property real cpuTemp: NaN           // °C, coretemp package
+    property real diskTemp: NaN          // °C, NVMe
+    property var fans: []                // rpm
+
+    // hwmon sensor files, found once by their driver name
+    property var hw: ({})
+    Process {
+        running: true
+        command: ["sh", "-c", "for d in /sys/class/hwmon/hwmon*; do printf '%s %s\\n' \"$(cat $d/name)\" \"$d\"; done"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const m = {};
+                for (const l of text.split("\n")) { const [n, d] = l.split(" "); if (n && !m[n]) m[n] = d; }
+                root.hw = m;
+            }
+        }
+    }
+    FileView { id: coreT; path: root.hw.coretemp ? root.hw.coretemp + "/temp1_input" : ""; onLoaded: root.cpuTemp = parseInt(text()) / 1000 }
+    FileView { id: nvmeT; path: root.hw.nvme ? root.hw.nvme + "/temp1_input" : ""; onLoaded: root.diskTemp = parseInt(text()) / 1000 }
+    FileView { id: fan1; path: root.hw.dell_smm ? root.hw.dell_smm + "/fan1_input" : ""; onLoaded: root.fans = [parseInt(text()), root.fans[1] || 0] }
+    FileView { id: fan2; path: root.hw.dell_smm ? root.hw.dell_smm + "/fan2_input" : ""; onLoaded: root.fans = [root.fans[0] || 0, parseInt(text())] }
 
     property var _prev: null
 
@@ -24,7 +48,10 @@ Singleton {
             if (root._prev) {
                 const dt = total - root._prev.total;
                 const di = idle - root._prev.idle;
-                if (dt > 0) root.cpu = Math.round(100 * (1 - di / dt));
+                if (dt > 0) {
+                    root.cpu = Math.round(100 * (1 - di / dt));
+                    root.cpuHistory = root.cpuHistory.concat([root.cpu]).slice(-60);
+                }
             }
             root._prev = { total: total, idle: idle };
         }
@@ -52,6 +79,9 @@ Singleton {
         interval: 2000
         running: true
         repeat: true
-        onTriggered: { stat.reload(); mem.reload(); }
+        onTriggered: {
+            stat.reload(); mem.reload();
+            for (const f of [coreT, nvmeT, fan1, fan2]) if (f.path) f.reload();
+        }
     }
 }

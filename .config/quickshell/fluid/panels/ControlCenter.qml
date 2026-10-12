@@ -15,11 +15,12 @@ DropPanel {
     required property string screenName
     open: Fluid.ccOpen && Fluid.ccScreen === screenName
     property string page: "main"
-    onOpenChanged: if (!open) page = "main"
+    // the volume pill opens straight on the Sound page (Fluid.ccPage)
+    onOpenChanged: page = open ? Fluid.ccPage : "main"
 
-    readonly property var pageList: ["main", "wifi", "bt", "display"]
+    readonly property var pageList: ["main", "wifi", "bt", "display", "sound"]
     readonly property int pageIndex: Math.max(0, pageList.indexOf(page))
-    readonly property var pageItems: [mainPage, wifiPage, btPage, displayPage]
+    readonly property var pageItems: [mainPage, wifiPage, btPage, displayPage, soundPage]
 
     width: page === "main" ? 400 : 480
     height: pageItems[pageIndex].implicitHeight + 32
@@ -98,37 +99,58 @@ DropPanel {
                     }
                     Toggle {
                         width: (mainPage.width - 10) / 2
-                        on: Vault.unlocked
-                        icon: Icons.g(0xf084)
-                        title: "Passwords"
-                        subtitle: Vault.unlocked ? "unlocked" : Vault.status === "missing" ? "bw not installed" : "Bitwarden"
-                        onClicked: Fluid.openIsland("vault", root.screenName)
+                        on: Fluid.awake
+                        icon: Icons.g(0xf0176)
+                        title: "Keep awake"
+                        subtitle: Fluid.awake ? "no dim, lock or sleep" : "off"
+                        onClicked: Fluid.setAwake(!Fluid.awake)
                     }
                     Toggle {
                         width: (mainPage.width - 10) / 2
-                        on: Spotify.state === "ready"
-                        icon: Icons.g(0xf1bc)
-                        title: "Spotify"
-                        subtitle: Spotify.state === "ready" ? "library & devices" : Spotify.state === "missing" ? "not installed" : "sign in"
-                        onClicked: Fluid.openIsland("spotify", root.screenName)
+                        on: NightLight.on
+                        icon: Icons.g(0xf0594)
+                        title: "Night light"
+                        subtitle: !NightLight.available ? "needs a weather location" : NightLight.on ? "sunset to sunrise" : "off"
+                        onClicked: NightLight.toggle()
                     }
                     Toggle {
                         width: (mainPage.width - 10) / 2
-                        on: Fluid.powerOpen
-                        icon: Icons.battery(Battery.percent, Battery.charging)
-                        title: "Power"
-                        subtitle: Battery.available ? Battery.percent + "% · " + (Battery.charging ? "charging" : "battery") : "Profiles, uptime"
-                        onClicked: Fluid.togglePower(root.screenName)
+                        on: Fluid.recording
+                        icon: Icons.g(0xf044a)
+                        title: "Record screen"
+                        subtitle: Fluid.recording ? "recording · tap to stop" : "whole screen · area: Super+Shift+R"
+                        onClicked: { Fluid.closeAll(); Quickshell.execDetached([Quickshell.shellDir + "/scripts/fluid-record.sh"]); }
                     }
                 }
 
-                FSlider {
+                Row {
                     width: parent.width
-                    value: Audio.volume
-                    icon: Icons.volume(Audio.percent, Audio.muted)
-                    fillColor: Audio.muted ? Theme.urgent : Theme.audio
-                    onMoved: v => Audio.setVolume(v)
-                    onIconClicked: Audio.toggleMute()
+                    spacing: 8
+                    FSlider {
+                        width: parent.width - 48
+                        value: Audio.volume
+                        icon: Icons.volume(Audio.percent, Audio.muted)
+                        fillColor: Audio.muted ? Theme.urgent : Theme.audio
+                        onMoved: v => Audio.setVolume(v)
+                        onIconClicked: Audio.toggleMute()
+                    }
+                    // Sound page: output device, microphone, per-app volume
+                    Rectangle {
+                        width: 40; height: 40; radius: 20
+                        color: soundMore.containsMouse ? Theme.surfaceHi : Theme.surface
+                        Text { anchors.centerIn: parent; text: "›"; color: Theme.fg; font.pixelSize: 22 }
+                        MouseArea { id: soundMore; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "sound" }
+                    }
+                }
+
+                // Night light strength (warmer to the right)
+                FSlider {
+                    visible: NightLight.on
+                    width: parent.width
+                    value: NightLight.strength
+                    icon: Icons.g(0xf0594)
+                    fillColor: Theme.clock
+                    onMoved: v => NightLight.setStrength(v)
                 }
 
                 FSlider {
@@ -228,7 +250,7 @@ DropPanel {
                     spacing: 10
                     Repeater {
                         model: [
-                            // Sleep (hibernates after 2 h asleep); locking is $mod+Shift+s
+                            // Sleep (hibernates after 12 h asleep or on low battery); locking is $mod+Shift+s
                             { i: Icons.moon, tip: "Sleep", cmd: [Quickshell.shellDir + "/scripts/fluid-sleep.sh"], confirm: false },
                             { i: Icons.g(0xf2f5), tip: "Log out", cmd: ["swaymsg", "exit"], confirm: true },
                             { i: Icons.g(0xf0709), tip: "Reboot", cmd: ["systemctl", "reboot"], confirm: true },
@@ -678,7 +700,79 @@ DropPanel {
                     }
                 }
             }
+
+            // ================= Sound page =================
+            // Output device, microphone and per-app volume (services/Audio.qml)
+            Column {
+                id: soundPage
+                width: viewport.width
+                spacing: 8
+
+                PageHeader { title: "Sound"; onBack: root.page = "main" }
+
+                FSlider {
+                    width: parent.width
+                    value: Audio.volume
+                    icon: Icons.volume(Audio.percent, Audio.muted)
+                    fillColor: Audio.muted ? Theme.urgent : Theme.audio
+                    onMoved: v => Audio.setVolume(v)
+                    onIconClicked: Audio.toggleMute()
+                }
+
+                SectionLabel { text: "Output" }
+                Repeater {
+                    model: Audio.outputs
+                    DeviceRow {
+                        required property var modelData
+                        title: Audio.label(modelData)
+                        selected: modelData === Audio.sink
+                        onClicked: Audio.setOutput(modelData)
+                    }
+                }
+
+                SectionLabel { text: "Microphone"; visible: Audio.inputs.length > 0 }
+                Repeater {
+                    model: Audio.inputs
+                    DeviceRow {
+                        required property var modelData
+                        title: Audio.label(modelData)
+                        selected: modelData === Audio.source
+                        onClicked: Audio.setInput(modelData)
+                    }
+                }
+
+                SectionLabel { text: Audio.streams.length > 0 ? "Apps" : "No app is playing sound" }
+                Repeater {
+                    model: Audio.streams
+                    Column {
+                        required property var modelData
+                        width: soundPage.width
+                        spacing: 4
+                        Text {
+                            x: 4
+                            width: parent.width - 8; elide: Text.ElideRight
+                            text: Audio.appName(parent.modelData)
+                            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                        }
+                        FSlider {
+                            width: parent.width
+                            implicitHeight: 32
+                            value: parent.modelData.audio ? parent.modelData.audio.volume : 0
+                            icon: Icons.volume(Math.round(value * 100), parent.modelData.audio && parent.modelData.audio.muted)
+                            fillColor: parent.modelData.audio && parent.modelData.audio.muted ? Theme.urgent : Theme.audio
+                            onMoved: v => Audio.setStreamVolume(parent.modelData, v)
+                            onIconClicked: if (parent.modelData.audio) parent.modelData.audio.muted = !parent.modelData.audio.muted
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    component SectionLabel: Text {
+        x: 4
+        topPadding: 6
+        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
     }
 
     component PageHeader: Item {

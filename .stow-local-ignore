@@ -18,6 +18,7 @@ _darcs
 setup-arch.sh
 ^/install.*
 ^/sddm
+^/grub
 ^/README.*
 .gitconfig_appendix.txt
 

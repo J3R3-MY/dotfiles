@@ -12,7 +12,7 @@ Rectangle {
     signal up()
     signal down()
     signal deleteRequested()   // Shift+Delete
-    signal shortcut(int key, int modifiers)   // Shift+Enter, Ctrl+<letter>
+    signal shortcut(int key, int modifiers)   // Shift/Ctrl+Enter, Ctrl+<letter>
 
     implicitHeight: 46
     radius: 14
@@ -43,8 +43,8 @@ Rectangle {
         clip: true
 
         Keys.onEscapePressed: Fluid.closeAll()
-        Keys.onReturnPressed: e => (e.modifiers & Qt.ShiftModifier) ? root.shortcut(Qt.Key_Return, e.modifiers) : root.accepted()
-        Keys.onEnterPressed: e => (e.modifiers & Qt.ShiftModifier) ? root.shortcut(Qt.Key_Return, e.modifiers) : root.accepted()
+        Keys.onReturnPressed: e => (e.modifiers & (Qt.ShiftModifier | Qt.ControlModifier)) ? root.shortcut(Qt.Key_Return, e.modifiers) : root.accepted()
+        Keys.onEnterPressed: e => (e.modifiers & (Qt.ShiftModifier | Qt.ControlModifier)) ? root.shortcut(Qt.Key_Return, e.modifiers) : root.accepted()
         Keys.onPressed: e => {
             // Ctrl+letter shortcuts, leaving the usual editing keys alone
             const editing = [Qt.Key_A, Qt.Key_C, Qt.Key_V, Qt.Key_X, Qt.Key_Z, Qt.Key_Y];

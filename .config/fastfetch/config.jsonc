@@ -47,7 +47,7 @@
 		},
 		{
 			"type": "os",
-			"key": "􀣺 OS ",
+			"key": " OS ",
 			"keyColor": "green",
 		},
 		{
@@ -84,7 +84,7 @@
 			"key": "│ ├ ",
 			"keyColor": "blue",
 			"type": "command",
-			"text": "pgrep yabai &> /dev/null && echo yabai || echo Quartz Compositor",
+			"text": "case $(uname) in Darwin) pgrep yabai >/dev/null && echo yabai || echo Quartz Compositor;; *) pgrep -x qs >/dev/null && echo 'fluid shell (Quickshell)' || echo waybar;; esac",
 		},
 		{
 			"type": "terminal",

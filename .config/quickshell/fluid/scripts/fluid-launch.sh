@@ -40,6 +40,9 @@ start_classic() {
     [ -n "$wp" ] && [ -f "$wp" ] && swaymsg output '*' bg "$wp" fill >/dev/null 2>&1
     pgrep -x waybar >/dev/null || setsid -f waybar >/dev/null 2>&1
     pgrep -x dunst  >/dev/null || setsid -f dunst  >/dev/null 2>&1
+    # password prompts: the shell's island did them, polkit-gnome takes over again
+    pgrep -x polkit-gnome-au >/dev/null \
+        || setsid -f /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 >/dev/null 2>&1
 }
 
 if [ "$mode" != "fluid" ] || [ -z "$qs_bin" ]; then

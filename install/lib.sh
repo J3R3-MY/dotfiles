@@ -20,12 +20,14 @@ FAILED_PKGS=()
 PKGS_BASE=(
     base-devel git wget curl unzip unrar 7zip stow jq gum pciutils
     firewalld fwupd         # firewall, firmware updates (see do_hardening)
+    chrony usbguard         # signed time (NTS), USB device allow-list (do_hardening)
     xdg-user-dirs xdg-utils
     polkit polkit-gnome
     networkmanager network-manager-applet
     bluez bluez-utils
     pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils pavucontrol pamixer playerctl
     brightnessctl upower
+    fprintd                 # fingerprint on the lock screen (enroll: fprintd-enroll)
     flatpak
 )
 
@@ -38,6 +40,7 @@ PKGS_LOGIN=(
 PKGS_SWAY=(
     swaybg swayidle swaylock xorg-xwayland
     grim slurp sway-contrib swappy   # sway-contrib provides grimshot
+    tesseract tesseract-data-eng tesseract-data-deu   # $mod+Ctrl+g: text from the screen (fluid-ocr.sh)
     wl-clipboard cliphist xclip
     waybar wofi rofi dunst libnotify
     xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
@@ -49,11 +52,11 @@ PKGS_SWAY=(
     nwg-look papirus-icon-theme materia-gtk-theme adwaita-icon-theme
 )
 
-# Shell + terminal tooling (.zsh_linux, .tmux.conf, starship, lazygit, ...)
+# Shell + terminal tooling (.zsh_linux, starship, lazygit, ...)
 PKGS_CLI=(
     zsh zsh-autosuggestions zsh-syntax-highlighting starship
     fzf fd ripgrep zoxide thefuck lsd sd choose broot tokei watchexec trash-cli
-    tmux lazygit git-delta htop fastfetch jq lnav fq mediainfo vim
+    lazygit git-delta htop fastfetch jq lnav fq mediainfo vim
     kitty
 )
 
@@ -84,10 +87,12 @@ PKGS_FONTS=(
 PKGS_FLUID=(
     quickshell qt6-imageformats matugen
     power-profiles-daemon   # Performance / Balanced / Saver in the power panel
-    spotify-player          # Spotify view ($mod+Shift+m), needs Premium
+    spotify-launcher        # official Spotify app ($mod+Shift+m)
     bitwarden-cli           # Bitwarden view ($mod+Shift+p)
     kanshi                  # monitor profiles applied on hotplug
     iw                      # Wi-Fi link details in the network panel
+    wlsunset                # night light (control center)
+    wf-recorder             # screen recording (control center, $mod+Shift+r)
 )
 
 # ----------------------------------------------------------
@@ -204,6 +209,8 @@ do_packages() {
     install_pkgs "${PKGS_SWAY[@]}"
     install_pkgs "${PKGS_CLI[@]}"
     install_pkgs "${PKGS_DEV[@]}"
+    # herdr: runs coding agents in persistent panes (AUR binary, pinned + checksummed)
+    aur_pinned herdr-bin || FAILED_PKGS+=(herdr-bin)
     install_pkgs "${PKGS_APPS[@]}"
     install_pkgs "${PKGS_FONTS[@]}"
     [ "$fluid" = "yes" ] && install_pkgs "${PKGS_FLUID[@]}"
@@ -277,7 +284,9 @@ do_services() {
 
 do_login_manager() {
     step "Configuring SDDM"
-    do_sddm_theme ""
+    do_sddm_theme
+    step "Boot menu theme"
+    do_grub_theme
 
     # sway refuses to start on the proprietary NVIDIA driver without this flag
     if lspci 2>/dev/null | grep -qiE 'vga.*nvidia|3d.*nvidia'; then
@@ -343,6 +352,39 @@ do_dotfiles() {
     ln -sfn "$REPO_DIR/.config/quickshell/fluid" "$qs_dir"
     info "~/.config/quickshell/fluid -> repo"
 
+    # Monochrome icon theme (shell + GTK). No package: a git clone (SVGs only),
+    # updated on every run
+    local icons="$HOME/.local/share/icons/yet-another-monochrome-icon-set"
+    if [ -d "$icons/.git" ]; then
+        git -C "$icons" pull -q >>"$LOG" 2>&1 || warn "icon theme: git pull failed"
+    else
+        mkdir -p "${icons%/*}"
+        git clone -q --depth 1 https://bitbucket.org/dirn-typo/yet-another-monochrome-icon-set.git "$icons" >>"$LOG" 2>&1 \
+            || warn "icon theme: clone failed"
+    fi
+    # GTK gets a copy in the theme's accent colour ("fluid-mono", redone by
+    # fluid-theme.sh); the plain set until a theme exists
+    # GTK dark by default (fluid-theme.sh follows the picker's dark/light later)
+    mkdir -p "$HOME/.config/gtk-3.0"
+    [ -f "$HOME/.config/gtk-3.0/settings.ini" ] || printf '[Settings]\ngtk-application-prefer-dark-theme=1\n' > "$HOME/.config/gtk-3.0/settings.ini"
+    gsettings set org.gnome.desktop.interface gtk-theme Adwaita 2>/dev/null
+    gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null
+    rm -f "$HOME/.local/state/fluid/icons-color"
+    "$REPO_DIR/.config/quickshell/fluid/scripts/fluid-icons.sh"
+    [ -d "$HOME/.local/share/icons/fluid-mono" ] \
+        || gsettings set org.gnome.desktop.interface icon-theme yet-another-monochrome-icon-set 2>/dev/null
+    info "icon theme: yet-another-monochrome-icon-set (GTK: fluid-mono, accent-coloured)"
+
+    # Launcher entries that come with dependencies and are never opened by
+    # hand (About Xfce from Thunar's libxfce4ui, avahi/gpsd/v4l/yad tools, ...):
+    # hidden by user overrides, delete one to bring it back
+    mkdir -p "$HOME/.local/share/applications"
+    for e in xfce4-about avahi-discover bssh bvnc lstopo qv4l2 qvidcap xgps xgpsspeed \
+             yad-icon-browser yad-settings uxterm xterm stoken-gui stoken-gui-small; do
+        [ -f "/usr/share/applications/$e.desktop" ] && [ ! -e "$HOME/.local/share/applications/$e.desktop" ] \
+            && printf '[Desktop Entry]\nType=Application\nName=%s\nNoDisplay=true\nHidden=true\n' "$e" > "$HOME/.local/share/applications/$e.desktop"
+    done
+
     # Git hooks for the encrypted developer docs (docs/docs.sh)
     git -C "$REPO_DIR" config core.hooksPath .githooks
 
@@ -365,14 +407,6 @@ do_user_setup() {
 
     if [ "$(getent passwd "$USER" | cut -d: -f7)" != "$(command -v zsh)" ]; then
         sudo chsh -s "$(command -v zsh)" "$USER" && info "login shell -> zsh"
-    fi
-
-    if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-        git clone -q https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm" \
-            && info "tmux plugin manager installed"
-        "$HOME/.tmux/plugins/tpm/bin/install_plugins" >>"$LOG" 2>&1 \
-            && info "tmux plugins installed" \
-            || warn "tmux plugins not installed yet: open tmux and press prefix + I"
     fi
 
     if command -v bob >/dev/null && [ ! -x "$HOME/.local/share/bob/nvim-bin/nvim" ]; then
@@ -399,46 +433,26 @@ do_shell_mode() {
 }
 
 # ----------------------------------------------------------
-# SDDM login theme (sddm/fluid in the repo, copied out so it doesn't depend
-# on the repo). Standalone: install/sddm.sh [image]
+# SDDM login theme: the lock screen design (sddm/fluid + the shared lock QML),
+# copied out so it doesn't depend on the repo. Wallpaper and colours follow
+# the desktop via scripts/fluid-sddm-sync.sh. Standalone: install/sddm.sh
 # ----------------------------------------------------------
 
 do_sddm_theme() {
-    local img="$1" dest=/usr/share/sddm/themes/fluid
-    local state="$HOME/.local/state/fluid"
-
-    if [ -z "$img" ]; then
-        local walls=() current
-        current="$(cat "$state/wallpaper" 2>/dev/null)"
-        mapfile -t walls < <(find -L "$REPO_DIR/.config/wallpapers" -maxdepth 1 -type f \
-            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) ! -name '._*' | sort)
-        if [ -t 0 ] && command -v gum >/dev/null && [ ${#walls[@]} -gt 0 ]; then
-            echo "Pick the login screen wallpaper:"
-            img="$(printf '%s\n' "${current:+[current] $current}" "${walls[@]}" | sed '/^$/d' \
-                | gum choose --height 15 | sed 's/^\[current\] //')"
-        fi
-        [ -z "$img" ] && img="${current:-$REPO_DIR/.config/wallpapers/knight.JPG}"
-    fi
-    if [ ! -f "$img" ]; then warn "wallpaper $img not found, SDDM theme not installed"; return; fi
+    local dest=/usr/share/sddm/themes/fluid lock="$REPO_DIR/.config/quickshell/fluid/lock"
+    local state="$HOME/.local/state/fluid" current
 
     sudo rm -rf "$dest"
     sudo mkdir -p "$dest"
-    sudo cp "$REPO_DIR/sddm/fluid/Main.qml" "$REPO_DIR/sddm/fluid/metadata.desktop" "$dest/"
-    # Scaled-down JPEG copy: loads fast, works for PNG/WebP sources too
-    if command -v magick >/dev/null; then
-        magick "$img[0]" -resize '2560x2560>' -quality 90 /tmp/fluid-sddm-bg.jpg && sudo mv /tmp/fluid-sddm-bg.jpg "$dest/background.jpg"
-    else
-        sudo cp "$img" "$dest/background.jpg"
-    fi
-
-    # Colours from the current fluid theme (matugen), else the waybar defaults
-    local c="$state/colors.json" accent="#c4bca4" on="#0e0c0c" panel="#0e0c0c" fg="#ffffff" dim="#a7a097"
-    if [ -s "$c" ] && command -v jq >/dev/null; then
-        accent=$(jq -r '.clock // "#c4bca4"' "$c"); on=$(jq -r '.onPill // "#0e0c0c"' "$c")
-        panel=$(jq -r '.bg // "#0e0c0c"' "$c"); fg=$(jq -r '.fg // "#ffffff"' "$c"); dim=$(jq -r '.fgDim // "#a7a097"' "$c")
-    fi
-    printf '[General]\nbackground=background.jpg\naccent=%s\nonAccent=%s\npanel=%s\nfg=%s\nfgDim=%s\nfont=Roboto\nclockFont=JetBrains Mono\n' \
-        "$accent" "$on" "$panel" "$fg" "$dim" | sudo tee "$dest/theme.conf" >/dev/null
+    sudo cp "$REPO_DIR/sddm/fluid/Main.qml" "$REPO_DIR/sddm/fluid/metadata.desktop" \
+        "$lock/LockFace.qml" "$lock/KeyRing.qml" "$lock/Avatar.qml" "$dest/"
+    # Wallpaper + colours belong to you, so fluid-theme.sh can update them
+    # without sudo; the QML stays root's
+    sudo install -m 644 -o "$USER" -g "$(id -gn)" /dev/null "$dest/background.jpg"
+    sudo install -m 644 -o "$USER" -g "$(id -gn)" /dev/null "$dest/theme.conf"
+    rm -f "$state/sddm-wallpaper"
+    current="$(cat "$state/wallpaper" 2>/dev/null)"
+    "$REPO_DIR/.config/quickshell/fluid/scripts/fluid-sddm-sync.sh" "${current:-$REPO_DIR/.config/wallpapers/knight.JPG}"
 
     sudo mkdir -p /etc/sddm.conf.d
     printf '[Theme]\nCurrent=fluid\n' | sudo tee /etc/sddm.conf.d/10-theme.conf >/dev/null
@@ -450,7 +464,37 @@ do_sddm_theme() {
     fi
     # its setup script set it in /etc/sddm.conf, which would override the drop-in
     [ -f /etc/sddm.conf ] && sudo sed -i 's/^Current=sddm-astronaut-theme$/Current=fluid/' /etc/sddm.conf
-    info "SDDM theme: fluid, wallpaper $(basename "$img") (preview: sddm-greeter-qt6 --test-mode --theme $dest)"
+    info "SDDM theme: fluid (preview: sddm-greeter-qt6 --test-mode --theme $dest)"
+}
+
+# ----------------------------------------------------------
+# Boot menu theme: minegrub (grub/ in the repo, copied to /boot so it doesn't
+# depend on the repo or a download). Standalone: install/grub.sh
+# ----------------------------------------------------------
+
+do_grub_theme() {
+    local dest=/boot/grub/themes/minegrub
+    if ! command -v grub-mkconfig >/dev/null || [ ! -f /etc/default/grub ]; then
+        info "no GRUB here, boot menu theme skipped"; return
+    fi
+    sudo rm -rf "$dest"
+    sudo mkdir -p "${dest%/*}"
+    sudo cp -r "$REPO_DIR/grub/minegrub" "$dest"
+    # the real package count instead of the theme's fixed "647"
+    sudo sed -i "s/\"[0-9]* Packages Installed\"/\"$(pacman -Qq | wc -l) Packages Installed\"/" "$dest/theme.txt"
+    if grep -q '^#\?GRUB_THEME=' /etc/default/grub; then
+        sudo sed -i "s|^#\?GRUB_THEME=.*|GRUB_THEME=\"$dest/theme.txt\"|" /etc/default/grub
+    else
+        echo "GRUB_THEME=\"$dest/theme.txt\"" | sudo tee -a /etc/default/grub >/dev/null
+    fi
+    # GRUB 2.16 adds a "(EFI BootNext)" entry per firmware boot entry; hide them
+    grep -q '^GRUB_DISABLE_BOOTNEXT=' /etc/default/grub ||
+        echo 'GRUB_DISABLE_BOOTNEXT=true' | sudo tee -a /etc/default/grub >/dev/null
+    if sudo grub-mkconfig -o /boot/grub/grub.cfg >>"$LOG" 2>&1; then
+        info "boot menu theme: minegrub"
+    else
+        warn "grub-mkconfig failed, see $LOG"
+    fi
 }
 
 # ----------------------------------------------------------
@@ -485,6 +529,16 @@ CONF
     sudo systemctl start firewalld.service >>"$LOG" 2>&1
     sudo firewall-cmd -q --permanent --remove-service=ssh 2>/dev/null && sudo firewall-cmd -q --reload
 
+    # SSH server: off unless you switch it on (scripts/fluid-ssh.sh on, until
+    # the next reboot). Masked so nothing else can start it; if it does run,
+    # keys only, no root, only you.
+    sudo systemctl disable --now sshd.service >>"$LOG" 2>&1
+    sudo systemctl mask sshd.service >>"$LOG" 2>&1
+    sudo mkdir -p /etc/ssh/sshd_config.d
+    printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin no\nAllowUsers %s\n' "$USER" \
+        | sudo tee /etc/ssh/sshd_config.d/10-fluid.conf >/dev/null
+    info "SSH server off and masked (fluid-ssh.sh on|off), firewall closed"
+
     # DNS over TLS to Quad9 with DNSSEC. On a hotel/airport login page that
     # blocks it: `resolvectl dnsovertls <interface> no` until you're through.
     sudo mkdir -p /etc/systemd/resolved.conf.d
@@ -495,11 +549,14 @@ Domains=~.
 DNSOverTLS=yes
 DNSSEC=allow-downgrade
 FallbackDNS=
+# LLMNR: old, spoofable Windows name lookup; mDNS is avahi's job (printers, ...)
+LLMNR=no
+MulticastDNS=no
 CONF
     enable_system systemd-resolved.service
     sudo systemctl restart systemd-resolved.service >>"$LOG" 2>&1
     sudo ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
-    info "DNS: Quad9 over TLS"
+    info "DNS: Quad9 over TLS, no LLMNR"
 
     # Kernel: only settings Arch doesn't already default to
     sudo tee /etc/sysctl.d/90-fluid-hardening.conf >/dev/null <<'CONF'
@@ -523,6 +580,51 @@ CONF
 
     # Firmware: refresh LVFS metadata daily; install updates with `fwupdmgr update`
     enable_system fwupd-refresh.timer
+
+    # Kernel modules nothing on a laptop uses, with a history of remote bugs:
+    # rare network protocols and FireWire. "install ... /bin/false" also stops
+    # automatic loading, which a plain blacklist doesn't.
+    printf 'install %s /bin/false\n' dccp sctp rds tipc firewire_core firewire_ohci \
+        | sudo tee /etc/modprobe.d/90-fluid-blacklist.conf >/dev/null
+
+    # su only for the wheel group; root's password locked (root via sudo only).
+    # Emergency shell then needs the install USB or init=/bin/bash at GRUB.
+    sudo sed -i -E 's/^#\s*(auth\s+required\s+pam_wheel\.so\s+use_uid)/\1/' /etc/pam.d/su /etc/pam.d/su-l
+    sudo passwd -l root >>"$LOG" 2>&1
+    info "rare kernel modules blocked, su = wheel only, root password locked"
+
+    # Time over NTS (signed, so the network can't fake the clock and with it
+    # certificate checks). chrony replaces systemd-timesyncd.
+    sudo tee /etc/chrony.conf >/dev/null <<'CONF'
+# Written by install/lib.sh (fluid): NTS-authenticated time only
+server time.cloudflare.com iburst nts
+server nts.netnod.se iburst nts
+server ptbtime1.ptb.de iburst nts
+ntsdumpdir /var/lib/chrony
+# the clock may be far off after a dead battery: skip the certificate's time
+# check for the first update
+nocerttimecheck 1
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+CONF
+    sudo systemctl disable --now systemd-timesyncd.service >>"$LOG" 2>&1
+    enable_system chronyd.service
+    sudo systemctl restart chronyd.service >>"$LOG" 2>&1
+    info "time: chrony with NTS"
+
+    # USBGuard: USB devices plugged in later stay blocked until allowed (the
+    # notification from fluid-usb.sh asks for your password). Everything
+    # connected right now is allowed first, so nothing in use gets cut off.
+    if [ ! -s /etc/usbguard/rules.conf ]; then
+        sudo sh -c 'usbguard generate-policy > /etc/usbguard/rules.conf && chmod 600 /etc/usbguard/rules.conf'
+    fi
+    sudo sed -i -E 's/^ImplicitPolicyTarget=.*/ImplicitPolicyTarget=block/; s/^PresentDevicePolicy=.*/PresentDevicePolicy=apply-policy/; s/^InsertedDevicePolicy=.*/InsertedDevicePolicy=apply-policy/' /etc/usbguard/usbguard-daemon.conf
+    # you may see devices and get told about new ones, not allow them yourself
+    sudo usbguard add-user "$USER" --devices listen,list >>"$LOG" 2>&1 || true
+    enable_system usbguard.service
+    sudo systemctl restart usbguard.service >>"$LOG" 2>&1
+    info "USBGuard on (current devices allowed)"
 }
 
 # ----------------------------------------------------------
@@ -581,6 +683,26 @@ do_hibernate() {
         #    parameters are needed, even for a swap file on btrfs.
         if command -v dracut >/dev/null; then
             echo 'add_dracutmodules+=" resume "' | sudo tee /etc/dracut.conf.d/fluid-resume.conf >/dev/null
+            # NVIDIA must not be in the initramfs: there it can't pause before
+            # the kernel jumps back into the saved image ("pci_pm_freeze
+            # returns -5"), the resume is abandoned and the machine boots fresh.
+            # It loads from the root filesystem instead; the laptop panel runs
+            # on the Intel GPU anyway. The nvidia-* units save video memory.
+            if lspci 2>/dev/null | grep -qiE 'vga.*nvidia|3d.*nvidia'; then
+                local f
+                for f in /etc/dracut.conf.d/*.conf; do
+                    [ "$f" = /etc/dracut.conf.d/fluid-nvidia.conf ] && continue
+                    grep -qE '^[^#]*force_drivers.*nvidia' "$f" 2>/dev/null || continue
+                    info "keeping NVIDIA out of the initramfs ($(basename "$f"))"
+                    sudo cp -n "$f" "$f.before-fluid"
+                    sudo sed -i -E 's/^([^#]*force_drivers.*nvidia)/# fluid: breaks resume from hibernation\n# \1/' "$f"
+                done
+                # in case nvidia-inst writes it again
+                echo 'omit_drivers+=" nvidia nvidia_modeset nvidia_uvm nvidia_drm "' \
+                    | sudo tee /etc/dracut.conf.d/fluid-nvidia.conf >/dev/null
+                enable_system nvidia-suspend.service nvidia-hibernate.service nvidia-resume.service \
+                    nvidia-suspend-then-hibernate.service
+            fi
             info "rebuilding the initramfs (dracut)"
             if command -v dracut-rebuild >/dev/null; then sudo dracut-rebuild >>"$LOG" 2>&1
             elif command -v reinstall-kernels >/dev/null; then sudo reinstall-kernels >>"$LOG" 2>&1
@@ -599,9 +721,11 @@ do_hibernate() {
         lid=suspend; reason="logind says hibernation isn't possible yet (try again after a reboot)"
     fi
 
-    # 4. How long to stay suspended before hibernating
+    # 4. How long to stay suspended before hibernating. Asleep (s2idle) this
+    #    laptop uses ~1.5 %/h, and systemd hibernates early anyway when the
+    #    battery drops below 5 %, so 12 h keeps a night's sleep instant.
     sudo mkdir -p /etc/systemd/sleep.conf.d
-    printf '[Sleep]\nHibernateDelaySec=2h\n' | sudo tee /etc/systemd/sleep.conf.d/10-fluid.conf >/dev/null
+    printf '[Sleep]\nHibernateDelaySec=12h\n' | sudo tee /etc/systemd/sleep.conf.d/10-fluid.conf >/dev/null
 
     # 5. Lid: sleep (docked with the lid closed keeps working)
     sudo mkdir -p /etc/systemd/logind.conf.d
@@ -616,26 +740,41 @@ do_hibernate() {
     mkdir -p "$(dirname "$slog")" && touch "$slog"
     sudo rm -f /etc/systemd/system-sleep/fluid-log
     sudo mkdir -p /usr/lib/systemd/system-sleep
-    sed "s|@LOG@|$slog|" <<'HOOK' | sudo tee /usr/lib/systemd/system-sleep/fluid-log >/dev/null
+    sed "s|@LOG@|$slog|; s|@USER@|$USER|" <<'HOOK' | sudo tee /usr/lib/systemd/system-sleep/fluid-log >/dev/null
 #!/bin/sh
 # Logs each sleep and wake for the fluid setup (installed by install/lib.sh).
 # $1 = pre|post, $2 = suspend|hibernate|suspend-then-hibernate|...,
 # SYSTEMD_SLEEP_ACTION = the phase within suspend-then-hibernate.
 log=@LOG@
+# runs as root, but the log is in your home: write it as you, so a symlink
+# there can't point root at a system file
+out() { runuser -u @USER@ -- tee -a "$log" >/dev/null; }
 state() { echo "battery=$(cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1)% ac=$(cat /sys/class/power_supply/A*/online 2>/dev/null | head -n1) lid=$(awk '{print $2}' /proc/acpi/button/lid/*/state 2>/dev/null)"; }
 what="$2${SYSTEMD_SLEEP_ACTION:+/$SYSTEMD_SLEEP_ACTION}"
 case "$1" in
     pre)  # let the kernel log how long each step and each device takes
           echo 1 > /sys/power/pm_print_times 2>/dev/null; echo 1 > /sys/power/pm_debug_messages 2>/dev/null
-          echo "$(date '+%F %T')  sleep  $what  $(state)" >> "$log" ;;
+          echo "$(date '+%F %T')  sleep  $what  $(state)" | out
+          # Hibernating: a touch on the touchpad (I2C) while the image is
+          # written aborts it; it can't wake a powered-off machine anyway
+          case "$what" in *hibernate) [ "$what" = suspend-then-hibernate/suspend ] ||
+              for w in /sys/bus/i2c/devices/*/power/wakeup; do
+                  [ "$(cat "$w" 2>/dev/null)" = enabled ] && echo disabled > "$w" && echo "$w" >> /run/fluid-wakeup
+              done ;;
+          esac ;;
     post)
+        [ -f /run/fluid-wakeup ] && { while read -r w; do echo enabled > "$w"; done < /run/fluid-wakeup; rm -f /run/fluid-wakeup; }
         { echo "$(date '+%F %T')  wake   $what  $(state)"
+          # a hibernate that never powered off: say what woke it
+          irq=$(journalctl -b -k --since -3min --no-pager 2>/dev/null | grep -q 'hibernation, rolling back' \
+              && journalctl -b -k --since -3min --no-pager | sed -n 's/.*Triggering wakeup from IRQ \([0-9]*\).*/\1/p' | tail -n1)
+          [ -n "$irq" ] && echo "        hibernate ABORTED by a wakeup from IRQ $irq ($(cat /sys/kernel/irq/$irq/actions 2>/dev/null))"
           # PM steps with their durations, plus any device slower than 0.2 s
           journalctl -b -k --since -3min --no-pager -o short-precise 2>/dev/null \
             | awk '/ after [0-9]+ usecs/ { for (i = 1; i < NF; i++) if ($(i+1) == "usecs" && $i > 200000) { print; break } next }
                    /PM: (suspend|resume|hibernation|image)|complete after|took [0-9]|nvidia/' \
             | tail -n 20 | sed 's/^/        /'
-        } >> "$log"
+        } | out
         # did the shell and Wi-Fi survive? Checked 20 s later by a timer (a background
         # job would be killed together with systemd-sleep)
         systemd-run --quiet --no-block --collect --on-active=20 "$0" check
@@ -643,18 +782,18 @@ case "$1" in
     check)
         now() { date '+%F %T'; }
         pgrep -f '(qs|quickshell) -c fluid' >/dev/null && r=running || r="NOT running"
-        echo "$(now)  shell  $r" >> "$log"
+        echo "$(now)  shell  $r" | out
         # Wi-Fi: the driver sometimes doesn't come back from hibernation (no
         # networks at all). If Wi-Fi is switched on but has no usable device,
         # log why, then reload the driver and NetworkManager.
         wifi_ok() { nmcli -t -f TYPE,STATE device 2>/dev/null | grep -Eq '^wifi:(connected|connecting|disconnected)'; }
         [ "$(nmcli radio wifi 2>/dev/null)" = enabled ] || exit 0
-        if wifi_ok; then echo "$(now)  wifi   ok ($(nmcli -t -f TYPE,STATE device | grep '^wifi:' | head -n1 | cut -d: -f2))" >> "$log"; exit 0; fi
+        if wifi_ok; then echo "$(now)  wifi   ok ($(nmcli -t -f TYPE,STATE device | grep '^wifi:' | head -n1 | cut -d: -f2))" | out; exit 0; fi
         { echo "$(now)  wifi   BROKEN: nm=$(nmcli -t -f STATE general) devices=$(nmcli -t -f DEVICE,TYPE,STATE device | tr '\n' ' ')"
           rfkill -n -o TYPE,SOFT,HARD 2>/dev/null | grep -i wlan | sed 's/^/        rfkill /'
           journalctl -b -k --since -10min --no-pager -o short-precise 2>/dev/null | grep -Ei 'iwl|wlan|wlp|ath|rtw|mt7|firmware' | tail -n 10 | sed 's/^/        /'
           journalctl -b -u NetworkManager --since -10min --no-pager -o short-precise 2>/dev/null | grep -Ei 'wifi|wlan|wlp|sleep|supplicant|unavailable' | tail -n 8 | sed 's/^/        /'
-        } >> "$log"
+        } | out
         mod=""
         for d in /sys/class/net/*; do [ -d "$d/wireless" ] && mod="$(basename "$(readlink -f "$d/device/driver/module")")"; done
         [ -z "$mod" ] && lsmod | grep -q '^iwlwifi' && mod=iwlwifi
@@ -663,17 +802,19 @@ case "$1" in
         systemctl restart NetworkManager
         sleep 15
         wifi_ok && r="fixed (reloaded ${mod:-no driver} + NetworkManager)" || r="still broken after reloading ${mod:-no driver found} + NetworkManager"
-        echo "$(now)  wifi   $r" >> "$log" ;;
+        echo "$(now)  wifi   $r" | out ;;
 esac
 exit 0
 HOOK
     sudo chmod 755 /usr/lib/systemd/system-sleep/fluid-log
-    sed "s|@LOG@|$slog|" <<'UNIT' | sudo tee /etc/systemd/system/fluid-sleep-boot.service >/dev/null
+    sed "s|@LOG@|$slog|; s|@USER@|$USER|" <<'UNIT' | sudo tee /etc/systemd/system/fluid-sleep-boot.service >/dev/null
 [Unit]
 Description=Note boots in the fluid sleep log (flags a sleep that never woke up)
 
 [Service]
 Type=oneshot
+# only touches your own log, so it runs as you
+User=@USER@
 ExecStart=/bin/sh -c 'l=@LOG@; [ -f $l ] || exit 0; grep -E "^[0-9-]+ [0-9:]+  (sleep|wake|boot) " $l | tail -n1 | grep -q "  sleep " && echo "$(date "+%%F %%T")  BOOT without a wake: the last sleep did not resume, the machine booted fresh" >> $l; echo "$(date "+%%F %%T")  boot" >> $l; [ "$(wc -l < $l)" -gt 2000 ] && tail -n 1000 $l > $l.tmp && cat $l.tmp > $l && rm $l.tmp; exit 0'
 
 [Install]
@@ -684,10 +825,10 @@ UNIT
     echo "$(date '+%F %T')  setup  sleep logging installed" >> "$slog"
 
     if [ "$lid" = suspend-then-hibernate ]; then
-        info "lid / 5 min idle: sleep, hibernate after 2 h asleep (hibernation works after the next reboot)"
+        info "lid / 10 min idle on battery: sleep, hibernate after 12 h asleep or on low battery (works after the next reboot)"
     else
         warn "hibernation not set up: $reason"
-        warn "closing the lid / 5 min idle will just suspend"
+        warn "closing the lid / 10 min idle on battery will just suspend"
     fi
 }
 

@@ -71,3 +71,4 @@ _fzf_compgen_dir() {
 
 eval $(thefuck --alias)
 eval "$(zoxide init zsh)"
+export PATH="$HOME/.local/bin:$PATH"

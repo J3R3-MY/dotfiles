@@ -1,5 +1,7 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import "../common"
 import "../services"
 
@@ -53,7 +55,10 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property bool isActive: index === root.activeIndex
-                readonly property string icon: Icons.workspaces[String(modelData.number)] || ""
+                // the apps open on it (max 3) as real theme icons, sharp at any
+                // size; named workspaces like Spotify's "m" show only the icons
+                readonly property var appIds: (Sway.apps[modelData.name] || []).slice(0, 3)
+                readonly property bool showName: modelData.number >= 0 || appIds.length === 0
 
                 height: Theme.pillHeight
                 width: label.implicitWidth + 18
@@ -78,8 +83,9 @@ Item {
                 Row {
                     id: label
                     anchors.centerIn: parent
-                    spacing: 2
+                    spacing: 5
                     Text {
+                        visible: btn.showName
                         text: btn.modelData.name
                         color: btn.isActive && root.outputFocused ? Theme.onPill : Theme.fg
                         font.family: Theme.font
@@ -87,12 +93,34 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         Behavior on color { ColorAnimation { duration: Anim.normal } }
                     }
-                    Glyph {
-                        visible: btn.icon.length > 0
-                        text: " " + btn.icon
-                        color: btn.isActive && root.outputFocused ? Theme.onPill : Theme.fg
-                        anchors.verticalCenter: parent.verticalCenter
-                        Behavior on color { ColorAnimation { duration: Anim.normal } }
+                    Repeater {
+                        model: btn.appIds
+                        Item {
+                            required property string modelData
+                            width: 20
+                            height: 20
+                            anchors.verticalCenter: parent.verticalCenter
+                            Image {
+                                anchors.fill: parent
+                                // the theme's icon named after the window first (the
+                                // Spotify app's desktop entry wants "spotify-launcher",
+                                // which only Papirus has, in colour)
+                                source: Quickshell.iconPath(parent.modelData, true) || ScreenTime.iconFor(parent.modelData)
+                                sourceSize: Qt.size(40, 40)
+                                smooth: true
+                                mipmap: true
+                                // monochrome icon theme: tinted with the theme's accent (the
+                                // highlight colour), dark on the highlighted workspace
+                                layer.enabled: true
+                                layer.effect: MultiEffect {
+                                    colorization: 1
+                                    colorizationColor: btn.isActive && root.outputFocused ? Theme.onPill : Theme.accent
+                                    // fades with the number; snapping made the icon flash
+                                    // dark-on-dark while the highlight was still sliding over
+                                    Behavior on colorizationColor { ColorAnimation { duration: Anim.normal } }
+                                }
+                            }
+                        }
                     }
                 }
 

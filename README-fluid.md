@@ -14,13 +14,13 @@ AGPL), so this stays under the repo's MIT licence.
 
 | Feature | Where | Notes |
 |---|---|---|
-| Fluid bar | top of every output | Waybar layout and colours. Sliding workspace highlight, pills widen on hover to show details |
+| Fluid bar | top of every output | Waybar layout and colours. Workspaces show icons of the apps open on them (monochrome theme "yet-another-monochrome-icon-set", tinted with the theme accent), sliding highlight, pills widen on hover to show details |
 | Dynamic island | the clock | Morphs into launcher, clipboard, media, dashboard, theme picker or cheat sheet. Live equaliser bars while music plays; hover to see the track |
 | Dashboard | click the clock, `$mod+c` | Calendar, big clock with the next 24 h of weather around it, wind/humidity/rain/feels-like rings, 7-day strip. Second tab: screen time |
 | Screen time | dashboard → Screen time | Per-app time, last 7 days, month heatmap, by-hour chart. Logged from sway focus events, paused when idle/locked, stored in `~/.local/state/fluid/screentime` |
-| Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert |
+| Control center | top-right corner, status pills, `$mod+i` | Toggles, sliders, media, notifications, power row. Wi-Fi and Bluetooth pages use the "orbit" view (connected thing in the middle, the rest around it); Displays page sets resolution/refresh/scale with a 15 s revert. Sound page (click the volume pill, or `›` next to the volume slider): output device, microphone, volume per app. Tiles for Keep awake (no dim/lock/sleep on idle), Night light (warmer from sunset to sunrise, strength slider; wlsunset with the weather location) and Record screen. Bar: DE/US badge for the keyboard layout (click = switch). Dashboard has a System tab (CPU, memory, temperatures, fans, top processes) |
 | Power panel | click the battery pill | Battery ring, uptime, brightness/volume, lock/suspend/reboot/off, Performance/Balanced/Saver |
-| Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders, WezTerm and (Linux only) the starship prompt. The same wallpaper + settings always give the same colours. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
+| Theme picker | `$mod+t` | Carousel of slanted wallpaper cards with colour filter; matugen recolours bar, panels, sway borders, WezTerm, the login screen, GTK icons (Thunar, in the accent colour) and (Linux only) the starship prompt and Neovim (live, via mini.base16; everforest elsewhere). The same wallpaper + settings always give the same colours. Tweaks: dark/light, base colour, hue, style, contrast, brightness, shuffle/reset |
 | Media | `$mod+m`, right-click the clock | Spinning-record cover, seek bar, 10-band equalizer with presets (PipeWire filter-chain, no EasyEffects) |
 | Lock screen | `$mod+Shift+s`, idle, before sleep | Blurred wallpaper + clock, password pill on any key. Falls back to swaylock without the shell |
 | OSD | bottom centre | Appears for any volume/brightness change |
@@ -31,21 +31,21 @@ AGPL), so this stays under the repo's MIT licence.
 
 | Feature | Where | Instead of |
 |---|---|---|
-| Net speed | bar pill `↓ ↑` in MB/s, click for chart (5/15/30 min), link details, per-app usage | davedes.netspeed |
+| Net speed | bar pill `↓ ↑` in Mbps, click for chart (5/15/30 min), link details, per-app usage | davedes.netspeed |
 | Connection health | same pill (hover shows the score) → Health tab: router and internet latency, jitter, loss, outage log, speed test | x3me.nexthop |
 | VPN | bar pill when a VPN exists → VPN tab: NetworkManager VPN/WireGuard, Tailscale (+ exit nodes), Mullvad | jkoestinger.vpn |
 | Port watch | bar pill while dev servers listen → Ports tab with stop buttons | zeru.portwatch |
 | AirPods | Bluetooth pill shows the pods' battery; Bluetooth page: L/R/case, noise mode, conversation awareness, auto-pause | thisisgm.omapods (own ~150-line Python bridge, no librepods) |
-| Spotify | `$mod+Shift+m` or "Library" in the media view: search, liked, playlists, Connect devices | quickshell.spotify (uses `spotify_player` as the backend, Premium needed) |
+| Spotify | `$mod+Shift+m` or "Spotify" in the media view: goes to the official app on its own workspace "m" (starts it if needed, again = back); play/pause/next from the media view and island | official app via `spotify-launcher` |
+| Password prompts | automatic: when an app needs admin rights (pkexec, mounting, Network Manager, installers, ...) the island turns into a prompt that names the app and why. Esc / click outside cancels. Waybar mode uses polkit-gnome as before | Quickshell's polkit agent |
 | Bitwarden | `$mod+Shift+p`: unlock, search, copy password/username/TOTP | elevate08.qs-bitwarden-cli (official `bw` CLI) |
-| Lock designs | Power panel → Lock style: Classic, Minimal, Info, Split with live previews | sirjul1337.lock-explorer |
 | Monitor profiles | Control center → Displays: drag to arrange, save profiles that kanshi re-applies on hotplug | crmne.hyprmoncfg |
 | Paste files as paths | copy files in Thunar, `Ctrl+Shift+V` in WezTerm pastes their quoted paths | Omarchy's file → terminal paste |
 
-Skipped: omdrop (needs Apple Silicon + Broadcom Wi-Fi) and herdr (not used).
+Skipped: omdrop (needs Apple Silicon + Broadcom Wi-Fi). herdr itself is installed (AUR `herdr-bin`, pinned), its bar widget is not.
 
-One-time setup for the accounts: Spotify → "Sign in" in the Spotify view
-(runs `spotify_player authenticate`); Bitwarden → "Log in" in the vault view
+One-time setup for the accounts: Spotify → sign in once in the app;
+Bitwarden → "Log in" in the vault view
 (runs `bw login`). Copied passwords never pass through the shell, are removed
 from clipboard history and cleared after 30 s; the vault locks after 10 minutes
 or when the screen locks.
@@ -60,15 +60,18 @@ Old binds are untouched. New ones use keys that were unbound:
 
 | Key | Action |
 |---|---|
-| `$mod+p` | App launcher (wofi stays on `$mod+d`) |
+| `$mod+p` | Launcher: apps, then files and folders in your home (fd, from 2 letters; Enter open, Shift+Enter show in Thunar, Ctrl+Enter copy path). wofi stays on `$mod+d` |
 | `$mod+v` | Clipboard history (Enter copies, Shift+Del removes) |
 | `$mod+m` | Media |
 | `$mod+c` | Dashboard (calendar, weather, screen time) |
 | `$mod+t` | Wallpaper / theme picker |
 | `$mod+i` | Control center |
 | `$mod+Escape` | Close whatever is open |
-| `$mod+Shift+m` | Spotify library |
+| `$mod+Shift+m` | Spotify (its own workspace "m"; again = back) |
 | `$mod+Shift+p` | Bitwarden passwords |
+| `$mod+Shift+r` | Record an area of the screen (again = stop; whole screen from the control center tile). Island shows a red dot + time, click it to stop. Saved to ~/Videos, no audio |
+| `$mod+Ctrl+g` | Copy text from the screen: drag a box, OCR (offline, English + German) puts it in the clipboard |
+| `$mod+Shift+o` | All windows solid / see-through again (Obsidian, Thunar, Spotify at 85 %, WezTerm 75 %; rules in `fluid.conf`) |
 | `$mod+Shift+n` | Network panel (traffic, health, VPN, ports) |
 | `$mod+?` / `$mod+F1` | Keybind cheat sheet (built from the sway config, so new binds appear automatically) |
 | `$mod+Alt+w` / `$mod+Alt+q` | Switch to the old waybar setup / back to the fluid shell |
@@ -90,7 +93,7 @@ Reboot afterwards and pick **Sway** in SDDM (**Sway (NVIDIA)** on NVIDIA cards).
 
 Both scripts share `install/lib.sh` and:
 
-- install everything the sway config, scripts, zsh/tmux/nvim setup and the
+- install everything the sway config, scripts, zsh/nvim setup and the
   apps from `setup-arch.sh` use (Hyprland-only packages are left out)
 - add snapper/btrfs-assistant on btrfs and run `nvidia-inst` on NVIDIA
 - enable NetworkManager, bluetooth, SDDM (own `fluid` theme, see below), fstrim, docker,
@@ -147,15 +150,26 @@ qs -c fluid ipc call fluid toggle launcher   # drive it by hand
 
 ## Sleep, lid and login screen
 
-- **Sleep like a Mac:** closing the lid, 5 min idle (after locking at 3) or
-  the moon button suspend right away; after 2 h asleep the laptop hibernates
-  on its own so the battery isn't drained (`suspend-then-hibernate`). With
-  external monitors connected, closing the lid just turns the laptop screen off.
+- **Sleep like a Mac:** closing the lid or the moon button suspend right away;
+  after 12 h asleep (or earlier, when the battery gets low) the laptop
+  hibernates on its own (`suspend-then-hibernate`). With external monitors
+  connected, closing the lid just turns the laptop screen off.
+- **Idle** (`scripts/fluid-idle.sh`, called by swayidle):
+
+  |          | dim  | screen off + lock | sleep |
+  |----------|------|-------------------|-------|
+  | battery  | 2:30 | 3 min             | 10 min |
+  | charger  | 9:30 | 10 min            | never |
+
+  Any input brings the brightness straight back. Playing audio only blocks
+  sleep (the screen still goes off); a microphone in use (a call) keeps the
+  screen on too. The held-back step runs once it has been quiet for 30 s.
 - `install/hibernate.sh` sets this up: a swap file at least as big as RAM (its
-  own subvolume on btrfs), resume support in the initramfs, the 2 h delay and
-  the lid setting. If hibernation can't work (no UEFI, Secure Boot lockdown,
-  too little disk space) it uses plain suspend and says why. The installers
-  run it; hibernating works after the next reboot.
+  own subvolume on btrfs), resume support in the initramfs (with the NVIDIA
+  driver kept out of it, otherwise resuming fails and the laptop boots fresh),
+  the 12 h delay and the lid setting. If hibernation can't work (no UEFI,
+  Secure Boot lockdown, too little disk space) it uses plain suspend and says
+  why. The installers run it; hibernating works after the next reboot.
 - **Sleep log:** every sleep, wake and boot is written to
   `~/.local/state/fluid/sleep.log` automatically: lid closed, the kind of sleep, battery and lid,
   the kernel's resume messages, whether the shell survived, and a

@@ -3,17 +3,18 @@ import Quickshell
 import "../common"
 import "../services"
 
-// Clock dashboard (click the clock / $mod+c). Two tabs:
+// Clock dashboard (click the clock / $mod+c). Three tabs:
 //   Today       – calendar, big clock with the next 24 h of weather around it,
 //                 current conditions and a 7-day strip
 //   Screen time – see ScreenTimePane.qml
+//   System      – CPU, memory, temperatures, top processes (SystemPane.qml)
 Item {
     id: root
 
     property string tab: "today"
 
     Keys.onEscapePressed: Fluid.closeAll()
-    Keys.onTabPressed: tab = tab === "today" ? "screentime" : "today"
+    Keys.onTabPressed: tab = ({ today: "screentime", screentime: "system", system: "today" })[tab]
     Component.onCompleted: {
         forceActiveFocus();
         if (!Weather.ready) Weather.refresh();
@@ -26,7 +27,7 @@ Item {
         id: tabs
         spacing: 6
         Repeater {
-            model: [{ id: "today", t: "Today" }, { id: "screentime", t: "Screen time" }]
+            model: [{ id: "today", t: "Today" }, { id: "screentime", t: "Screen time" }, { id: "system", t: "System" }]
             Chip {
                 required property var modelData
                 text: modelData.t
@@ -232,6 +233,18 @@ Item {
             text: "Loading weather…"
             color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
         }
+    }
+
+    // ---- System -------------------------------------------------------------
+    SystemPane {
+        anchors.top: tabs.bottom
+        anchors.topMargin: 14
+        anchors.bottom: parent.bottom
+        width: parent.width
+        shown: root.tab === "system"
+        opacity: shown ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: Anim.normal } }
     }
 
     // ---- Screen time --------------------------------------------------------

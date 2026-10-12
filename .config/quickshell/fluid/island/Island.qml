@@ -7,7 +7,8 @@ import "../services"
 // The dynamic island: sits where the waybar clock was and morphs.
 //   rest   – clock pill in the old clock colour (+ a "live" equaliser if music plays)
 //   hover  – grows; with music playing it shows the track and a play/pause button
-//   open   – morphs into launcher / clipboard / media / calendar / theme
+//   open   – morphs into launcher / clipboard / media / calendar / theme,
+//            or a system password prompt (auth) when an app asks for one
 //
 // Size and colour are bound to the state and animated with a slightly
 // overshooting spring, so every transition is one continuous shape change.
@@ -36,9 +37,8 @@ Item {
         "calendar": Qt.size(1120, 620),
         "theme": Qt.size(1180, 600),
         "keys": Qt.size(1040, 640),
-        "spotify": Qt.size(720, 560),
         "vault": Qt.size(680, 520),
-        "lockstyle": Qt.size(980, 700)
+        "auth": Qt.size(460, 230)
     })
     readonly property real restWidth: restRow.implicitWidth + 26
     readonly property size targetSize: open ? viewSizes[view]
@@ -75,6 +75,32 @@ Item {
         scale: island.open ? 0.8 : 1
         Behavior on opacity { NumberAnimation { duration: Anim.fast } }
         Behavior on scale { NumberAnimation { duration: Anim.normal } }
+
+        // Recording: red dot + time; clicking the island stops it
+        Row {
+            visible: Fluid.recording
+            spacing: 6
+            anchors.verticalCenter: parent.verticalCenter
+            Rectangle {
+                width: 10; height: 10; radius: 5
+                color: "#e5484d"
+                anchors.verticalCenter: parent.verticalCenter
+                SequentialAnimation on opacity {
+                    running: Fluid.recording; loops: Animation.Infinite
+                    NumberAnimation { to: 0.35; duration: 700 }
+                    NumberAnimation { to: 1; duration: 700 }
+                }
+            }
+            Text {
+                id: recTime
+                color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize
+                anchors.verticalCenter: parent.verticalCenter
+                Timer {
+                    running: Fluid.recording; repeat: true; interval: 1000; triggeredOnStart: true
+                    onTriggered: { const s = Math.floor((Date.now() - Fluid.recordStart) / 1000); recTime.text = Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+                }
+            }
+        }
 
         // "Live activity": tiny bouncing bars while something is playing
         Row {
@@ -162,7 +188,8 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         onClicked: m => {
-            if (Media.active && (island.mediaHover || m.button === Qt.RightButton))
+            if (Fluid.recording) Fluid.stopRecording();
+            else if (Media.active && (island.mediaHover || m.button === Qt.RightButton))
                 Fluid.openIsland("media", island.screenName);
             else
                 Fluid.openIsland("calendar", island.screenName);
@@ -170,22 +197,34 @@ Item {
     }
 
     // ---- Expanded views -----------------------------------------------------
-    Loader {
-        id: viewLoader
+    // The view keeps its full open size and is clipped by the morphing shape,
+    // so it never reflows while the island grows or shrinks.
+    Item {
         anchors.fill: parent
-        anchors.margins: 14
-        active: island.shownView !== ""
-        opacity: island.open ? 1 : 0
-        // Fade in once the shape has mostly finished morphing
-        Behavior on opacity {
-            SequentialAnimation {
-                PauseAnimation { duration: island.open ? 120 : 0 }
-                NumberAnimation { duration: Anim.fast }
+        clip: true
+        Loader {
+            id: viewLoader
+            readonly property size openSize: island.viewSizes[island.shownView] || Qt.size(island.width, island.height)
+            anchors.top: parent.top
+            anchors.topMargin: 14
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: openSize.width - 28
+            height: openSize.height - 28
+            active: island.shownView !== ""
+            opacity: island.open ? 1 : 0
+            visible: opacity > 0
+            // Opening: fade in once the shape has mostly finished morphing.
+            // Closing: gone almost at once, before the shape visibly shrinks.
+            Behavior on opacity {
+                SequentialAnimation {
+                    PauseAnimation { duration: island.open ? 120 : 0 }
+                    NumberAnimation { duration: island.open ? Anim.fast : 90; easing.type: island.open ? Easing.Linear : Easing.OutQuad }
+                }
             }
+            readonly property var files: ({ launcher: "LauncherView.qml", clipboard: "ClipboardView.qml", media: "MediaView.qml",
+                                             calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml",
+                                             vault: "VaultView.qml", auth: "AuthView.qml" })
+            source: island.shownView ? files[island.shownView] : ""
         }
-        readonly property var files: ({ launcher: "LauncherView.qml", clipboard: "ClipboardView.qml", media: "MediaView.qml",
-                                         calendar: "DashboardView.qml", theme: "ThemeView.qml", keys: "KeysView.qml",
-                                         spotify: "SpotifyView.qml", vault: "VaultView.qml", lockstyle: "LockStyleView.qml" })
-        source: island.shownView ? files[island.shownView] : ""
     }
 }

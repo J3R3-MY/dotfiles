@@ -34,7 +34,7 @@ Item {
     }
     Connections {
         target: Brightness
-        function onCurrentChanged() { root.show("brightness"); }
+        function onCurrentChanged() { if (!Brightness.idleDimmed) root.show("brightness"); }
     }
     Connections {
         target: Fluid

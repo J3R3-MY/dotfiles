@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Set up (or re-check) sleep on its own: suspend, hibernating after 2 h asleep
+# Set up (or re-check) sleep on its own: suspend, hibernating after 12 h asleep
 # (swap file >= RAM, resume in the initramfs, lid switch). Reboot afterwards.
 set -u
 source "$(dirname "$(realpath "$0")")/lib.sh"
