@@ -134,14 +134,11 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 	#Start firefox
 	bindsym $mod+b exec firefox
 
-	#Start nautilus
-	bindsym $mod+n exec nautilus
+	#Start the file manager
+	bindsym $mod+n exec thunar
 
-	#Start ranger
-	bindsym $mod+o exec wezterm ranger ~
-
-	#Start ranger int udc folder
-	bindsym $mod+u exec wezterm ranger ~/udc
+	#Start the file manager in the udc folder
+	bindsym $mod+u exec thunar ~/udc
 
 	#Start zathura
 	# bindsym $mod+z exec zathura

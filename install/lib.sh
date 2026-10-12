@@ -41,15 +41,13 @@ PKGS_SWAY=(
     swaybg swayidle swaylock xorg-xwayland
     grim slurp sway-contrib swappy   # sway-contrib provides grimshot
     tesseract tesseract-data-eng tesseract-data-deu   # $mod+Ctrl+g: text from the screen (fluid-ocr.sh)
-    wl-clipboard cliphist xclip
+    wl-clipboard cliphist
     waybar wofi dunst libnotify
     xdg-desktop-portal xdg-desktop-portal-wlr xdg-desktop-portal-gtk
     qt5-wayland qt6-wayland
     imagemagick            # SDDM wallpaper copy, wallpaper colour filter
     wezterm                # $term
-    nautilus               # $mod+n
-    ranger                 # $mod+o / $mod+u
-    nwg-look papirus-icon-theme materia-gtk-theme adwaita-icon-theme
+    nwg-look papirus-icon-theme adwaita-icon-theme
 )
 
 # Shell + terminal tooling (.zsh_linux, starship, lazygit, ...)
@@ -57,7 +55,6 @@ PKGS_CLI=(
     zsh zsh-autosuggestions zsh-syntax-highlighting starship
     fzf fd ripgrep zoxide thefuck lsd sd choose broot tokei watchexec trash-cli
     lazygit git-delta htop fastfetch jq lnav fq mediainfo vim
-    kitty
 )
 
 # Neovim (managed by bob, as in .zsh_linux's PATH) and what the plugins need:
@@ -413,6 +410,11 @@ do_user_setup() {
     if command -v bob >/dev/null && [ ! -x "$HOME/.local/share/bob/nvim-bin/nvim" ]; then
         bob use stable >>"$LOG" 2>&1 && info "neovim stable installed via bob" || warn "bob use stable failed"
     fi
+
+    # Default apps: other installed programs (a terminal, the browser) would
+    # otherwise claim folders and PDFs
+    xdg-mime default thunar.desktop inode/directory
+    xdg-mime default org.kde.okular.desktop application/pdf
 
     mkdir -p "$HOME/.local/state/fluid"
 }
