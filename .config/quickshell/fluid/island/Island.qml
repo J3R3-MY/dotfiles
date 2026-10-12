@@ -101,9 +101,9 @@ Item {
                     NumberAnimation { to: 1; duration: 700 }
                 }
             }
-            Text {
+            Label {
                 id: recTime
-                color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize
+                color: Theme.onPill; size: "lg"
                 anchors.verticalCenter: parent.verticalCenter
                 Timer {
                     running: Fluid.recording; repeat: true; interval: 1000; triggeredOnStart: true
@@ -142,11 +142,10 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
         }
         // Same format as the old waybar clock: "%a, %d %b %H : %M"
-        Text {
+        Label {
             text: Qt.formatDateTime(clock.date, "ddd, dd MMM HH : mm")
             color: Theme.onPill
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            size: "lg"
             anchors.verticalCenter: parent.verticalCenter
         }
     }
@@ -170,15 +169,15 @@ Item {
         Column {
             width: parent.width - 36 - 40 - 20
             anchors.verticalCenter: parent.verticalCenter
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: Media.title
-                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
+                font.weight: Font.DemiBold
             }
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: Media.artist
-                color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                dim: true; size: "sm"
             }
         }
         Rectangle {

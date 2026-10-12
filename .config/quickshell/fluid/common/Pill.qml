@@ -49,12 +49,11 @@ Item {
         anchors.centerIn: parent
         spacing: 6
 
-        Text {
+        Label {
             visible: root.label.length > 0
             text: root.label
             color: root.alert ? Theme.fg : root.textColor
-            font.family: Theme.font
-            font.pixelSize: Theme.fontSize
+            size: "lg"
             anchors.verticalCenter: parent.verticalCenter
         }
 
@@ -69,13 +68,11 @@ Item {
             Behavior on width {
                 NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
             }
-            Text {
+            Label {
                 id: detailText
                 text: root.detail
                 color: root.alert ? Theme.fg : root.textColor
                 opacity: root.hovered ? 0.85 : 0
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
                 Behavior on opacity { NumberAnimation { duration: Anim.normal } }
             }
         }

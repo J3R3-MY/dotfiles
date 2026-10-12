@@ -117,10 +117,10 @@ Item {
                         color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 24
                     }
                 }
-                Text {
+                Label {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: Qt.formatDateTime(clock.date, "dddd, d MMMM") + (Weather.city ? "  ·  " + Weather.city : "")
-                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
+                    dim: true
                 }
             }
 
@@ -147,9 +147,9 @@ Item {
                     Column {
                         anchors.centerIn: parent
                         spacing: 1
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDateTime(bubble.modelData.time, "HH:mm"); color: bubble.now ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: 10 }
+                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDateTime(bubble.modelData.time, "HH:mm"); color: bubble.now ? Theme.onPill : Theme.fgDim; font.pixelSize: 10 }
                         Glyph { anchors.horizontalCenter: parent.horizontalCenter; text: Weather.iconFor(bubble.modelData.code, bubble.modelData.time.getHours() >= 6 && bubble.modelData.time.getHours() < 20); size: 15; color: bubble.now ? Theme.onPill : Theme.fg }
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(bubble.modelData.temp) + "°"; color: bubble.now ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: 12 }
+                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(bubble.modelData.temp) + "°"; color: bubble.now ? Theme.onPill : Theme.fg; font.pixelSize: 12 }
                     }
                 }
             }
@@ -162,7 +162,7 @@ Item {
             anchors.right: parent.right
             width: 250
             spacing: 8
-            Text { text: "Weather for"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+            Label { text: "Weather for"; dim: true; size: "sm" }
             Rectangle {
                 width: parent.width; height: 40; radius: 14
                 color: Theme.surfaceHi
@@ -189,7 +189,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 8
                 Glyph { text: Weather.icon; size: 18; anchors.verticalCenter: parent.verticalCenter }
-                Text { text: Weather.summary; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; anchors.verticalCenter: parent.verticalCenter }
+                Label { text: Weather.summary; anchors.verticalCenter: parent.verticalCenter }
             }
             Item { width: 1; height: 6 }
             Grid {
@@ -254,20 +254,20 @@ Item {
                     Column {
                         anchors.centerIn: parent
                         spacing: 3
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : Qt.formatDate(modelData.date, "ddd"); color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : Qt.formatDate(modelData.date, "ddd"); dim: true; size: "xs" }
                         Glyph { anchors.horizontalCenter: parent.horizontalCenter; text: Weather.iconFor(modelData.code, true); size: 18 }
-                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(modelData.max) + "° / " + Math.round(modelData.min) + "°"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(modelData.max) + "° / " + Math.round(modelData.min) + "°"; size: "xs" }
                     }
                 }
             }
         }
 
-        Text {
+        Label {
             anchors.centerIn: centre
             anchors.verticalCenterOffset: 90
             visible: Weather.located && !Weather.ready
             text: "Loading weather…"
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+            dim: true; size: "sm"
         }
     }
 

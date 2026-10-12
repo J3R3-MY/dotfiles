@@ -18,13 +18,12 @@ Rectangle {
         color: dr.selected ? Theme.audio : "transparent"
         border.width: 2; border.color: dr.selected ? Theme.audio : Theme.fgDim
     }
-    Text {
+    Label {
         anchors.left: dot.right; anchors.leftMargin: 12
         anchors.right: parent.right; anchors.rightMargin: 12
         anchors.verticalCenter: parent.verticalCenter
         elide: Text.ElideRight
         text: dr.title
-        color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
     }
     MouseArea { id: drArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: dr.clicked() }
 }

@@ -49,8 +49,8 @@ Item {
                     anchors.right: parent.right; anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: 3
-                    Text { text: gcard.modelData.title; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold }
-                    Text { width: parent.width; wrapMode: Text.Wrap; visible: text.length > 0; text: gcard.modelData.sub; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                    Label { text: gcard.modelData.title; font.weight: Font.DemiBold }
+                    Label { width: parent.width; wrapMode: Text.Wrap; visible: text.length > 0; text: gcard.modelData.sub; dim: true; size: "xs" }
                 }
             }
         }
@@ -82,16 +82,16 @@ Item {
             spacing: 4
             Row {
                 width: parent.width
-                Text { width: parent.width - 180; text: "Process"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                Text { width: 90; horizontalAlignment: Text.AlignRight; text: "CPU"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                Text { width: 90; horizontalAlignment: Text.AlignRight; text: "Memory"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                Label { width: parent.width - 180; text: "Process"; dim: true; size: "xs" }
+                Label { width: 90; horizontalAlignment: Text.AlignRight; text: "CPU"; dim: true; size: "xs" }
+                Label { width: 90; horizontalAlignment: Text.AlignRight; text: "Memory"; dim: true; size: "xs" }
             }
             Repeater {
                 model: root.procs
                 Row {
                     required property var modelData
                     width: parent.width
-                    Text { width: parent.width - 180; elide: Text.ElideRight; text: modelData.name; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
+                    Label { width: parent.width - 180; elide: Text.ElideRight; text: modelData.name }
                     Text { width: 90; horizontalAlignment: Text.AlignRight; text: modelData.cpu.toFixed(1) + "%"; color: Theme.fg; font.family: "JetBrains Mono"; font.pixelSize: Theme.fontSize - 3 }
                     Text { width: 90; horizontalAlignment: Text.AlignRight; text: Math.round(modelData.mem) + " MB"; color: Theme.fgDim; font.family: "JetBrains Mono"; font.pixelSize: Theme.fontSize - 3 }
                 }

@@ -12,10 +12,10 @@ Row {
             Network.connected ? (Network.type === "ethernet" ? Icons.ethernet : Icons.wifi) + "  " + Network.name : "",
             Weather.ready ? Weather.icon + "  " + Math.round(Weather.temp) + "°" : ""
         ].filter(t => t)
-        Text {
+        Label {
             required property string modelData
             text: modelData
-            color: "white"; font.family: Theme.font; font.pixelSize: Theme.fontSize
+            color: "white"; size: "lg"
         }
     }
 }

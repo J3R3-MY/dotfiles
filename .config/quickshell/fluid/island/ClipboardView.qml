@@ -60,11 +60,11 @@ Item {
         removeDisplaced: Transition { NumberAnimation { property: "y"; duration: Anim.normal; easing.type: Easing.OutCubic } }
         remove: Transition { NumberAnimation { property: "opacity"; to: 0; duration: Anim.fast } }
 
-        Text {
+        Label {
             anchors.centerIn: parent
             visible: list.count === 0
             text: "Clipboard is empty"
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize
+            dim: true; size: "lg"
         }
 
         delegate: Item {
@@ -74,7 +74,7 @@ Item {
             width: list.width
             height: 42
 
-            Text {
+            Label {
                 anchors.fill: parent
                 anchors.leftMargin: 14
                 anchors.rightMargin: 14
@@ -82,7 +82,6 @@ Item {
                 elide: Text.ElideRight
                 maximumLineCount: 1
                 text: row.modelData.image ? "🖼  Image" : row.modelData.text.replace(/\s+/g, " ")
-                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
             }
 
             MouseArea {

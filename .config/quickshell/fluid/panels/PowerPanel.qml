@@ -79,11 +79,11 @@ DropPanel {
                         text: Battery.available ? Icons.battery(Battery.percent, Battery.charging) + " " + Battery.percent + "%" : Icons.bolt + " AC"
                         color: Theme.fg; font.family: "JetBrains Mono"; font.pixelSize: 30; font.weight: Font.Bold
                     }
-                    Text {
+                    Label {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: !Battery.available ? "no battery"
                             : (Battery.charging ? "charging" : "on battery") + (Battery.timeLeft ? " · " + Battery.timeLeft : "")
-                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                        dim: true; size: "xs"
                     }
                 }
             }

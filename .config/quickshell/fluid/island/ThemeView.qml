@@ -34,10 +34,10 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             spacing: 10
             Glyph { text: Icons.palette; color: Theme.clock; size: 20; anchors.verticalCenter: parent.verticalCenter }
-            Text {
+            Label {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "Wallpaper & theme"
-                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
+                font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
             }
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
@@ -174,11 +174,11 @@ Item {
             }
         }
 
-        Text {
+        Label {
             anchors.centerIn: parent
             visible: root.shown.length === 0
             text: root.colorFilter ? "No wallpapers in this colour" : "No wallpapers found in ~/.config/wallpapers"
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize
+            dim: true; size: "lg"
         }
     }
 
@@ -213,7 +213,7 @@ Item {
                 Column {
                     width: parent.width
                     spacing: 6
-                    Text { text: "Base colour from the wallpaper"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                    Label { text: "Base colour from the wallpaper"; dim: true; size: "sm" }
                     Row {
                         spacing: 8
                         Repeater {
@@ -280,7 +280,7 @@ Item {
             Column {
                 width: tweaks.colW
                 spacing: 10
-                Text { text: "Style"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Label { text: "Style"; dim: true; size: "sm" }
                 Flow {
                     width: parent.width
                     spacing: 6
@@ -311,10 +311,9 @@ Item {
                             border.color: Theme.border
                             scale: btnArea.pressed ? 0.95 : 1
                             Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
-                            Text {
+                            Label {
                                 anchors.centerIn: parent
                                 text: parent.modelData.t
-                                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
                             }
                             MouseArea { id: btnArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
                         }

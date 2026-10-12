@@ -36,24 +36,21 @@ Rectangle {
         Column {
             anchors.verticalCenter: parent.verticalCenter
             width: root.width - 60 - (root.hasMore ? 30 : 0)
-            Text {
+            Label {
                 width: parent.width
                 text: root.title
                 elide: Text.ElideRight
                 color: root.on ? Theme.onPill : Theme.fg
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 1
                 font.weight: Font.DemiBold
             }
-            Text {
+            Label {
                 width: parent.width
                 visible: text.length > 0
                 text: root.subtitle
                 elide: Text.ElideRight
                 color: root.on ? Theme.onPill : Theme.fgDim
                 opacity: 0.85
-                font.family: Theme.font
-                font.pixelSize: Theme.fontSize - 3
+                size: "sm"
             }
         }
     }

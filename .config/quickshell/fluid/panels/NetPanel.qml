@@ -25,14 +25,12 @@ DropPanel {
     width: 460
     height: Math.min(640, content.implicitHeight + 32)
 
-    component Label: Text { color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-    component Value: Text { color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
 
     component Node: Column {
         property string icon; property string name
         width: 70
         Glyph { anchors.horizontalCenter: parent.horizontalCenter; text: parent.icon; size: 22 }
-        Label { anchors.horizontalCenter: parent.horizontalCenter; text: parent.name }
+        Label { size: "xs"; dim: true; anchors.horizontalCenter: parent.horizontalCenter; text: parent.name }
     }
 
     component Leg: Column {
@@ -40,7 +38,7 @@ DropPanel {
         property var leg
         width: 120
         spacing: 4
-        Value {
+        Label {
             anchors.horizontalCenter: parent.horizontalCenter
             text: parent.leg.last >= 0 ? Math.round(parent.leg.last) + " ms" : "—"
             color: parent.leg.loss > 0.2 ? Theme.urgent : Theme.fg
@@ -64,6 +62,7 @@ DropPanel {
             }
         }
         Label {
+            dim: true
             anchors.horizontalCenter: parent.horizontalCenter
             text: "jitter " + Math.round(parent.leg.jitter) + " · loss " + Math.round(parent.leg.loss * 100) + "%"
             font.pixelSize: 9
@@ -80,8 +79,8 @@ DropPanel {
         Glyph { id: vg; x: 14; anchors.verticalCenter: parent.verticalCenter; text: parent.on ? Icons.g(0xf0483) : Icons.g(0xf099c); color: parent.on ? Theme.onPill : Theme.fg }
         Column {
             anchors.left: vg.right; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter
-            Text { text: vr.title; color: vr.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
-            Text { text: vr.sub; color: vr.on ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5 }
+            Label { text: vr.title; color: vr.on ? Theme.onPill : Theme.fg }
+            Label { text: vr.sub; color: vr.on ? Theme.onPill : Theme.fgDim; size: "xs" }
         }
         MouseArea { id: va; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; enabled: !Vpn.busy; onClicked: parent.clicked() }
     }
@@ -103,11 +102,11 @@ DropPanel {
             anchors.right: killBtn.left; anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             // what it is, then who can reach it and how it was started
-            Text { width: parent.width; elide: Text.ElideRight; text: [pr.p.name, pr.p.purpose, pr.p.pid ? "pid " + pr.p.pid : ""].filter(t => t).join("  ·  "); color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
-            Text {
+            Label { width: parent.width; elide: Text.ElideRight; text: [pr.p.name, pr.p.purpose, pr.p.pid ? "pid " + pr.p.pid : ""].filter(t => t).join("  ·  "); size: "sm" }
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: [pr.p.scope, pr.p.proto, pr.p.cwd ? pr.p.cwd + "  $ " + pr.p.cmd : pr.p.desc].filter(t => t).join("  ·  ")
-                color: pr.p.reach === 2 ? Theme.clock : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+                color: pr.p.reach === 2 ? Theme.clock : Theme.fgDim; size: "xs"
             }
         }
         Rectangle {
@@ -117,7 +116,7 @@ DropPanel {
             width: pr.armed ? 72 : 30; height: 30; radius: 15
             color: pr.armed ? Theme.urgent : (ka.containsMouse ? Theme.surfaceHi : "transparent")
             Behavior on width { NumberAnimation { duration: Anim.fast } }
-            Text { anchors.centerIn: parent; text: pr.armed ? "Stop?" : Icons.close; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+            Label { anchors.centerIn: parent; text: pr.armed ? "Stop?" : Icons.close; size: "sm" }
             Timer { id: disarm; interval: 3000; onTriggered: pr.armed = false }
             MouseArea {
                 id: ka; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -145,8 +144,8 @@ DropPanel {
                 Glyph { text: Network.type === "ethernet" ? Icons.ethernet : Icons.wifi; size: 20; color: Theme.clock; anchors.verticalCenter: parent.verticalCenter }
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
-                    Value { text: Network.connected ? Network.name : "Disconnected"; font.weight: Font.DemiBold }
-                    Label { text: (Network.connected ? "connected" : "offline") + (Vpn.connected ? "  ·  VPN " + Vpn.label : "") }
+                    Label { text: Network.connected ? Network.name : "Disconnected"; font.weight: Font.DemiBold }
+                    Label { size: "xs"; dim: true; text: (Network.connected ? "connected" : "offline") + (Vpn.connected ? "  ·  VPN " + Vpn.label : "") }
                 }
             }
             Row {
@@ -167,8 +166,8 @@ DropPanel {
 
                 Row {
                     spacing: 24
-                    Column { Label { text: "Download" } Text { text: "↓ " + NetStats.mbps(NetStats.down) + " Mbps"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
-                    Column { Label { text: "Upload" } Text { text: "↑ " + NetStats.mbps(NetStats.up) + " Mbps"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { size: "xs"; dim: true; text: "Download" } Text { text: "↓ " + NetStats.mbps(NetStats.down) + " Mbps"; color: Theme.clock; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
+                    Column { Label { size: "xs"; dim: true; text: "Upload" } Text { text: "↑ " + NetStats.mbps(NetStats.up) + " Mbps"; color: Theme.network; font.family: "JetBrains Mono"; font.pixelSize: 22; font.weight: Font.Bold } }
                 }
 
                 Rectangle {
@@ -203,7 +202,7 @@ DropPanel {
                             draw("up", String(Theme.network), false);
                         }
                     }
-                    Label { anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.mbps(chartBox.peak) + " Mbps" }
+                    Label { size: "xs"; dim: true; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 8; text: "peak " + NetStats.mbps(chartBox.peak) + " Mbps" }
                 }
                 Row {
                     spacing: 6
@@ -228,21 +227,21 @@ DropPanel {
                         Row {
                             required property var modelData
                             width: 200
-                            Label { width: 70; text: modelData[0] }
-                            Value { width: 130; elide: Text.ElideRight; text: modelData[1]; font.pixelSize: Theme.fontSize - 4 }
+                            Label { size: "xs"; dim: true; width: 70; text: modelData[0] }
+                            Label { width: 130; elide: Text.ElideRight; text: modelData[1]; font.pixelSize: Theme.fontSize - 4 }
                         }
                     }
                 }
 
-                Label { text: "Apps right now"; visible: NetStats.apps.length > 0 }
+                Label { size: "xs"; dim: true; text: "Apps right now"; visible: NetStats.apps.length > 0 }
                 Repeater {
                     model: NetStats.apps
                     Row {
                         required property var modelData
                         width: parent.width
-                        Value { width: parent.width - 160; elide: Text.ElideRight; text: modelData.name; font.pixelSize: Theme.fontSize - 3 }
-                        Label { width: 96; text: "↓ " + NetStats.mbps(modelData.down) + " Mbps" }
-                        Label { width: 96; text: "↑ " + NetStats.mbps(modelData.up) + " Mbps" }
+                        Label { width: parent.width - 160; elide: Text.ElideRight; text: modelData.name; font.pixelSize: Theme.fontSize - 3 }
+                        Label { size: "xs"; dim: true; width: 96; text: "↓ " + NetStats.mbps(modelData.down) + " Mbps" }
+                        Label { size: "xs"; dim: true; width: 96; text: "↑ " + NetStats.mbps(modelData.up) + " Mbps" }
                     }
                 }
             }
@@ -263,8 +262,8 @@ DropPanel {
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
                         width: 300
-                        Value { text: "Connection score"; font.weight: Font.DemiBold }
-                        Label { width: parent.width; wrapMode: Text.Wrap; text: Health.verdict; font.pixelSize: Theme.fontSize - 3 }
+                        Label { text: "Connection score"; font.weight: Font.DemiBold }
+                        Label { size: "xs"; dim: true; width: parent.width; wrapMode: Text.Wrap; text: Health.verdict; font.pixelSize: Theme.fontSize - 3 }
                     }
                 }
 
@@ -285,7 +284,7 @@ DropPanel {
                 Row {
                     spacing: 10
                     Chip { text: Health.testing ? "Testing…" : "Run speed test"; on: Health.testing; onClicked: Health.speedTest() }
-                    Value {
+                    Label {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: Health.speedDown >= 0
                         text: "↓ " + NetStats.mbit(Health.speedDown) + " Mbps   ↑ " + NetStats.mbit(Health.speedUp) + " Mbps"
@@ -293,15 +292,15 @@ DropPanel {
                     }
                 }
 
-                Label { text: Health.outages.length ? "Outages" : "No outages recorded" }
+                Label { size: "xs"; dim: true; text: Health.outages.length ? "Outages" : "No outages recorded" }
                 Repeater {
                     model: Health.outages.slice().reverse().slice(0, 6)
                     Row {
                         required property var modelData
                         spacing: 10
-                        Value { text: Qt.formatDateTime(new Date(modelData.start), "ddd d MMM HH:mm"); font.pixelSize: Theme.fontSize - 4 }
-                        Label { text: Math.max(1, Math.round((modelData.end - modelData.start) / 60000)) + " min" }
-                        Label { text: modelData.leg === "lan" ? "Wi-Fi / router" : "internet / ISP"; color: Theme.urgent }
+                        Label { text: Qt.formatDateTime(new Date(modelData.start), "ddd d MMM HH:mm"); font.pixelSize: Theme.fontSize - 4 }
+                        Label { size: "xs"; dim: true; text: Math.max(1, Math.round((modelData.end - modelData.start) / 60000)) + " min" }
+                        Label { size: "xs"; dim: true; text: modelData.leg === "lan" ? "Wi-Fi / router" : "internet / ISP"; color: Theme.urgent }
                     }
                 }
             }
@@ -312,7 +311,7 @@ DropPanel {
                 width: parent.width
                 spacing: 8
 
-                Label {
+                Label { size: "xs"; dim: true
                     visible: !Vpn.available
                     width: parent.width; wrapMode: Text.Wrap
                     text: "No VPN found. Add WireGuard/OpenVPN profiles to NetworkManager, or install Tailscale or Mullvad."
@@ -339,7 +338,7 @@ DropPanel {
                     visible: Vpn.tailscaleUp && Vpn.exitNodes.length > 0
                     width: parent.width
                     spacing: 6
-                    Label { text: "Exit node:"; height: 28; verticalAlignment: Text.AlignVCenter }
+                    Label { size: "xs"; dim: true; text: "Exit node:"; height: 28; verticalAlignment: Text.AlignVCenter }
                     Chip { text: "none"; on: !Vpn.tailscaleExit; onClicked: Vpn.setExitNode("") }
                     Repeater {
                         model: Vpn.exitNodes
@@ -362,7 +361,7 @@ DropPanel {
                 spacing: 6
                 property bool showOther: false
 
-                Label { visible: Ports.count === 0; text: "Nothing of yours is listening right now" }
+                Label { size: "xs"; dim: true; visible: Ports.count === 0; text: "Nothing of yours is listening right now" }
 
                 Repeater { model: Ports.dev; PortRow { required property var modelData; p: modelData } }
 

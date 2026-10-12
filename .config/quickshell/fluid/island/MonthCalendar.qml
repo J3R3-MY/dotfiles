@@ -32,10 +32,10 @@ Item {
 
         Item {
             width: parent.width; height: 28
-            Text {
+            Label {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Qt.formatDate(root.shown, "MMMM yyyy")
-                color: Theme.clock; font.family: Theme.font; font.pixelSize: Theme.fontSize; font.weight: Font.DemiBold
+                color: Theme.clock; size: "lg"; font.weight: Font.DemiBold
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.monthOffset = 0 }
             }
             Row {
@@ -62,12 +62,12 @@ Item {
 
             Repeater {
                 model: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-                Text {
+                Label {
                     required property string modelData
                     width: grid.cell; height: 22
                     horizontalAlignment: Text.AlignHCenter
                     text: modelData
-                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                    dim: true; size: "xs"
                 }
             }
 
@@ -92,12 +92,12 @@ Item {
                         border.width: day.isSelected || (root.heat && day.isToday) ? 2 : 0
                         border.color: Theme.fg
                     }
-                    Text {
+                    Label {
                         anchors.centerIn: parent
                         text: day.d.getDate()
                         color: (day.isToday && !root.heat) || day.heatValue > 0.55 ? Theme.onPill : Theme.fg
                         opacity: day.inMonth ? 1 : 0.3
-                        font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                        size: "sm"
                     }
                     MouseArea {
                         anchors.fill: parent

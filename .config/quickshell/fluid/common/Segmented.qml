@@ -37,12 +37,11 @@ Rectangle {
                 required property int index
                 width: root.segW
                 height: parent.height
-                Text {
+                Label {
                     anchors.centerIn: parent
                     text: parent.modelData.label
                     color: root.sel === parent.index ? Theme.onPill : Theme.fg
-                    font.family: Theme.font
-                    font.pixelSize: Theme.fontSize - 3
+                    size: "sm"
                 }
                 MouseArea {
                     anchors.fill: parent

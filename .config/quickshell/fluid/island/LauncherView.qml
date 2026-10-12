@@ -102,16 +102,16 @@ Item {
                 Column {
                     anchors.verticalCenter: parent.verticalCenter
                     width: row.width - 70
-                    Text {
+                    Label {
                         width: parent.width; elide: Text.ElideRight
                         text: row.app ? row.app.name : row.file.name
-                        color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize
+                        size: "lg"
                     }
-                    Text {
+                    Label {
                         width: parent.width; elide: Text.ElideMiddle
                         visible: text.length > 0
                         text: row.app ? (row.app.comment || row.app.genericName || "") : row.file.dir
-                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                        dim: true; size: "sm"
                     }
                 }
             }
@@ -128,12 +128,12 @@ Item {
         }
     }
 
-    Text {
+    Label {
         id: hint
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         visible: !!(root.results[list.currentIndex] && root.results[list.currentIndex].file)
         text: "Enter open  ·  Shift+Enter show in Thunar  ·  Ctrl+Enter copy path"
-        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+        dim: true; size: "xs"
     }
 }

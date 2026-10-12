@@ -66,19 +66,19 @@ Rectangle {
             width: content.width - (card.iconSource.length > 0 ? 52 : 0) - 24
             spacing: 3
 
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: card.notification ? card.notification.appName : ""
                 textFormat: Text.PlainText      // AutoText would render HTML (and fetch <img>)
-                color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                dim: true; size: "xs"
             }
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: card.notification ? card.notification.summary : ""
                 textFormat: Text.PlainText
-                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
+                font.weight: Font.DemiBold
             }
-            Text {
+            Label {
                 width: parent.width
                 visible: text.length > 0
                 // images are dropped: an <img src="https://…"> would be fetched and could
@@ -88,8 +88,8 @@ Rectangle {
                 wrapMode: Text.Wrap
                 maximumLineCount: 4
                 elide: Text.ElideRight
-                color: Theme.fg; opacity: 0.85
-                font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                opacity: 0.85
+                size: "sm"
             }
 
             Row {

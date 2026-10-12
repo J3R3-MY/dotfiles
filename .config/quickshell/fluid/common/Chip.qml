@@ -21,12 +21,11 @@ Rectangle {
     Behavior on color { ColorAnimation { duration: Anim.fast } }
     Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
 
-    Text {
+    Label {
         id: label
         anchors.centerIn: parent
         text: root.text
         color: root.on ? Theme.onPill : Theme.fg
-        font.family: Theme.font
         font.pixelSize: root.size
     }
 

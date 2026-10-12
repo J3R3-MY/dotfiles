@@ -84,12 +84,11 @@ Item {
                     id: label
                     anchors.centerIn: parent
                     spacing: 5
-                    Text {
+                    Label {
                         visible: btn.showName
                         text: btn.modelData.name
                         color: btn.isActive && root.outputFocused ? Theme.onPill : Theme.fg
-                        font.family: Theme.font
-                        font.pixelSize: Theme.fontSize
+                        size: "lg"
                         anchors.verticalCenter: parent.verticalCenter
                         Behavior on color { ColorAnimation { duration: Anim.normal } }
                     }

@@ -237,10 +237,10 @@ Item {
                             width: column.width
                             spacing: 4
 
-                            Text {
+                            Label {
                                 text: sec.modelData.title
                                 color: Theme.clock
-                                font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
+                                font.weight: Font.DemiBold
                                 bottomPadding: 2
                             }
 
@@ -275,15 +275,14 @@ Item {
                                             }
                                         }
                                     }
-                                    Text {
+                                    Label {
                                         anchors.left: caps.right
                                         anchors.leftMargin: 10
                                         anchors.right: parent.right
                                         anchors.verticalCenter: parent.verticalCenter
                                         elide: Text.ElideRight
                                         text: row.modelData.desc
-                                        color: Theme.fg
-                                        font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                                        size: "sm"
                                     }
                                 }
                             }
@@ -293,11 +292,11 @@ Item {
             }
         }
 
-        Text {
+        Label {
             anchors.centerIn: parent
             visible: root.filtered.length === 0
             text: root.sections.length === 0 ? "Reading sway config…" : "No keybinds match"
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize
+            dim: true; size: "lg"
         }
     }
 }

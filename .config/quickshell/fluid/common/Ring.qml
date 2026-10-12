@@ -41,21 +41,20 @@ Item {
                 ctx.stroke();
             }
         }
-        Text {
+        Label {
             anchors.centerIn: parent
             text: root.text
-            color: Theme.fg
-            font.family: Theme.font; font.pixelSize: Theme.fontSize - 3; font.weight: Font.DemiBold
+            size: "sm"; font.weight: Font.DemiBold
         }
     }
 
-    Text {
+    Label {
         visible: root.label.length > 0
         anchors.top: canvas.bottom
         anchors.topMargin: 4
         anchors.horizontalCenter: parent.horizontalCenter
         text: root.label
-        color: Theme.fgDim
-        font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+        dim: true
+        size: "xs"
     }
 }

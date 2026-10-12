@@ -26,11 +26,11 @@ Item {
         width: parent.width
         height: 170
 
-        Text {
+        Label {
             anchors.centerIn: parent
             visible: !Media.active
             text: "Nothing playing"
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize
+            dim: true; size: "lg"
         }
 
         // Vinyl: grooves + label (the cover) + spindle hole; spins while playing
@@ -93,15 +93,15 @@ Item {
             anchors.verticalCenter: vinyl.verticalCenter
             spacing: 8
 
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: Media.title
-                color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 3; font.weight: Font.DemiBold
+                font.pixelSize: Theme.fontSize + 3; font.weight: Font.DemiBold
             }
-            Text {
+            Label {
                 width: parent.width; elide: Text.ElideRight
                 text: Media.artist
-                color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1
+                dim: true
             }
 
             Item {
@@ -124,8 +124,8 @@ Item {
             Row {
                 width: parent.width
                 visible: Media.length > 0
-                Text { width: parent.width / 2; text: root.fmt(Media.position); color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
-                Text { width: parent.width / 2; horizontalAlignment: Text.AlignRight; text: root.fmt(Media.length); color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                Label { width: parent.width / 2; text: root.fmt(Media.position); dim: true; size: "xs" }
+                Label { width: parent.width / 2; horizontalAlignment: Text.AlignRight; text: root.fmt(Media.length); dim: true; size: "xs" }
             }
 
             Row {
@@ -168,20 +168,20 @@ Item {
         radius: 16
         color: Theme.surface
 
-        Text {
+        Label {
             x: 14; y: 10
             text: "Equalizer" + (Equalizer.available ? "  ·  " + Equalizer.preset : "")
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+            dim: true; size: "sm"
         }
 
-        Text {
+        Label {
             anchors.centerIn: parent
             width: parent.width - 40
             visible: !Equalizer.available
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignHCenter
             text: "The equalizer starts with PipeWire. Log out and back in once (or run\nsystemctl --user restart pipewire) after installing."
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+            dim: true; size: "sm"
         }
 
         // 10 vertical band sliders, -12..+12 dB
@@ -229,11 +229,11 @@ Item {
                         border.color: Theme.clock
                         Behavior on y { enabled: !bandDrag.pressed; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
                     }
-                    Text {
+                    Label {
                         anchors.bottom: parent.bottom
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: Equalizer.freqs[band.index]
-                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: 9
+                        dim: true; font.pixelSize: 9
                     }
                     MouseArea {
                         id: bandDrag

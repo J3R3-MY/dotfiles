@@ -171,11 +171,11 @@ DropPanel {
                             border.width: nArea.containsMouse && !chosen ? 1 : 0
                             border.color: Theme.clock
                             Behavior on color { ColorAnimation { duration: Anim.fast } }
-                            Text {
+                            Label {
                                 anchors.centerIn: parent
                                 text: index + 1
                                 color: parent.chosen ? Theme.onPill : Theme.fg
-                                font.family: Theme.font; font.pixelSize: Theme.fontSize - 2; font.weight: Font.DemiBold
+                                font.weight: Font.DemiBold
                             }
                             MouseArea { id: nArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: NightLight.setLevel(index) }
                         }
@@ -210,8 +210,8 @@ DropPanel {
                         Column {
                             width: parent.width - 48 - 3 * 36 - 30
                             anchors.verticalCenter: parent.verticalCenter
-                            Text { width: parent.width; elide: Text.ElideRight; text: Media.title; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2; font.weight: Font.DemiBold }
-                            Text { width: parent.width; elide: Text.ElideRight; text: Media.artist; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4 }
+                            Label { width: parent.width; elide: Text.ElideRight; text: Media.title; font.weight: Font.DemiBold }
+                            Label { width: parent.width; elide: Text.ElideRight; text: Media.artist; dim: true; size: "xs" }
                         }
                         Repeater {
                             model: [
@@ -233,18 +233,17 @@ DropPanel {
                 Item {
                     width: parent.width
                     height: 24
-                    Text {
+                    Label {
                         anchors.verticalCenter: parent.verticalCenter
                         text: Notifs.count > 0 ? `Notifications (${Notifs.count})` : "No notifications"
-                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+                        dim: true
                     }
-                    Text {
+                    Label {
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
                         visible: Notifs.count > 0
                         text: "Clear all"
-                        color: clearAll.containsMouse ? Theme.fg : Theme.fgDim
-                        font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+                        dim: !clearAll.containsMouse
                         MouseArea { id: clearAll; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
                     }
                 }
@@ -412,10 +411,10 @@ DropPanel {
                                     text: Pods.level(modelData) + "%"
                                     color: Pods.charging(modelData) ? Theme.cpu : Pods.level(modelData) <= 20 ? Theme.urgent : Theme.clock
                                 }
-                                Text {
+                                Label {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: ({ left: "Left", right: "Right", case: "Case", headset: "Battery" })[modelData] + (Pods.charging(modelData) ? " " + Icons.bolt : "")
-                                    color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                                    dim: true; size: "xs"
                                 }
                             }
                         }
@@ -511,8 +510,8 @@ DropPanel {
                             border.color: Theme.clock
                             Column {
                                 anchors.centerIn: parent
-                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.name; color: drag.active ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4; font.weight: Font.DemiBold }
-                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.width + "×" + mon.modelData.height; color: drag.active ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: 9 }
+                                Label { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.name; color: drag.active ? Theme.onPill : Theme.fg; size: "xs"; font.weight: Font.DemiBold }
+                                Label { anchors.horizontalCenter: parent.horizontalCenter; text: mon.modelData.width + "×" + mon.modelData.height; color: drag.active ? Theme.onPill : Theme.fgDim; font.pixelSize: 9 }
                             }
                             DragHandler {
                                 id: drag
@@ -527,11 +526,11 @@ DropPanel {
                         }
                     }
 
-                    Text {
+                    Label {
                         anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.margins: 8
                         visible: !stage.dirty
                         text: "Drag screens to arrange them"
-                        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+                        dim: true; size: "xs"
                     }
                     Row {
                         anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 8
@@ -581,15 +580,15 @@ DropPanel {
                             Column {
                                 id: oText
                                 anchors.centerIn: parent
-                                Text { text: modelData.name; color: parent.parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2; font.weight: Font.DemiBold }
-                                Text { text: modelData.width + "×" + modelData.height + " @ " + Math.round(modelData.refresh / 1000) + " Hz"; color: parent.parent.on ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 5 }
+                                Label { text: modelData.name; color: parent.parent.on ? Theme.onPill : Theme.fg; font.weight: Font.DemiBold }
+                                Label { text: modelData.width + "×" + modelData.height + " @ " + Math.round(modelData.refresh / 1000) + " Hz"; color: parent.parent.on ? Theme.onPill : Theme.fgDim; size: "xs" }
                             }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: displayPage.sel = parent.index }
                         }
                     }
                 }
 
-                Text { text: "Resolution"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Label { text: "Resolution"; dim: true; size: "sm" }
                 Grid {
                     columns: 2
                     columnSpacing: 6; rowSpacing: 6
@@ -604,8 +603,8 @@ DropPanel {
                             width: (displayPage.width - 6) / 2; height: 34; radius: 12
                             color: on ? Theme.clock : (rArea.containsMouse ? Theme.surfaceHi : Theme.surface)
                             Behavior on color { ColorAnimation { duration: Anim.fast } }
-                            Text { anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: parent.tag; color: parent.on ? Theme.onPill : Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 4; font.weight: Font.DemiBold }
-                            Text { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: modelData.w + "×" + modelData.h; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            Label { anchors.left: parent.left; anchors.leftMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: parent.tag; color: parent.on ? Theme.onPill : Theme.fgDim; size: "xs"; font.weight: Font.DemiBold }
+                            Label { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: modelData.w + "×" + modelData.h; color: parent.on ? Theme.onPill : Theme.fg; size: "sm" }
                             MouseArea {
                                 id: rArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                 onClicked: {
@@ -631,7 +630,7 @@ DropPanel {
 
                 Row {
                     spacing: 6
-                    Text { anchors.verticalCenter: parent.verticalCenter; text: "Scale"; width: 60; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                    Label { anchors.verticalCenter: parent.verticalCenter; text: "Scale"; width: 60; dim: true; size: "sm" }
                     Repeater {
                         model: [1, 1.25, 1.5, 2]
                         Rectangle {
@@ -639,7 +638,7 @@ DropPanel {
                             readonly property bool on: Math.abs(displayPage.pickScale - modelData) < 0.01
                             width: 56; height: 30; radius: 10
                             color: on ? Theme.clock : Theme.surface
-                            Text { anchors.centerIn: parent; text: parent.modelData + "×"; color: parent.on ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            Label { anchors.centerIn: parent; text: parent.modelData + "×"; color: parent.on ? Theme.onPill : Theme.fg; size: "sm" }
                             MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: displayPage.pickScale = parent.modelData }
                         }
                     }
@@ -651,11 +650,11 @@ DropPanel {
                     readonly property bool confirming: Displays.pendingRevert !== null
                     color: confirming ? Theme.surfaceHi : Theme.clock
                     Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Text {
+                    Label {
                         visible: !parent.confirming
                         anchors.centerIn: parent
                         text: "Apply"
-                        color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1; font.weight: Font.DemiBold
+                        color: Theme.onPill; font.weight: Font.DemiBold
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -668,12 +667,12 @@ DropPanel {
                         anchors.fill: parent
                         anchors.margins: 5
                         spacing: 6
-                        Text {
+                        Label {
                             width: parent.width - 2 * 90 - 12
                             anchors.verticalCenter: parent.verticalCenter
                             leftPadding: 8
                             text: "Keep? Reverting in " + Displays.countdown + " s"
-                            color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                            size: "sm"
                         }
                         Repeater {
                             model: [{ t: "Keep", f: () => Displays.keep(), main: true }, { t: "Revert", f: () => Displays.revert(), main: false }]
@@ -681,7 +680,7 @@ DropPanel {
                                 required property var modelData
                                 width: 90; height: parent.height; radius: 10
                                 color: modelData.main ? Theme.clock : Theme.surface
-                                Text { anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                                Label { anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; size: "sm" }
                                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: parent.modelData.f() }
                             }
                         }
@@ -689,7 +688,7 @@ DropPanel {
                 }
 
                 // ---- Profiles: re-applied automatically when the same screens connect ----
-                Text { text: "Profiles  ·  applied automatically on hotplug"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                Label { text: "Profiles  ·  applied automatically on hotplug"; dim: true; size: "sm" }
                 Flow {
                     width: parent.width
                     spacing: 6
@@ -700,7 +699,7 @@ DropPanel {
                             height: 30; radius: 15
                             width: pn.implicitWidth + 46
                             color: Theme.surface
-                            Text { id: pn; x: 14; anchors.verticalCenter: parent.verticalCenter; text: parent.modelData.name + "  (" + parent.modelData.outputs.filter(o => o.enabled).length + ")"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                            Label { id: pn; x: 14; anchors.verticalCenter: parent.verticalCenter; text: parent.modelData.name + "  (" + parent.modelData.outputs.filter(o => o.enabled).length + ")"; size: "sm" }
                             Text {
                                 anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
                                 text: "×"; color: delArea.containsMouse ? Theme.urgent : Theme.fgDim; font.pixelSize: 16
@@ -728,7 +727,7 @@ DropPanel {
                         id: saveBtn
                         width: 110; height: 36; radius: 12
                         color: Theme.clock
-                        Text { anchors.centerIn: parent; text: "Save current"; color: Theme.onPill; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3 }
+                        Label { anchors.centerIn: parent; text: "Save current"; color: Theme.onPill; size: "sm" }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { Displays.saveProfile(profileName.text); profileName.text = ""; } }
                     }
                 }
@@ -782,11 +781,11 @@ DropPanel {
                         required property var modelData
                         width: soundPage.width
                         spacing: 4
-                        Text {
+                        Label {
                             x: 4
                             width: parent.width - 8; elide: Text.ElideRight
                             text: Audio.appName(parent.modelData)
-                            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+                            dim: true; size: "sm"
                         }
                         FSlider {
                             width: parent.width
@@ -803,11 +802,7 @@ DropPanel {
         }
     }
 
-    component SectionLabel: Text {
-        x: 4
-        topPadding: 6
-        color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
-    }
+    component SectionLabel: Label { x: 4; topPadding: 6; dim: true; size: "sm" }
 
     component PageHeader: Item {
         id: ph
@@ -824,12 +819,12 @@ DropPanel {
             Text { anchors.centerIn: parent; text: "‹"; color: Theme.fg; font.pixelSize: 24 }
             MouseArea { id: backArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ph.back() }
         }
-        Text {
+        Label {
             anchors.left: backBtn.right
             anchors.leftMargin: 8
             anchors.verticalCenter: parent.verticalCenter
             text: ph.title
-            color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
+            font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold
         }
         Chip {
             visible: ph.actionText.length > 0

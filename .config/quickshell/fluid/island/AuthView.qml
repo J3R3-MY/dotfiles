@@ -29,18 +29,18 @@ Item {
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                Text { text: Auth.app || "Authentication"; color: Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold }
-                Text { text: "needs your password"; color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2 }
+                Label { text: Auth.app || "Authentication"; font.pixelSize: Theme.fontSize + 1; font.weight: Font.DemiBold }
+                Label { text: "needs your password"; dim: true }
             }
         }
 
-        Text {
+        Label {
             width: parent.width
             wrapMode: Text.Wrap
             maximumLineCount: 2
             elide: Text.ElideRight
             text: root.flow ? root.flow.message : ""
-            color: Theme.fgDim; font.family: Theme.font; font.pixelSize: Theme.fontSize - 2
+            dim: true
         }
 
         Rectangle {
@@ -71,13 +71,13 @@ Item {
                 }
             }
         }
-        Text {
+        Label {
             visible: text.length > 0
             width: parent.width
             wrapMode: Text.Wrap
             text: root.flow ? root.flow.supplementaryMessage : ""
             color: root.flow && root.flow.supplementaryIsError ? Theme.urgent : Theme.fgDim
-            font.family: Theme.font; font.pixelSize: Theme.fontSize - 3
+            size: "sm"
         }
 
         Row {
@@ -90,7 +90,7 @@ Item {
                     width: label.implicitWidth + 28; height: 32; radius: 16
                     color: modelData.main ? (area.containsMouse ? Theme.accent : Theme.clock) : (area.containsMouse ? Theme.surfaceHi : "transparent")
                     Behavior on color { ColorAnimation { duration: Anim.fast } }
-                    Text { id: label; anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg; font.family: Theme.font; font.pixelSize: Theme.fontSize - 1 }
+                    Label { id: label; anchors.centerIn: parent; text: parent.modelData.t; color: parent.modelData.main ? Theme.onPill : Theme.fg }
                     MouseArea {
                         id: area; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: { if (parent.modelData.main) { Auth.submit(pw.text); pw.text = ""; } else Fluid.closeAll(); }

@@ -83,12 +83,11 @@ Item {
         }
     }
 
-    Text {
+    Label {
         anchors.centerIn: parent
         text: root.text
-        color: Theme.fg
         style: Text.Outline
         styleColor: Qt.alpha(Theme.bg, 0.6)
-        font.family: Theme.font; font.pixelSize: root.size * 0.2; font.weight: Font.Bold
+        font.pixelSize: root.size * 0.2; font.weight: Font.Bold
     }
 }

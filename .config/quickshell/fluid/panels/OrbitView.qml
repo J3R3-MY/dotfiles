@@ -121,18 +121,18 @@ Item {
                     Glyph { anchors.verticalCenter: parent.verticalCenter; text: sat.modelData.icon; size: 14; color: sat.modelData.active ? Theme.onPill : Theme.fg }
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
-                        Text {
+                        Label {
                             width: Math.min(implicitWidth, 100); elide: Text.ElideRight
                             text: sat.modelData.title
                             color: sat.modelData.active ? Theme.onPill : Theme.fg
-                            font.family: Theme.font; font.pixelSize: Theme.fontSize - 4
+                            size: "xs"
                         }
-                        Text {
+                        Label {
                             visible: text.length > 0
                             width: Math.min(implicitWidth, 100); elide: Text.ElideRight
                             text: sat.modelData.subtitle || ""
                             color: sat.modelData.active ? Theme.onPill : Theme.fgDim
-                            font.family: Theme.font; font.pixelSize: 9
+                            font.pixelSize: 9
                         }
                     }
                 }
@@ -176,18 +176,18 @@ Item {
             width: parent.width - 16
             spacing: 2
             Glyph { anchors.horizontalCenter: parent.horizontalCenter; text: root.center.icon; size: 26; color: root.center.active ? Theme.onPill : Theme.fg }
-            Text {
+            Label {
                 width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
                 text: root.center.title
                 color: root.center.active ? Theme.onPill : Theme.fg
-                font.family: Theme.font; font.pixelSize: Theme.fontSize - 3; font.weight: Font.DemiBold
+                size: "sm"; font.weight: Font.DemiBold
             }
-            Text {
+            Label {
                 width: parent.width; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
                 visible: text.length > 0
                 text: root.center.subtitle
                 color: root.center.active ? Theme.onPill : Theme.fgDim
-                font.family: Theme.font; font.pixelSize: Theme.fontSize - 5
+                size: "xs"
             }
         }
         MouseArea { id: hubArea; anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.centerClicked() }

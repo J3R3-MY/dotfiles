@@ -32,19 +32,16 @@ Item {
         if (Math.abs(v - value) > 1e-6) root.moved(v);
     }
 
-    Text {
+    Label {
         id: title
         text: root.label
-        color: Theme.fgDim
-        font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 3
+        dim: true
+        size: "sm"
     }
-    Text {
+    Label {
         anchors.right: parent.right
         text: root.valueText || (root.value > 0 && root.from < 0 ? "+" : "") + root.value.toFixed(root.decimals) + root.suffix
-        color: Theme.fg
-        font.family: Theme.font
-        font.pixelSize: Theme.fontSize - 3
+        size: "sm"
     }
 
     Item {
