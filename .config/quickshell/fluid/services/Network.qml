@@ -80,9 +80,14 @@ Singleton {
                     const p = line.split(":");
                     if (p.length < 4) continue;
                     const ssid = p.slice(3).join(":").replace(/\\:/g, ":");
-                    if (!ssid || seen[ssid]) continue;
-                    seen[ssid] = true;
-                    out.push({ ssid: ssid, signal: parseInt(p[1]) || 0, secure: p[2].length > 0 && p[2] !== "--", active: p[0] === "*" });
+                    if (!ssid) continue;
+                    // one entry per name (several access points can share it);
+                    // the one we're connected to wins
+                    const n = { ssid: ssid, signal: parseInt(p[1]) || 0, secure: p[2].length > 0 && p[2] !== "--", active: p[0] === "*" };
+                    if (seen[ssid] && !n.active) continue;
+                    if (seen[ssid]) out.splice(out.indexOf(seen[ssid]), 1);
+                    seen[ssid] = n;
+                    out.push(n);
                 }
                 out.sort((a, b) => (b.active - a.active) || (b.signal - a.signal));
                 root.networks = out;
