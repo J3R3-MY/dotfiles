@@ -44,9 +44,9 @@ Item {
     opacity: shown ? 1 : 0
     scale: shown ? 1 : 0.9
     visible: opacity > 0
-    transform: Translate { y: root.shown ? 0 : 24; Behavior on y { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } } }
-    Behavior on opacity { NumberAnimation { duration: Anim.normal } }
-    Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+    transform: Translate { y: root.shown ? 0 : 24; Behavior on y { Emphasized {} } }
+    Behavior on opacity { Bounce { duration: Anim.normal } }
+    Behavior on scale { NumberAnimation { duration: Anim.normal } }
 
     Rectangle {
         anchors.fill: parent

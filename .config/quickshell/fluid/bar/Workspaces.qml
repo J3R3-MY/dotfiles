@@ -21,7 +21,7 @@ Item {
     implicitWidth: row.implicitWidth
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+        Emphasized {}
     }
 
     // Sliding highlight
@@ -35,8 +35,8 @@ Item {
         height: parent.height
         radius: 5
         color: root.outputFocused ? Theme.accent : Theme.surfaceHi
-        Behavior on x { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-        Behavior on width { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+        Behavior on x { Spring {} }
+        Behavior on width { Emphasized { duration: Anim.slow } }
         Behavior on color { ColorAnimation { duration: Anim.normal } }
     }
 
@@ -67,7 +67,7 @@ Item {
                 scale: 0.6
                 opacity: 0
                 Component.onCompleted: { scale = 1; opacity = 1; }
-                Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                Behavior on scale { Bounce { duration: Anim.normal } }
                 Behavior on opacity { NumberAnimation { duration: Anim.normal } }
 
                 Rectangle {

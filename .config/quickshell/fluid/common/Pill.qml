@@ -22,7 +22,7 @@ Item {
     implicitWidth: row.implicitWidth + 16
 
     Behavior on implicitWidth {
-        NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+        Emphasized {}
     }
 
     Rectangle {
@@ -31,7 +31,7 @@ Item {
         radius: Theme.pillRadius
         color: root.alert ? Theme.urgent : root.color
         scale: mouse.pressed ? 0.94 : 1.0
-        Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+        Behavior on scale { Bounce {} }
         Behavior on color { ColorAnimation { duration: Anim.normal } }
 
         // Critical-battery blink, same idea as the waybar keyframes
@@ -66,7 +66,7 @@ Item {
             clip: true
             visible: width > 0
             Behavior on width {
-                NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+                Emphasized {}
             }
             Label {
                 id: detailText

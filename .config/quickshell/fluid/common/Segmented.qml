@@ -24,7 +24,7 @@ Rectangle {
         height: parent.height - 8
         radius: parent.radius - 3
         color: Theme.clock
-        Behavior on x { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
+        Behavior on x { Spring { duration: Anim.normal } }
     }
 
     Row {

@@ -18,9 +18,9 @@ Item {
     // fade as one picture: without a layer every tile fades on its own and
     // the translucent ones show what's behind them mid-fade
     layer.enabled: visible && opacity < 1
-    Behavior on scale { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-    Behavior on opacity { NumberAnimation { duration: Anim.fast } }
-    Behavior on height { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+    Behavior on scale { Spring {} }
+    Behavior on opacity { Emphasized { duration: Anim.fast } }
+    Behavior on height { NumberAnimation { duration: Anim.normal } }
 
     // Override to do something else on Esc (the control center goes back a page)
     function dismiss() { Fluid.closeAll(); }

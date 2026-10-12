@@ -47,8 +47,8 @@ Item {
 
     width: targetSize.width
     height: targetSize.height
-    Behavior on width { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
-    Behavior on height { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
+    Behavior on width { Spring {} }
+    Behavior on height { Spring {} }
 
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
@@ -59,7 +59,7 @@ Item {
         color: island.open || island.mediaHover ? Theme.bg : Theme.clock
         border.width: island.open ? 2 : 0
         border.color: Theme.border
-        Behavior on radius { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+        Behavior on radius { Emphasized { duration: Anim.slow } }
         Behavior on color { ColorAnimation { duration: Anim.normal } }
     }
     // drifting colour blobs behind the open views (inside the 2 px border)

@@ -14,12 +14,12 @@ Column {
 
     add: Transition {
         ParallelAnimation {
-            NumberAnimation { property: "x"; from: 420; to: 0; duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+            Emphasized { property: "x"; from: 420; to: 0; duration: Anim.slow }
             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Anim.normal }
         }
     }
     move: Transition {
-        NumberAnimation { properties: "y"; duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+        Emphasized { properties: "y" }
     }
 
     Repeater {

@@ -30,7 +30,7 @@ Item {
             color: root.fillColor
             Behavior on width {
                 enabled: !drag.pressed
-                NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+                Emphasized {}
             }
         }
     }

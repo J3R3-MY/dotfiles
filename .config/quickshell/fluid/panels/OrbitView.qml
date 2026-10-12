@@ -29,7 +29,7 @@ Item {
     property real drift: 0
     property real sway: 0
     Component.onCompleted: spread = 1
-    Behavior on spread { NumberAnimation { duration: 650; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
+    Behavior on spread { Spring { duration: 650 } }
     NumberAnimation on drift { from: 0; to: 2 * Math.PI; duration: 120000; loops: Animation.Infinite; running: root.visible }
     NumberAnimation on sway { from: 0; to: 2 * Math.PI; duration: 7000; loops: Animation.Infinite; running: root.visible }
 
@@ -69,7 +69,7 @@ Item {
             // Slot angle springs when satellites are added/removed; the slow
             // drift is added on top directly so it never fights the spring
             property real slot: root.angleFor(index)
-            Behavior on slot { NumberAnimation { duration: 700; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.spring } }
+            Behavior on slot { Spring { duration: 700 } }
             readonly property real px: root.width / 2 + root.rx * root.spread * Math.cos(slot + root.drift)
             readonly property real py: root.height / 2 + root.ry * root.spread * Math.sin(slot + root.drift)
             anchors.fill: parent
@@ -111,7 +111,7 @@ Item {
                 scale: satArea.containsMouse ? 1.06 : 1
                 Component.onCompleted: opacity = 1
                 Behavior on opacity { NumberAnimation { duration: Anim.normal } }
-                Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+                Behavior on scale { Bounce {} }
                 Behavior on color { ColorAnimation { duration: Anim.normal } }
 
                 Row {
@@ -149,7 +149,7 @@ Item {
         color: root.center.active ? Theme.clock : Theme.surfaceHi
         Behavior on color { ColorAnimation { duration: Anim.normal } }
         scale: hubArea.pressed ? 0.95 : 1
-        Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+        Behavior on scale { Bounce {} }
 
         // Ripple while scanning / connecting
         Rectangle {

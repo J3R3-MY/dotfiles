@@ -47,8 +47,8 @@ PanelWindow {
             color: Theme.mode
             textColor: Theme.fg
             label: Sway.mode
-            Behavior on opacity { NumberAnimation { duration: Anim.normal } }
-            Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+            Behavior on opacity { Bounce { duration: Anim.normal } }
+            Behavior on scale { NumberAnimation { duration: Anim.normal } }
         }
     }
 
@@ -62,7 +62,7 @@ PanelWindow {
 
         // Every pill animates its width, so the Row re-flows smoothly too
         move: Transition {
-            NumberAnimation { properties: "x"; duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+            Emphasized { properties: "x" }
         }
 
         // Keyboard layout (Caps Lock switches it); only with more than one layout

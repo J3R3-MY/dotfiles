@@ -25,7 +25,7 @@ DropPanel {
 
     width: page === "main" ? 400 : 480
     height: pageItems[pageIndex].implicitHeight + 32
-    Behavior on width { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+    Behavior on width { Emphasized {} }
 
     function dismiss() { if (page === "main") Fluid.closeAll(); else page = "main"; }
 
@@ -36,7 +36,7 @@ DropPanel {
     property string sub: "wifi"
     onPageChanged: if (page !== "main") sub = page
     property real slide: page === "main" ? 0 : 1
-    Behavior on slide { NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+    Behavior on slide { Emphasized {} }
 
     Item {
         id: viewport
@@ -464,8 +464,8 @@ DropPanel {
                             x: baseX + offset.x
                             y: baseY + offset.y
                             z: drag.active ? 2 : 1
-                            Behavior on x { enabled: !drag.active; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
-                            Behavior on y { enabled: !drag.active; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                            Behavior on x { enabled: !drag.active; Bounce { duration: Anim.normal } }
+                            Behavior on y { enabled: !drag.active; Bounce { duration: Anim.normal } }
                             radius: 8
                             color: drag.active ? Theme.clock : Theme.surfaceHi
                             border.width: 2

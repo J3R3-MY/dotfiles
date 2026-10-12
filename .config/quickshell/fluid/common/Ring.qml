@@ -15,7 +15,7 @@ Item {
     implicitHeight: 64 + (label ? 20 : 0)
 
     property real shown: value
-    Behavior on shown { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+    Behavior on shown { Emphasized { duration: Anim.slow } }
     onShownChanged: canvas.requestPaint()
     onColorChanged: canvas.requestPaint()
 

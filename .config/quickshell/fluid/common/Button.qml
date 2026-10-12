@@ -25,7 +25,7 @@ Rectangle {
     color: hovered ? hoverColor : baseColor
     scale: pressed ? 0.94 : 1
     Behavior on color { ColorAnimation { duration: Anim.fast } }
-    Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+    Behavior on scale { Bounce {} }
 
     Row {
         id: row

@@ -143,7 +143,7 @@ Item {
                     opacity: intro * (0.3 + 0.7 * depth)
                     scale: (0.6 + 0.4 * intro) * (0.6 + 0.4 * depth)
                     Component.onCompleted: intro = 1
-                    Behavior on intro { NumberAnimation { duration: Anim.slow + index * 40; easing.type: Easing.OutBack } }
+                    Behavior on intro { Bounce { duration: Anim.slow + index * 40 } }
                     Column {
                         anchors.centerIn: parent
                         spacing: 1

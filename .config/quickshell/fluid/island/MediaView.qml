@@ -227,7 +227,7 @@ Item {
                         color: Theme.fg
                         border.width: 3
                         border.color: Theme.clock
-                        Behavior on y { enabled: !bandDrag.pressed; NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                        Behavior on y { enabled: !bandDrag.pressed; Bounce { duration: Anim.normal } }
                     }
                     Label {
                         anchors.bottom: parent.bottom

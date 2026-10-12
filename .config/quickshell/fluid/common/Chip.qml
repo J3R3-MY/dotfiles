@@ -19,7 +19,7 @@ Rectangle {
     border.color: Theme.border
     scale: area.pressed ? 0.95 : 1
     Behavior on color { ColorAnimation { duration: Anim.fast } }
-    Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+    Behavior on scale { Bounce {} }
 
     Label {
         id: label

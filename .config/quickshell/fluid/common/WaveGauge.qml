@@ -18,7 +18,7 @@ Item {
     implicitHeight: size
 
     property real shown: Math.max(0, Math.min(1, value))
-    Behavior on shown { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+    Behavior on shown { Emphasized { duration: Anim.slow } }
 
     readonly property real amp: size * 0.055
     // the surface bobs a little so the liquid never looks like a loop

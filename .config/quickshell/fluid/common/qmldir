@@ -15,3 +15,6 @@ Blobs 1.0 Blobs.qml
 Label 1.0 Label.qml
 Button 1.0 Button.qml
 PowerButton 1.0 PowerButton.qml
+Emphasized 1.0 Emphasized.qml
+Spring 1.0 Spring.qml
+Bounce 1.0 Bounce.qml

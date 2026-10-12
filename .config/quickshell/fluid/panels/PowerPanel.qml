@@ -43,7 +43,7 @@ DropPanel {
                 anchors.centerIn: parent
                 width: 180; height: 180
                 property real shown: Battery.available ? Battery.percent / 100 : 1
-                Behavior on shown { NumberAnimation { duration: 900; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+                Behavior on shown { Emphasized { duration: 900 } }
                 onShownChanged: requestPaint()
                 Connections { target: Theme; function onClockChanged() { ring.requestPaint(); } }
                 onPaint: {

@@ -93,10 +93,10 @@ Item {
             border.width: 3
             border.color: Theme.clock
             scale: drag.pressed ? 1.2 : 1
-            Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+            Behavior on scale { Bounce {} }
             Behavior on x {
                 enabled: !drag.pressed
-                NumberAnimation { duration: Anim.normal; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized }
+                Emphasized {}
             }
         }
 

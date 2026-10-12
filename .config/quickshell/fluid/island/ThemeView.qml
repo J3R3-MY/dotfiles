@@ -80,7 +80,7 @@ Item {
                         border.width: on ? 2 : 0
                         border.color: Theme.fg
                         scale: on ? 1.15 : (fArea.containsMouse ? 1.08 : 1)
-                        Behavior on scale { NumberAnimation { duration: Anim.fast; easing.type: Easing.OutBack } }
+                        Behavior on scale { Bounce {} }
                         MouseArea { id: fArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.colorFilter = parent.on ? "" : parent.modelData.id }
                     }
                 }
@@ -123,7 +123,7 @@ Item {
             width: focused ? 460 : 150
             height: carousel.height
             z: focused ? 2 : 1
-            Behavior on width { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+            Behavior on width { Emphasized { duration: Anim.slow } }
 
             // Shear along x so every card is a parallelogram
             ClippingRectangle {
@@ -138,8 +138,8 @@ Item {
                                          0, 0, 1, 0,
                                          0, 0, 0, 1)
                 }
-                Behavior on anchors.topMargin { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
-                Behavior on anchors.bottomMargin { NumberAnimation { duration: Anim.slow; easing.type: Easing.BezierSpline; easing.bezierCurve: Anim.emphasized } }
+                Behavior on anchors.topMargin { Emphasized { duration: Anim.slow } }
+                Behavior on anchors.bottomMargin { Emphasized { duration: Anim.slow } }
 
                 Image {
                     anchors.centerIn: parent
@@ -227,7 +227,7 @@ Item {
                                 border.width: chosen ? 3 : 1
                                 border.color: chosen ? Theme.fg : Theme.border
                                 scale: chosen ? 1.1 : 1
-                                Behavior on scale { NumberAnimation { duration: Anim.normal; easing.type: Easing.OutBack } }
+                                Behavior on scale { Bounce { duration: Anim.normal } }
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
